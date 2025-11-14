@@ -36,9 +36,11 @@ import com.greenopal.zargon.ui.components.SpriteView
 import com.greenopal.zargon.ui.components.StatsCard
 import com.greenopal.zargon.ui.screens.BattleScreen
 import com.greenopal.zargon.ui.screens.DialogScreen
+import com.greenopal.zargon.ui.screens.GameOverScreen
 import com.greenopal.zargon.ui.screens.HealerScreen
 import com.greenopal.zargon.ui.screens.MapScreen
 import com.greenopal.zargon.ui.screens.MenuScreen
+import com.greenopal.zargon.ui.screens.TitleScreen
 import com.greenopal.zargon.ui.screens.WeaponShopScreen
 import com.greenopal.zargon.ui.theme.ZargonTheme
 import com.greenopal.zargon.ui.viewmodels.GameViewModel
@@ -47,7 +49,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
 enum class ScreenState {
-    MENU, MAP, BATTLE, STATS, DIALOG, WEAPON_SHOP, HEALER
+    TITLE, MENU, MAP, BATTLE, STATS, DIALOG, WEAPON_SHOP, HEALER, GAME_OVER
 }
 
 @AndroidEntryPoint
@@ -73,8 +75,9 @@ class MainActivity : ComponentActivity() {
                 var playerSprite by remember { mutableStateOf<Sprite?>(null) }
                 var monsterSprites by remember { mutableStateOf<Map<String, Sprite?>>(emptyMap()) }
                 var spriteCount by remember { mutableStateOf(0) }
-                var screenState by remember { mutableStateOf(ScreenState.MENU) }
+                var screenState by remember { mutableStateOf(ScreenState.TITLE) }
                 var currentNpcType by remember { mutableStateOf<NpcType?>(null) }
+                var isExplorationMode by remember { mutableStateOf(false) }
 
                 LaunchedEffect(Unit) {
                     val sprites = spriteParser.parseAllSprites()
@@ -99,12 +102,36 @@ class MainActivity : ComponentActivity() {
 
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     when (screenState) {
+                        ScreenState.TITLE -> {
+                            val saveSlots = remember { saveRepository.getAllSaves() }
+                            TitleScreen(
+                                saveSlots = saveSlots,
+                                onNewGame = {
+                                    // Reset to new game state
+                                    viewModel.newGame()
+                                    screenState = ScreenState.MENU
+                                },
+                                onContinue = { slot ->
+                                    // Load saved game
+                                    saveRepository.loadGame(slot)?.let { savedState ->
+                                        viewModel.updateGameState(savedState)
+                                        screenState = ScreenState.MENU
+                                    }
+                                },
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .padding(innerPadding)
+                            )
+                        }
+
                         ScreenState.MENU -> {
                             MenuScreen(
                                 onStartExploration = {
+                                    isExplorationMode = true
                                     screenState = ScreenState.MAP
                                 },
                                 onStartBattleTest = {
+                                    isExplorationMode = false
                                     screenState = ScreenState.BATTLE
                                 },
                                 onViewStats = {
@@ -161,26 +188,30 @@ class MainActivity : ComponentActivity() {
                                     // Update game state
                                     viewModel.updateGameState(updatedGameState)
 
-                                    // Handle battle result
+                                    // Handle battle result based on outcome
                                     when (result) {
                                         is BattleResult.Victory -> {
-                                            // Victory handled by rewards dialog
+                                            // Return to map if exploring, menu if testing
+                                            screenState = if (isExplorationMode) {
+                                                ScreenState.MAP
+                                            } else {
+                                                ScreenState.MENU
+                                            }
                                         }
                                         is BattleResult.Defeat -> {
-                                            // Return to menu on defeat
-                                            screenState = ScreenState.MENU
+                                            // Player died - game over
+                                            screenState = ScreenState.GAME_OVER
                                         }
                                         is BattleResult.Fled -> {
-                                            // Return to map if in exploration mode
-                                            // For now, just return to menu
-                                            screenState = ScreenState.MENU
+                                            // Fled - return to map if exploring
+                                            screenState = if (isExplorationMode) {
+                                                ScreenState.MAP
+                                            } else {
+                                                ScreenState.MENU
+                                            }
                                         }
                                         else -> {}
                                     }
-
-                                    // Return to menu for battle test mode
-                                    // TODO: Return to map if in exploration mode
-                                    screenState = ScreenState.MENU
                                 },
                                 modifier = Modifier
                                     .fillMaxSize()
@@ -303,6 +334,19 @@ class MainActivity : ComponentActivity() {
                                 onHealerExit = { updatedState ->
                                     viewModel.updateGameState(updatedState)
                                     screenState = ScreenState.MAP
+                                },
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .padding(innerPadding)
+                            )
+                        }
+
+                        ScreenState.GAME_OVER -> {
+                            GameOverScreen(
+                                finalGameState = gameState,
+                                onReturnToTitle = {
+                                    viewModel.newGame()
+                                    screenState = ScreenState.TITLE
                                 },
                                 modifier = Modifier
                                     .fillMaxSize()
