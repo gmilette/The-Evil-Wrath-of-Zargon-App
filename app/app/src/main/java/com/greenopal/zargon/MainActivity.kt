@@ -25,27 +25,41 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.greenopal.zargon.data.models.NpcType
+import com.greenopal.zargon.data.models.StoryAction
+import com.greenopal.zargon.data.repository.SaveGameRepository
 import com.greenopal.zargon.domain.battle.BattleResult
 import com.greenopal.zargon.domain.graphics.Sprite
 import com.greenopal.zargon.domain.graphics.SpriteParser
+import com.greenopal.zargon.domain.story.NpcDialogProvider
 import com.greenopal.zargon.ui.components.SpriteView
 import com.greenopal.zargon.ui.components.StatsCard
 import com.greenopal.zargon.ui.screens.BattleScreen
+import com.greenopal.zargon.ui.screens.DialogScreen
+import com.greenopal.zargon.ui.screens.HealerScreen
 import com.greenopal.zargon.ui.screens.MapScreen
 import com.greenopal.zargon.ui.screens.MenuScreen
+import com.greenopal.zargon.ui.screens.WeaponShopScreen
 import com.greenopal.zargon.ui.theme.ZargonTheme
 import com.greenopal.zargon.ui.viewmodels.GameViewModel
+import com.greenopal.zargon.ui.viewmodels.TileInteraction
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
 enum class ScreenState {
-    MENU, MAP, BATTLE, STATS
+    MENU, MAP, BATTLE, STATS, DIALOG, WEAPON_SHOP, HEALER
 }
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     @Inject
     lateinit var spriteParser: SpriteParser
+
+    @Inject
+    lateinit var dialogProvider: NpcDialogProvider
+
+    @Inject
+    lateinit var saveRepository: SaveGameRepository
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -60,6 +74,7 @@ class MainActivity : ComponentActivity() {
                 var monsterSprites by remember { mutableStateOf<Map<String, Sprite?>>(emptyMap()) }
                 var spriteCount by remember { mutableStateOf(0) }
                 var screenState by remember { mutableStateOf(ScreenState.MENU) }
+                var currentNpcType by remember { mutableStateOf<NpcType?>(null) }
 
                 LaunchedEffect(Unit) {
                     val sprites = spriteParser.parseAllSprites()
@@ -109,6 +124,24 @@ class MainActivity : ComponentActivity() {
                                     // Update game state with encounter
                                     viewModel.updateGameState(encounterState)
                                     screenState = ScreenState.BATTLE
+                                },
+                                onInteract = { interaction ->
+                                    when (interaction) {
+                                        is TileInteraction.NpcDialog -> {
+                                            currentNpcType = interaction.npcType
+                                            screenState = ScreenState.DIALOG
+                                        }
+                                        is TileInteraction.WeaponShop -> {
+                                            screenState = ScreenState.WEAPON_SHOP
+                                        }
+                                        is TileInteraction.Healer -> {
+                                            screenState = ScreenState.HEALER
+                                        }
+                                        is TileInteraction.Castle -> {
+                                            // TODO: Implement castle/final boss
+                                            screenState = ScreenState.MENU
+                                        }
+                                    }
                                 },
                                 onOpenMenu = {
                                     screenState = ScreenState.MENU
@@ -204,6 +237,77 @@ class MainActivity : ComponentActivity() {
                                     }
                                 }
                             }
+                        }
+
+                        ScreenState.DIALOG -> {
+                            currentNpcType?.let { npcType ->
+                                val dialog = dialogProvider.getDialog(npcType, gameState)
+                                DialogScreen(
+                                    npcType = npcType,
+                                    dialog = dialog,
+                                    gameState = gameState,
+                                    onDialogEnd = { updatedState, storyAction ->
+                                        // Handle story actions
+                                        val finalState = when (storyAction) {
+                                            is StoryAction.AdvanceStory -> {
+                                                updatedState.updateStory(storyAction.newStatus)
+                                            }
+                                            is StoryAction.GiveItem -> {
+                                                updatedState.addItem(
+                                                    com.greenopal.zargon.data.models.Item(
+                                                        id = storyAction.itemName.hashCode(),
+                                                        name = storyAction.itemName,
+                                                        description = ""
+                                                    )
+                                                )
+                                            }
+                                            is StoryAction.BuildBoat -> {
+                                                updatedState.updateStory(5.5f)
+                                            }
+                                            is StoryAction.ResurrectBoatman -> {
+                                                updatedState.updateStory(5.0f)
+                                            }
+                                            else -> updatedState
+                                        }
+                                        viewModel.updateGameState(finalState)
+                                        screenState = ScreenState.MAP
+                                    },
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .padding(innerPadding)
+                                )
+                            } ?: run {
+                                screenState = ScreenState.MAP
+                            }
+                        }
+
+                        ScreenState.WEAPON_SHOP -> {
+                            WeaponShopScreen(
+                                gameState = gameState,
+                                onShopExit = { updatedState ->
+                                    viewModel.updateGameState(updatedState)
+                                    screenState = ScreenState.MAP
+                                },
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .padding(innerPadding)
+                            )
+                        }
+
+                        ScreenState.HEALER -> {
+                            HealerScreen(
+                                gameState = gameState,
+                                onSaveGame = {
+                                    saveRepository.saveGame(gameState, 1)
+                                },
+                                onHealerExit = { updatedState ->
+                                    viewModel.updateGameState(updatedState)
+                                    screenState = ScreenState.MAP
+                                },
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .padding(innerPadding)
+                            )
                         }
                     }
                 }

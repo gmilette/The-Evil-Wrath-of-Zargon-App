@@ -3,8 +3,10 @@ package com.greenopal.zargon.ui.viewmodels
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.greenopal.zargon.data.models.GameState
+import com.greenopal.zargon.data.models.NpcType
 import com.greenopal.zargon.domain.map.GameMap
 import com.greenopal.zargon.domain.map.MapParser
+import com.greenopal.zargon.domain.map.TileType
 import com.greenopal.zargon.ui.screens.Direction
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -13,6 +15,16 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import kotlin.random.Random
+
+/**
+ * Interaction types for map tiles
+ */
+sealed class TileInteraction {
+    data class NpcDialog(val npcType: NpcType) : TileInteraction()
+    object WeaponShop : TileInteraction()
+    object Healer : TileInteraction()
+    object Castle : TileInteraction()
+}
 
 /**
  * ViewModel for map exploration
@@ -46,6 +58,32 @@ class MapViewModel @Inject constructor(
      */
     fun setGameState(state: GameState) {
         _gameState.value = state
+    }
+
+    /**
+     * Check if player is standing on an interactive tile
+     */
+    fun getCurrentInteraction(): TileInteraction? {
+        val state = _gameState.value ?: return null
+        val map = _currentMap.value ?: return null
+        val tile = map.getTile(state.characterX, state.characterY) ?: return null
+
+        return when (tile) {
+            TileType.HUT -> {
+                // Determine which NPC based on world position
+                // This is a simplified approach - ideally read from map metadata
+                when {
+                    state.worldX == 1 && state.worldY == 1 -> TileInteraction.NpcDialog(NpcType.BOATMAN)
+                    state.worldX == 2 && state.worldY == 1 -> TileInteraction.NpcDialog(NpcType.SANDMAN)
+                    state.worldX == 4 && state.worldY == 1 -> TileInteraction.NpcDialog(NpcType.NECROMANCER)
+                    else -> TileInteraction.NpcDialog(NpcType.BOATMAN) // Default
+                }
+            }
+            TileType.WEAPON_SHOP -> TileInteraction.WeaponShop
+            TileType.HEALER -> TileInteraction.Healer
+            TileType.CASTLE -> TileInteraction.Castle
+            else -> null
+        }
     }
 
     /**

@@ -40,6 +40,7 @@ import com.greenopal.zargon.data.models.GameState
 import com.greenopal.zargon.domain.graphics.Sprite
 import com.greenopal.zargon.domain.map.GameMap
 import com.greenopal.zargon.ui.viewmodels.MapViewModel
+import com.greenopal.zargon.ui.viewmodels.TileInteraction
 
 /**
  * Map exploration screen showing tile grid and player
@@ -50,6 +51,7 @@ fun MapScreen(
     gameState: GameState,
     playerSprite: Sprite?,
     onEnterBattle: (GameState) -> Unit,
+    onInteract: (TileInteraction) -> Unit,
     onOpenMenu: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: MapViewModel = hiltViewModel()
@@ -101,6 +103,28 @@ fun MapScreen(
                         .fillMaxWidth()
                         .weight(1f)
                 )
+
+                // Interact button (if on interactive tile)
+                val currentInteraction = viewModel.getCurrentInteraction()
+                if (currentInteraction != null) {
+                    Button(
+                        onClick = { onInteract(currentInteraction) },
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.tertiary
+                        )
+                    ) {
+                        Text(
+                            text = when (currentInteraction) {
+                                is TileInteraction.NpcDialog -> "Talk to ${currentInteraction.npcType.displayName}"
+                                is TileInteraction.WeaponShop -> "Enter Weapon Shop"
+                                is TileInteraction.Healer -> "Visit Healer"
+                                is TileInteraction.Castle -> "Enter Castle"
+                            },
+                            style = MaterialTheme.typography.titleMedium
+                        )
+                    }
+                }
 
                 // Movement controls
                 MovementControls(
