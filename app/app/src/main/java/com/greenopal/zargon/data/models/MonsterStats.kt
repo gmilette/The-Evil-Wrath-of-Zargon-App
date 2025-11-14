@@ -10,8 +10,9 @@ data class MonsterStats(
     val currentHP: Int,         // mDP in QBASIC
     val maxHP: Int,             // Original mDP
     val scalingFactor: Int = 1, // howmuchbigger in QBASIC
+    val displayName: String? = null, // Custom display name (e.g., "Great Bat")
 ) {
-    val name: String get() = type.displayName
+    val name: String get() = displayName ?: type.displayName
     val isAlive: Boolean get() = currentHP > 0
     val hpPercentage: Float get() = currentHP.toFloat() / maxHP.toFloat()
 

@@ -99,31 +99,20 @@ class MonsterSelector @Inject constructor() {
         val scaledAP = type.baseAP * scalingFactor
         val scaledDP = type.baseDP * scalingFactor
 
+        // Build display name with prefix if present
+        val displayName = if (prefix.isNotEmpty()) {
+            prefix + type.displayName
+        } else {
+            null // Use default from type
+        }
+
         return MonsterStats(
             type = type,
             attackPower = scaledAP,
             currentHP = scaledDP,
             maxHP = scaledDP,
-            scalingFactor = scalingFactor
-        ).copy(
-            type = type.copy(displayName = prefix + type.displayName)
+            scalingFactor = scalingFactor,
+            displayName = displayName
         )
-    }
-
-    /**
-     * Extension to copy MonsterType with new display name
-     */
-    private fun MonsterType.copy(displayName: String): MonsterType {
-        // Create a wrapper that preserves all properties but changes display name
-        return object : MonsterType(
-            displayName = displayName,
-            baseAP = this.baseAP,
-            baseDP = this.baseDP,
-            minLevel = this.minLevel,
-            baseExperience = this.baseExperience,
-            baseGold = this.baseGold
-        ) {
-            override fun toString() = displayName
-        }
     }
 }
