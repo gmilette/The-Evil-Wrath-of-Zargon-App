@@ -25,6 +25,9 @@ data class GameState(
     // Special flags
     val inShip: Boolean = false,  // inship in QBASIC
 
+    // Progression (QBASIC: nextlev)
+    val nextLevelXP: Int = 30,  // XP needed for next level
+
     // Game meta
     val saveSlot: Int = 1,
     val playtime: Long = 0L  // milliseconds

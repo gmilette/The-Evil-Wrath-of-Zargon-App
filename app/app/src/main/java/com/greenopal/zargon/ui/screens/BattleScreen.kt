@@ -24,6 +24,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -34,6 +37,7 @@ import com.greenopal.zargon.data.models.GameState
 import com.greenopal.zargon.domain.battle.BattleAction
 import com.greenopal.zargon.domain.battle.BattleResult
 import com.greenopal.zargon.domain.graphics.Sprite
+import com.greenopal.zargon.ui.components.BattleRewardsDialog
 import com.greenopal.zargon.ui.components.MagicMenu
 import com.greenopal.zargon.ui.components.MonsterStatsBox
 import com.greenopal.zargon.ui.components.SpriteView
@@ -58,13 +62,23 @@ fun BattleScreen(
     }
 
     val battleState by viewModel.battleState.collectAsState()
+    val battleRewards by viewModel.battleRewards.collectAsState()
 
-    // Handle battle end
-    LaunchedEffect(battleState?.battleResult) {
+    var showRewardsDialog by remember { mutableStateOf(false) }
+
+    // Show rewards dialog when battle is won and rewards are available
+    LaunchedEffect(battleState?.battleResult, battleRewards) {
+        if (battleState?.battleResult == BattleResult.Victory && battleRewards != null) {
+            showRewardsDialog = true
+        }
+    }
+
+    // Handle battle end after rewards dialog is dismissed
+    fun handleBattleEnd() {
         val state = battleState
         if (state != null && state.battleResult != BattleResult.InProgress) {
-            // Update game state with new character stats
-            val updatedGameState = gameState.updateCharacter(state.character)
+            // Get updated game state with all rewards applied
+            val updatedGameState = viewModel.getUpdatedGameState() ?: gameState
             onBattleEnd(state.battleResult, updatedGameState)
         }
     }
@@ -176,6 +190,17 @@ fun BattleScreen(
                     color = Color.White
                 )
             }
+        }
+
+        // Rewards dialog
+        if (showRewardsDialog && battleRewards != null) {
+            BattleRewardsDialog(
+                rewards = battleRewards!!,
+                onDismiss = {
+                    showRewardsDialog = false
+                    handleBattleEnd()
+                }
+            )
         }
     }
 }

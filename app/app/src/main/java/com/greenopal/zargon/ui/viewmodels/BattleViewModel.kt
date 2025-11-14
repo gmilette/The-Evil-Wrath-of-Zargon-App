@@ -8,6 +8,9 @@ import com.greenopal.zargon.domain.battle.BattleAction
 import com.greenopal.zargon.domain.battle.BattleResult
 import com.greenopal.zargon.domain.battle.BattleState
 import com.greenopal.zargon.domain.battle.MonsterSelector
+import com.greenopal.zargon.domain.progression.BattleRewards
+import com.greenopal.zargon.domain.progression.LevelingSystem
+import com.greenopal.zargon.domain.progression.RewardSystem
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -23,22 +26,31 @@ import kotlin.random.Random
  */
 @HiltViewModel
 class BattleViewModel @Inject constructor(
-    private val monsterSelector: MonsterSelector
+    private val monsterSelector: MonsterSelector,
+    private val rewardSystem: RewardSystem,
+    private val levelingSystem: LevelingSystem
 ) : ViewModel() {
 
     private val _battleState = MutableStateFlow<BattleState?>(null)
     val battleState: StateFlow<BattleState?> = _battleState.asStateFlow()
 
+    private val _battleRewards = MutableStateFlow<BattleRewards?>(null)
+    val battleRewards: StateFlow<BattleRewards?> = _battleRewards.asStateFlow()
+
+    private var currentGameState: GameState? = null
+
     /**
      * Start a new battle
      */
     fun startBattle(gameState: GameState) {
+        currentGameState = gameState
         val monster = monsterSelector.selectMonster(gameState)
         _battleState.value = BattleState(
             character = gameState.character,
             monster = monster,
             messages = listOf("A ${monster.name} appears!")
         )
+        _battleRewards.value = null
     }
 
     /**
@@ -74,7 +86,13 @@ class BattleViewModel @Inject constructor(
             // Check if monster is defeated
             if (!newMonster.isAlive) {
                 newState = newState.addMessage("${state.monster.name} is defeated!")
-                    .checkBattleEnd()
+                _battleState.value = newState
+
+                // Calculate rewards
+                delay(500)
+                calculateVictoryRewards(newState)
+
+                newState = newState.checkBattleEnd()
                 _battleState.value = newState
                 return@launch
             }
@@ -211,7 +229,13 @@ class BattleViewModel @Inject constructor(
                 if (!damagedMonster.isAlive) {
                     newState = newState
                         .addMessage("${state.monster.name} is defeated!")
-                        .checkBattleEnd()
+                    _battleState.value = newState
+
+                    // Calculate rewards
+                    delay(500)
+                    calculateVictoryRewards(newState)
+
+                    newState = newState.checkBattleEnd()
                     _battleState.value = newState
                     return@launch
                 }
@@ -245,5 +269,92 @@ class BattleViewModel @Inject constructor(
      */
     fun getUpdatedCharacter(): CharacterStats? {
         return _battleState.value?.character
+    }
+
+    /**
+     * Calculate victory rewards (WinBattle from ZARGON.BAS:3658)
+     */
+    private fun calculateVictoryRewards(state: BattleState) {
+        val gameState = currentGameState ?: return
+        val monster = state.monster
+
+        // Calculate XP and gold
+        val xpGained = rewardSystem.calculateXP(monster.type, monster.scalingFactor)
+        val goldGained = rewardSystem.calculateGold(monster.type, monster.scalingFactor)
+
+        // Check for special item drops
+        val itemDropped = rewardSystem.getSpecialDrop(
+            monster.type,
+            gameState.worldX,
+            gameState.worldY
+        )
+
+        // Update character with XP and gold
+        var updatedCharacter = state.character
+            .gainExperience(xpGained)
+            .gainGold(goldGained)
+
+        // Check for level up
+        val (leveledCharacter, didLevelUp) = levelingSystem.checkAndApplyLevelUp(
+            updatedCharacter,
+            gameState.nextLevelXP
+        )
+
+        val rewards = if (didLevelUp) {
+            // Character leveled up!
+            updatedCharacter = leveledCharacter
+            val apGain = leveledCharacter.baseAP - state.character.baseAP
+            val dpGain = leveledCharacter.baseDP - state.character.baseDP
+            val mpGain = leveledCharacter.baseMP - state.character.baseMP
+
+            BattleRewards(
+                xpGained = xpGained,
+                goldGained = goldGained,
+                itemDropped = itemDropped,
+                leveledUp = true,
+                newLevel = leveledCharacter.level,
+                apGain = apGain,
+                dpGain = dpGain,
+                mpGain = mpGain
+            )
+        } else {
+            BattleRewards(
+                xpGained = xpGained,
+                goldGained = goldGained,
+                itemDropped = itemDropped
+            )
+        }
+
+        // Update battle state with new character stats
+        val newState = state.updateCharacter(updatedCharacter)
+        _battleState.value = newState
+        _battleRewards.value = rewards
+    }
+
+    /**
+     * Get updated game state with battle results
+     */
+    fun getUpdatedGameState(): GameState? {
+        val gameState = currentGameState ?: return null
+        val character = _battleState.value?.character ?: return null
+        val rewards = _battleRewards.value
+
+        var updatedState = gameState.updateCharacter(character)
+
+        // Add item to inventory if dropped
+        rewards?.itemDropped?.let { item ->
+            updatedState = updatedState.addItem(item)
+        }
+
+        // Update next level XP if leveled up
+        if (rewards?.leveledUp == true) {
+            val newNextLevelXP = rewardSystem.calculateXPForNextLevel(
+                character.level,
+                gameState.nextLevelXP
+            )
+            updatedState = updatedState.copy(nextLevelXP = newNextLevelXP)
+        }
+
+        return updatedState
     }
 }
