@@ -146,7 +146,7 @@ fun WeaponShopScreen(
                                         weaponBonus = weapon.attackBonus
                                     )
                                 )
-                                message = "Purchased ${weapon.name}!"
+                                message = "Purchased ${weapon.displayName}!"
                                 currentScreen = ShopScreen.MAIN
                             } else {
                                 message = "You can't afford it"
@@ -167,7 +167,7 @@ fun WeaponShopScreen(
                                         armorBonus = armor.defenseBonus
                                     )
                                 )
-                                message = "Purchased ${armor.name}!"
+                                message = "Purchased ${armor.displayName}!"
                                 currentScreen = ShopScreen.MAIN
                             } else {
                                 message = "You can't afford it"
@@ -261,7 +261,7 @@ private fun WeaponItem(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Text("${weapon.name} (+${weapon.attackBonus} AP)")
+            Text("${weapon.displayName} (+${weapon.attackBonus} AP)")
             Text("${price}g", color = Color(0xFFFFD700))
         }
     }
@@ -316,7 +316,7 @@ private fun ArmorItem(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Text("${armor.name} (+${armor.defenseBonus} DP)")
+            Text("${armor.displayName} (+${armor.defenseBonus} DP)")
             Text("${price}g", color = Color(0xFFFFD700))
         }
     }
@@ -340,9 +340,7 @@ enum class Weapon(val displayName: String, val basePrice: Int, val attackBonus: 
     BROAD_SWORD("broad sword", 103, 9),
     TWOHANDED_SWORD("twohanded sword", 250, 15),
     ATLANTEAN_SWORD("Atlantean Sword", 500, 25),
-    GERMANIC_WARCLEAVER("Germanic WarCleaver", 834, 40);
-
-    val name: String get() = displayName
+    GERMANIC_WARCLEAVER("Germanic WarCleaver", 834, 40)
 }
 
 enum class Armor(val displayName: String, val basePrice: Int, val defenseBonus: Int) {
@@ -353,7 +351,5 @@ enum class Armor(val displayName: String, val basePrice: Int, val defenseBonus: 
     CHAIN_MAIL("chain mail", 134, 28),
     PLATEMAIL("platemail", 279, 50),
     SPLINT_MAIL("Splint mail", 578, 80),
-    RITE_OF_TOUGH_SKIN("Rite of tough skin", 1004, 120);
-
-    val name: String get() = displayName
+    RITE_OF_TOUGH_SKIN("Rite of tough skin", 1004, 120)
 }
