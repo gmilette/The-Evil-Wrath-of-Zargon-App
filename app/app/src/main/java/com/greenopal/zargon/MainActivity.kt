@@ -255,9 +255,9 @@ class MainActivity : ComponentActivity() {
                                             is StoryAction.GiveItem -> {
                                                 updatedState.addItem(
                                                     com.greenopal.zargon.data.models.Item(
-                                                        id = storyAction.itemName.hashCode(),
                                                         name = storyAction.itemName,
-                                                        description = ""
+                                                        description = "Story item",
+                                                        type = com.greenopal.zargon.data.models.ItemType.KEY_ITEM
                                                     )
                                                 )
                                             }
