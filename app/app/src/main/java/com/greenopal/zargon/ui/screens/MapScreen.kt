@@ -277,9 +277,9 @@ private fun DrawScope.drawPlayerSprite(
 
     for (py in 0 until sprite.height) {
         for (px in 0 until sprite.width) {
-            val colorIndex = sprite.getPixel(px, py)
-            if (colorIndex != 0) { // 0 is transparent
-                val color = sprite.palette.getColor(colorIndex)
+            val color = sprite.getPixel(px, py)
+            // Skip transparent pixels
+            if (color.alpha > 0f) {
                 drawRect(
                     color = color,
                     topLeft = Offset(

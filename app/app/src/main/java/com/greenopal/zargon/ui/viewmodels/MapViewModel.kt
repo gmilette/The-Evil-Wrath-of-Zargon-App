@@ -107,47 +107,36 @@ class MapViewModel @Inject constructor(
     private fun handleMapTransition(direction: Direction, state: GameState) {
         val map = _currentMap.value ?: return
 
-        // Calculate new world coordinates
-        val (newWorldX, newWorldY, newCharX, newCharY) = when (direction) {
+        // Calculate new world coordinates and character position
+        val (newWorldPos, newCharPos) = when (direction) {
             Direction.UP -> {
                 if (state.worldY > 1) {
-                    // Move to map above
-                    Pair(state.worldX, state.worldY - 1) to Pair(state.characterX, map.height - 1)
+                    Pair(Pair(state.worldX, state.worldY - 1), Pair(state.characterX, map.height - 1))
                 } else {
                     return // Can't go further up
                 }
             }
             Direction.DOWN -> {
                 if (state.worldY < 4) {
-                    // Move to map below
-                    Pair(state.worldX, state.worldY + 1) to Pair(state.characterX, 0)
+                    Pair(Pair(state.worldX, state.worldY + 1), Pair(state.characterX, 0))
                 } else {
                     return // Can't go further down
                 }
             }
             Direction.LEFT -> {
                 if (state.worldX > 1) {
-                    // Move to map on left
-                    Pair(state.worldX - 1, state.worldY) to Pair(map.width - 1, state.characterY)
+                    Pair(Pair(state.worldX - 1, state.worldY), Pair(map.width - 1, state.characterY))
                 } else {
                     return // Can't go further left
                 }
             }
             Direction.RIGHT -> {
                 if (state.worldX < 4) {
-                    // Move to map on right
-                    Pair(state.worldX + 1, state.worldY) to Pair(0, state.characterY)
+                    Pair(Pair(state.worldX + 1, state.worldY), Pair(0, state.characterY))
                 } else {
                     return // Can't go further right
                 }
             }
-        }
-
-        val (newWorldPos, newCharPos) = when (direction) {
-            Direction.UP -> Pair(Pair(state.worldX, state.worldY - 1), Pair(state.characterX, map.height - 1))
-            Direction.DOWN -> Pair(Pair(state.worldX, state.worldY + 1), Pair(state.characterX, 0))
-            Direction.LEFT -> Pair(Pair(state.worldX - 1, state.worldY), Pair(map.width - 1, state.characterY))
-            Direction.RIGHT -> Pair(Pair(state.worldX + 1, state.worldY), Pair(0, state.characterY))
         }
 
         // Update game state with new map and position
