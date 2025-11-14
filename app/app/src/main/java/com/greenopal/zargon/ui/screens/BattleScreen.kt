@@ -34,6 +34,7 @@ import com.greenopal.zargon.data.models.GameState
 import com.greenopal.zargon.domain.battle.BattleAction
 import com.greenopal.zargon.domain.battle.BattleResult
 import com.greenopal.zargon.domain.graphics.Sprite
+import com.greenopal.zargon.ui.components.MagicMenu
 import com.greenopal.zargon.ui.components.MonsterStatsBox
 import com.greenopal.zargon.ui.components.SpriteView
 import com.greenopal.zargon.ui.viewmodels.BattleViewModel
@@ -148,6 +149,20 @@ fun BattleScreen(
                         modifier = Modifier.weight(0.3f)
                     )
                 }
+            }
+
+            // Magic menu overlay
+            if (battleState!!.showMagicMenu) {
+                MagicMenu(
+                    playerLevel = battleState!!.character.level,
+                    currentMP = battleState!!.character.currentMP,
+                    onSpellSelected = { spellAction ->
+                        viewModel.onAction(spellAction)
+                    },
+                    onCancel = {
+                        viewModel.closeMagicMenu()
+                    }
+                )
             }
         } else {
             // Loading

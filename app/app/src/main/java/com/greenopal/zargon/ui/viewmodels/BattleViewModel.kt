@@ -146,14 +146,83 @@ class BattleViewModel @Inject constructor(
 
     /**
      * Cast a spell (Magix from ZARGON.BAS:2515)
-     * To be implemented in Phase 3
      */
     private fun castSpell(state: BattleState, spellIndex: Int) {
-        // Placeholder - will implement in Phase 3, Step 7
-        val newState = state
-            .copy(showMagicMenu = false)
-            .addMessage("Magic not yet implemented!")
-        _battleState.value = newState
+        viewModelScope.launch {
+            // Get the spell (convert 1-based index to 0-based)
+            val spell = com.greenopal.zargon.domain.battle.Spells.getByIndex(spellIndex)
+
+            if (spell == null) {
+                // Invalid spell index
+                val newState = state
+                    .copy(showMagicMenu = false)
+                    .addMessage("Invalid spell!")
+                _battleState.value = newState
+                return@launch
+            }
+
+            // Check if player has unlocked this spell
+            val availableSpells = com.greenopal.zargon.domain.battle.Spells.getAvailableSpells(state.character.level)
+            if (spell !in availableSpells) {
+                val newState = state
+                    .addMessage("Spell not yet learned!")
+                _battleState.value = newState
+                return@launch
+            }
+
+            // Check MP cost
+            if (!spell.canCast(state.character.currentMP)) {
+                val newState = state
+                    .addMessage("Not enough MP!")
+                _battleState.value = newState
+                return@launch
+            }
+
+            // Close magic menu
+            var newState = state.copy(showMagicMenu = false)
+
+            // Deduct MP cost
+            val newCharacter = state.character.useMagic(spell.mpCost)
+            newState = newState.updateCharacter(newCharacter)
+
+            if (spell.isHealing) {
+                // Cure spell - heal player
+                val healAmount = spell.calculateEffect(state.character.level)
+                val healedCharacter = newCharacter.heal(healAmount)
+                newState = newState
+                    .updateCharacter(healedCharacter)
+                    .addMessage("${spell.name} restores $healAmount HP!")
+
+                _battleState.value = newState
+
+                // Monster counterattack after healing
+                delay(500)
+                monsterCounterattack(newState)
+            } else {
+                // Damage spell - attack monster
+                val damage = spell.calculateEffect(state.character.level)
+                val damagedMonster = state.monster.takeDamage(damage)
+
+                newState = newState
+                    .updateMonster(damagedMonster)
+                    .addMessage("${spell.name} deals $damage damage!")
+
+                // Check if monster is defeated
+                if (!damagedMonster.isAlive) {
+                    newState = newState
+                        .addMessage("${state.monster.name} is defeated!")
+                        .checkBattleEnd()
+                    _battleState.value = newState
+                    return@launch
+                }
+
+                _battleState.value = newState
+
+                // Monster counterattack
+                delay(500)
+                monsterCounterattack(newState)
+            }
+        }
     }
 
     /**
