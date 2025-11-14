@@ -31,10 +31,16 @@ import com.greenopal.zargon.domain.graphics.SpriteParser
 import com.greenopal.zargon.ui.components.SpriteView
 import com.greenopal.zargon.ui.components.StatsCard
 import com.greenopal.zargon.ui.screens.BattleScreen
+import com.greenopal.zargon.ui.screens.MapScreen
+import com.greenopal.zargon.ui.screens.MenuScreen
 import com.greenopal.zargon.ui.theme.ZargonTheme
 import com.greenopal.zargon.ui.viewmodels.GameViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
+
+enum class ScreenState {
+    MENU, MAP, BATTLE, STATS
+}
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -53,7 +59,7 @@ class MainActivity : ComponentActivity() {
                 var playerSprite by remember { mutableStateOf<Sprite?>(null) }
                 var monsterSprites by remember { mutableStateOf<Map<String, Sprite?>>(emptyMap()) }
                 var spriteCount by remember { mutableStateOf(0) }
-                var inBattle by remember { mutableStateOf(false) }
+                var screenState by remember { mutableStateOf(ScreenState.MENU) }
 
                 LaunchedEffect(Unit) {
                     val sprites = spriteParser.parseAllSprites()
@@ -77,83 +83,125 @@ class MainActivity : ComponentActivity() {
                 }
 
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    if (inBattle) {
-                        // Battle screen
-                        BattleScreen(
-                            gameState = gameState,
-                            playerSprite = playerSprite,
-                            monsterSprites = monsterSprites,
-                            onBattleEnd = { result, updatedGameState ->
-                                // Update game state
-                                viewModel.updateGameState(updatedGameState)
+                    when (screenState) {
+                        ScreenState.MENU -> {
+                            MenuScreen(
+                                onStartExploration = {
+                                    screenState = ScreenState.MAP
+                                },
+                                onStartBattleTest = {
+                                    screenState = ScreenState.BATTLE
+                                },
+                                onViewStats = {
+                                    screenState = ScreenState.STATS
+                                },
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .padding(innerPadding)
+                            )
+                        }
 
-                                // Show result message (could add dialog here)
-                                when (result) {
-                                    is BattleResult.Victory -> {
-                                        // Handle victory (XP, gold - Phase 4)
-                                    }
-                                    is BattleResult.Defeat -> {
-                                        // Handle defeat (game over)
-                                    }
-                                    is BattleResult.Fled -> {
-                                        // Fled successfully
-                                    }
-                                    else -> {}
-                                }
+                        ScreenState.MAP -> {
+                            MapScreen(
+                                gameState = gameState,
+                                playerSprite = playerSprite,
+                                onEnterBattle = { encounterState ->
+                                    // Update game state with encounter
+                                    viewModel.updateGameState(encounterState)
+                                    screenState = ScreenState.BATTLE
+                                },
+                                onOpenMenu = {
+                                    screenState = ScreenState.MENU
+                                },
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .padding(innerPadding)
+                            )
+                        }
 
-                                // Return to main screen
-                                inBattle = false
-                            },
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .padding(innerPadding)
-                        )
-                    } else {
-                        // Main screen
-                        Box(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .padding(innerPadding)
-                                .padding(16.dp),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Column(
-                                horizontalAlignment = Alignment.CenterHorizontally,
-                                verticalArrangement = Arrangement.spacedBy(16.dp)
+                        ScreenState.BATTLE -> {
+                            BattleScreen(
+                                gameState = gameState,
+                                playerSprite = playerSprite,
+                                monsterSprites = monsterSprites,
+                                onBattleEnd = { result, updatedGameState ->
+                                    // Update game state
+                                    viewModel.updateGameState(updatedGameState)
+
+                                    // Handle battle result
+                                    when (result) {
+                                        is BattleResult.Victory -> {
+                                            // Victory handled by rewards dialog
+                                        }
+                                        is BattleResult.Defeat -> {
+                                            // Return to menu on defeat
+                                            screenState = ScreenState.MENU
+                                        }
+                                        is BattleResult.Fled -> {
+                                            // Return to map if in exploration mode
+                                            // For now, just return to menu
+                                            screenState = ScreenState.MENU
+                                        }
+                                        else -> {}
+                                    }
+
+                                    // Return to menu for battle test mode
+                                    // TODO: Return to map if in exploration mode
+                                    screenState = ScreenState.MENU
+                                },
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .padding(innerPadding)
+                            )
+                        }
+
+                        ScreenState.STATS -> {
+                            // Stats screen
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .padding(innerPadding)
+                                    .padding(16.dp),
+                                contentAlignment = Alignment.Center
                             ) {
-                                Text(
-                                    text = "The Evil Wrath of Zargon",
-                                    style = androidx.compose.material3.MaterialTheme.typography.titleLarge
-                                )
-
-                                Spacer(modifier = Modifier.height(8.dp))
-
-                                // Display sprite
-                                SpriteView(
-                                    sprite = playerSprite,
-                                    size = 150.dp
-                                )
-
-                                if (spriteCount > 0) {
-                                    Text("Loaded $spriteCount sprites from bomb.sht")
-                                }
-
-                                Spacer(modifier = Modifier.height(8.dp))
-
-                                // Display stats
-                                StatsCard(
-                                    stats = gameState.character,
-                                    modifier = Modifier.padding(16.dp)
-                                )
-
-                                Spacer(modifier = Modifier.height(16.dp))
-
-                                // Battle button
-                                Button(
-                                    onClick = { inBattle = true },
-                                    modifier = Modifier.fillMaxWidth(0.6f)
+                                Column(
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                    verticalArrangement = Arrangement.spacedBy(16.dp)
                                 ) {
-                                    Text("Start Battle (Test)")
+                                    Text(
+                                        text = "Character Stats",
+                                        style = androidx.compose.material3.MaterialTheme.typography.titleLarge
+                                    )
+
+                                    Spacer(modifier = Modifier.height(8.dp))
+
+                                    // Display sprite
+                                    SpriteView(
+                                        sprite = playerSprite,
+                                        size = 150.dp
+                                    )
+
+                                    if (spriteCount > 0) {
+                                        Text("Loaded $spriteCount sprites from bomb.sht")
+                                    }
+
+                                    Spacer(modifier = Modifier.height(8.dp))
+
+                                    // Display stats
+                                    StatsCard(
+                                        stats = gameState.character,
+                                        modifier = Modifier.padding(16.dp)
+                                    )
+
+                                    Spacer(modifier = Modifier.height(16.dp))
+
+                                    // Back button
+                                    Button(
+                                        onClick = { screenState = ScreenState.MENU },
+                                        modifier = Modifier.fillMaxWidth(0.6f)
+                                    ) {
+                                        Text("Back to Menu")
+                                    }
                                 }
                             }
                         }
