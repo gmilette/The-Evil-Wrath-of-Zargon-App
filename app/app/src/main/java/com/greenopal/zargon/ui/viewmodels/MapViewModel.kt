@@ -73,12 +73,16 @@ class MapViewModel @Inject constructor(
         return when (tile) {
             TileType.HUT -> {
                 // Determine which NPC based on world position
-                // This is a simplified approach - ideally read from map metadata
+                // Maps to QBASIC hut() SUB (ZARGON.BAS:1845-2091)
                 when {
-                    state.worldX == 1 && state.worldY == 1 -> TileInteraction.NpcDialog(NpcType.BOATMAN)
-                    state.worldX == 2 && state.worldY == 1 -> TileInteraction.NpcDialog(NpcType.SANDMAN)
-                    state.worldX == 4 && state.worldY == 1 -> TileInteraction.NpcDialog(NpcType.NECROMANCER)
-                    else -> TileInteraction.NpcDialog(NpcType.BOATMAN) // Default
+                    state.worldX == 2 && state.worldY == 4 -> TileInteraction.NpcDialog(NpcType.BOATMAN)  // Map 24
+                    state.worldX == 1 && state.worldY == 4 -> TileInteraction.NpcDialog(NpcType.SANDMAN)  // Map 14
+                    state.worldX == 4 && state.worldY == 1 -> TileInteraction.NpcDialog(NpcType.NECROMANCER)  // Map 41
+                    state.worldX == 4 && state.worldY == 3 -> TileInteraction.NpcDialog(NpcType.MOUNTAIN_JACK)  // Map 43
+                    state.worldX == 4 && state.worldY == 4 -> TileInteraction.NpcDialog(NpcType.OLD_MAN)  // Map 44
+                    state.worldX == 1 && state.worldY == 1 -> TileInteraction.NpcDialog(NpcType.FOUNTAIN)  // Map 11
+                    state.worldX == 3 && state.worldY == 2 -> TileInteraction.NpcDialog(NpcType.FOUNTAIN)  // Map 32
+                    else -> null
                 }
             }
             TileType.WEAPON_SHOP -> TileInteraction.WeaponShop

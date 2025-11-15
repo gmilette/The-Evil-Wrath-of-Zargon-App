@@ -75,6 +75,9 @@ enum class NpcType(val npcId: String, val displayName: String) {
     BOATMAN("11", "Boatman"),
     SANDMAN("14", "Sandman"),
     NECROMANCER("41", "Necromancer"),
+    MOUNTAIN_JACK("43", "Mountain Jack"),
+    OLD_MAN("44", "Old Man"),
+    FOUNTAIN("F", "Fountain"),
     GOTHOX("W", "Gothox (Weapon Shop)"),
     HEALER("H", "Healer")
 }

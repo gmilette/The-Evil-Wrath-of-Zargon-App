@@ -293,7 +293,15 @@ class MainActivity : ComponentActivity() {
                                                 )
                                             }
                                             is StoryAction.BuildBoat -> {
-                                                updatedState.updateStory(5.5f)
+                                                updatedState
+                                                    .updateStory(5.5f)
+                                                    .addItem(
+                                                        com.greenopal.zargon.data.models.Item(
+                                                            name = "ship",
+                                                            description = "Allows travel on the river",
+                                                            type = com.greenopal.zargon.data.models.ItemType.KEY_ITEM
+                                                        )
+                                                    )
                                             }
                                             is StoryAction.ResurrectBoatman -> {
                                                 updatedState.updateStory(5.0f)

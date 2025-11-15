@@ -22,6 +22,9 @@ class NpcDialogProvider @Inject constructor() {
             NpcType.BOATMAN -> getBoatmanDialog(gameState)
             NpcType.SANDMAN -> getSandmanDialog(gameState)
             NpcType.NECROMANCER -> getNecromancerDialog(gameState)
+            NpcType.MOUNTAIN_JACK -> getMountainJackDialog(gameState)
+            NpcType.OLD_MAN -> getOldManDialog(gameState)
+            NpcType.FOUNTAIN -> getFountainDialog()
             else -> Dialog("", "No one is here", "", "", "", "")
         }
     }
@@ -217,5 +220,64 @@ class NpcDialogProvider @Inject constructor() {
 
             else -> Dialog("", "No one is here", "", "", "", "")
         }
+    }
+
+    /**
+     * Mountain Jack dialog (ZARGON.BAS:1962-1980)
+     */
+    private fun getMountainJackDialog(gameState: GameState): Dialog {
+        val status = gameState.storyStatus
+
+        return when {
+            status < 4f -> {
+                Dialog(
+                    question1 = "",
+                    answer1 = "there is no one here",
+                    question2 = "",
+                    answer2 = "",
+                    question3 = "",
+                    answer3 = ""
+                )
+            }
+            status >= 4f -> {
+                Dialog(
+                    question1 = "hey old man",
+                    answer1 = "wha?... who you callin old man, get away from me",
+                    question2 = "please help me, i need a trapped soul",
+                    answer2 = "a trapped soul!?! you're crazy kid...ok fine, i do know where one is, if you just get away from me. travel to the north east, there is a graveyard, an evil graveyard. There you will find what you seek",
+                    question3 = "that's it?",
+                    answer3 = "yep."
+                )
+            }
+            else -> Dialog("", "No one is here", "", "", "", "")
+        }
+    }
+
+    /**
+     * Old Man dialog (ZARGON.BAS:1998-2004)
+     */
+    private fun getOldManDialog(gameState: GameState): Dialog {
+        return Dialog(
+            question1 = "hello old man",
+            answer1 = "hello traveler, how may i help you?",
+            question2 = "where am i?",
+            answer2 = "this is the land of gef. you seek the castle i presume?",
+            question3 = "yes, how do i get there?",
+            answer3 = "well, you can take the long way, down by the river, or you can take my airship, but first you must play me in a game (play the old man's color matching game for the airship)"
+        )
+    }
+
+    /**
+     * Fountain dialog (ZARGON.BAS:1487-1540)
+     */
+    private fun getFountainDialog(): Dialog {
+        return Dialog(
+            question1 = "drink from fountain",
+            answer1 = "You drink the cool refreshing water. You feel revitalized! (HP and MP restored)",
+            question2 = "bathe in fountain",
+            answer2 = "You bathe in the fountain. The water cleanses your wounds! (HP and MP restored)",
+            question3 = "save game",
+            answer3 = "You rest by the fountain and save your progress."
+        )
     }
 }
