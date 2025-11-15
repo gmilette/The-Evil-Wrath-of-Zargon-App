@@ -3,6 +3,8 @@ package com.greenopal.zargon.ui.viewmodels
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.greenopal.zargon.data.models.GameState
+import com.greenopal.zargon.data.models.Item
+import com.greenopal.zargon.data.models.MapItems
 import com.greenopal.zargon.data.models.NpcType
 import com.greenopal.zargon.domain.map.GameMap
 import com.greenopal.zargon.domain.map.MapParser
@@ -196,5 +198,32 @@ class MapViewModel @Inject constructor(
      */
     fun getUpdatedGameState(): GameState? {
         return _gameState.value
+    }
+
+    /**
+     * Search for items at current location
+     * Based on QBASIC found() SUB (ZARGON.BAS:1454-1485)
+     * Returns the item found, or null if nothing found
+     */
+    fun searchForItem(): Item? {
+        val state = _gameState.value ?: return null
+
+        // Check if item exists at this location and not already in inventory
+        val foundItem = MapItems.getItemAt(
+            worldX = state.worldX,
+            worldY = state.worldY,
+            spotX = state.characterX,
+            spotY = state.characterY
+        )
+
+        // Only return item if player doesn't already have it
+        return if (foundItem != null && !state.hasItem(foundItem.name)) {
+            // Add item to game state
+            val newState = state.addItem(foundItem)
+            _gameState.value = newState
+            foundItem
+        } else {
+            null
+        }
     }
 }

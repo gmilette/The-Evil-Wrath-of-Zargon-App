@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -22,10 +23,14 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -34,9 +39,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.greenopal.zargon.data.models.GameState
+import com.greenopal.zargon.data.models.Item
 import com.greenopal.zargon.domain.graphics.Sprite
 import com.greenopal.zargon.domain.map.GameMap
 import com.greenopal.zargon.ui.viewmodels.MapViewModel
@@ -56,6 +63,9 @@ fun MapScreen(
     modifier: Modifier = Modifier,
     viewModel: MapViewModel = hiltViewModel()
 ) {
+    // State for found item dialog
+    var foundItem by remember { mutableStateOf<Item?>(null) }
+
     // Initialize map
     LaunchedEffect(gameState.worldX, gameState.worldY) {
         viewModel.loadMap(gameState.worldX, gameState.worldY)
@@ -131,6 +141,14 @@ fun MapScreen(
                     onMove = { direction ->
                         viewModel.movePlayer(direction)
                     },
+                    onSearch = {
+                        val item = viewModel.searchForItem()
+                        if (item != null) {
+                            foundItem = item
+                        } else {
+                            foundItem = Item("", "Nothing found here", type = com.greenopal.zargon.data.models.ItemType.MISC)
+                        }
+                    },
                     modifier = Modifier.fillMaxWidth()
                 )
             }
@@ -146,6 +164,14 @@ fun MapScreen(
                     color = Color.White
                 )
             }
+        }
+
+        // Found item dialog
+        if (foundItem != null) {
+            ItemFoundDialog(
+                item = foundItem!!,
+                onDismiss = { foundItem = null }
+            )
         }
     }
 }
@@ -350,6 +376,7 @@ private fun DrawScope.drawGrid(
 @Composable
 private fun MovementControls(
     onMove: (Direction) -> Unit,
+    onSearch: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Card(
@@ -396,6 +423,19 @@ private fun MovementControls(
                     text = "→"
                 )
             }
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            // Search button
+            Button(
+                onClick = onSearch,
+                modifier = Modifier.fillMaxWidth(0.7f),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.tertiary
+                )
+            ) {
+                Text("SEARCH (S)")
+            }
         }
     }
 }
@@ -419,6 +459,57 @@ private fun DirectionButton(
             style = MaterialTheme.typography.headlineMedium
         )
     }
+}
+
+/**
+ * Dialog shown when item is found
+ * Based on QBASIC found() SUB display (ZARGON.BAS:1454-1485)
+ */
+@Composable
+private fun ItemFoundDialog(
+    item: Item,
+    onDismiss: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Text(
+                text = if (item.name.isEmpty()) "Search Result" else "Item Found!",
+                style = MaterialTheme.typography.titleLarge,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth()
+            )
+        },
+        text = {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                if (item.name.isNotEmpty()) {
+                    Text(
+                        text = item.name.uppercase(),
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.primary,
+                        textAlign = TextAlign.Center
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                }
+                Text(
+                    text = item.description,
+                    style = MaterialTheme.typography.bodyMedium,
+                    textAlign = TextAlign.Center
+                )
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onDismiss) {
+                Text("OK")
+            }
+        },
+        containerColor = MaterialTheme.colorScheme.surface,
+        tonalElevation = 6.dp
+    )
 }
 
 enum class Direction {
