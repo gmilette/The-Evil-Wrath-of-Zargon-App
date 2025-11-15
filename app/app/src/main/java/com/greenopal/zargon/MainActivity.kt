@@ -40,6 +40,7 @@ import com.greenopal.zargon.ui.screens.GameOverScreen
 import com.greenopal.zargon.ui.screens.HealerScreen
 import com.greenopal.zargon.ui.screens.MapScreen
 import com.greenopal.zargon.ui.screens.MenuScreen
+import com.greenopal.zargon.ui.screens.StatsScreen
 import com.greenopal.zargon.ui.screens.TitleScreen
 import com.greenopal.zargon.ui.screens.WeaponShopScreen
 import com.greenopal.zargon.ui.theme.ZargonTheme
@@ -220,54 +221,13 @@ class MainActivity : ComponentActivity() {
                         }
 
                         ScreenState.STATS -> {
-                            // Stats screen
-                            Box(
+                            StatsScreen(
+                                gameState = gameState,
+                                onBack = { screenState = ScreenState.MENU },
                                 modifier = Modifier
                                     .fillMaxSize()
                                     .padding(innerPadding)
-                                    .padding(16.dp),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Column(
-                                    horizontalAlignment = Alignment.CenterHorizontally,
-                                    verticalArrangement = Arrangement.spacedBy(16.dp)
-                                ) {
-                                    Text(
-                                        text = "Character Stats",
-                                        style = androidx.compose.material3.MaterialTheme.typography.titleLarge
-                                    )
-
-                                    Spacer(modifier = Modifier.height(8.dp))
-
-                                    // Display sprite
-                                    SpriteView(
-                                        sprite = playerSprite,
-                                        size = 150.dp
-                                    )
-
-                                    if (spriteCount > 0) {
-                                        Text("Loaded $spriteCount sprites from bomb.sht")
-                                    }
-
-                                    Spacer(modifier = Modifier.height(8.dp))
-
-                                    // Display stats
-                                    StatsCard(
-                                        stats = gameState.character,
-                                        modifier = Modifier.padding(16.dp)
-                                    )
-
-                                    Spacer(modifier = Modifier.height(16.dp))
-
-                                    // Back button
-                                    Button(
-                                        onClick = { screenState = ScreenState.MENU },
-                                        modifier = Modifier.fillMaxWidth(0.6f)
-                                    ) {
-                                        Text("Back to Menu")
-                                    }
-                                }
-                            }
+                            )
                         }
 
                         ScreenState.DIALOG -> {
