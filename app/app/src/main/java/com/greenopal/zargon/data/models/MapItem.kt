@@ -61,12 +61,11 @@ object MapItems {
         ),
 
         // Item 5: Cloth - Map 13 (World 1, Quadrant 3)
-        // QBASIC Line 1472-1474
-        // TODO: Get exact coordinates from map13.lvl
+        // QBASIC Line 1472-1474, coordinates from map13.lvl
         MapItem(
             worldX = 1,
             worldY = 3,
-            spotX = 5,
+            spotX = 7,
             spotY = 5,
             item = Item(
                 name = "cloth",
@@ -76,13 +75,12 @@ object MapItems {
         ),
 
         // Item 6: Wood - Map 22 (World 2, Quadrant 2)
-        // QBASIC Line 1475-1477
-        // TODO: Get exact coordinates from map22.lvl
+        // QBASIC Line 1475-1477, coordinates from map22.lvl
         MapItem(
             worldX = 2,
             worldY = 2,
             spotX = 10,
-            spotY = 10,
+            spotY = 4,
             item = Item(
                 name = "wood",
                 description = "Strong wood for ship hull",
