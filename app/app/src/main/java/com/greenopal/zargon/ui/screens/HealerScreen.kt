@@ -206,7 +206,8 @@ fun HealerScreen(
                     },
                     modifier = Modifier.fillMaxWidth(),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.tertiary
+                        containerColor = Color(0xFF4CAF50), // Bright green
+                        contentColor = Color.White
                     )
                 ) {
                     Text("4. shall i save your game?")
@@ -216,7 +217,8 @@ fun HealerScreen(
                     onClick = { onHealerExit(updatedGameState) },
                     modifier = Modifier.fillMaxWidth(),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = Color.DarkGray
+                        containerColor = Color(0xFF666666), // Medium gray with white text
+                        contentColor = Color.White
                     )
                 ) {
                     Text("5. i've had enough of this guy")

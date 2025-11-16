@@ -207,7 +207,10 @@ private fun MainMenu(
     Button(
         onClick = onBuyWeapon,
         modifier = Modifier.fillMaxWidth(),
-        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
+        colors = ButtonDefaults.buttonColors(
+            containerColor = Color(0xFF1976D2), // Blue
+            contentColor = Color.White
+        )
     ) {
         Text("1. Buy a Weapon")
     }
@@ -215,7 +218,10 @@ private fun MainMenu(
     Button(
         onClick = onBuyArmor,
         modifier = Modifier.fillMaxWidth(),
-        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
+        colors = ButtonDefaults.buttonColors(
+            containerColor = Color(0xFF1976D2), // Blue
+            contentColor = Color.White
+        )
     ) {
         Text("2. Buy Armor")
     }
@@ -223,7 +229,10 @@ private fun MainMenu(
     Button(
         onClick = onLeave,
         modifier = Modifier.fillMaxWidth(),
-        colors = ButtonDefaults.buttonColors(containerColor = Color.DarkGray)
+        colors = ButtonDefaults.buttonColors(
+            containerColor = Color(0xFF666666), // Medium gray with white text
+            contentColor = Color.White
+        )
     ) {
         Text("0. Leave the store")
     }
@@ -252,7 +261,10 @@ private fun WeaponList(
         Button(
             onClick = onBack,
             modifier = Modifier.fillMaxWidth(),
-            colors = ButtonDefaults.buttonColors(containerColor = Color.DarkGray)
+            colors = ButtonDefaults.buttonColors(
+                containerColor = Color(0xFF666666), // Medium gray with white text
+                contentColor = Color.White
+            )
         ) {
             Text("Back")
         }
@@ -317,7 +329,10 @@ private fun ArmorList(
         Button(
             onClick = onBack,
             modifier = Modifier.fillMaxWidth(),
-            colors = ButtonDefaults.buttonColors(containerColor = Color.DarkGray)
+            colors = ButtonDefaults.buttonColors(
+                containerColor = Color(0xFF666666), // Medium gray with white text
+                contentColor = Color.White
+            )
         ) {
             Text("Back")
         }
