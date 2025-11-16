@@ -1,5 +1,6 @@
 package com.greenopal.zargon.ui.screens
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -56,6 +57,14 @@ fun WeaponShopScreen(
     var message by remember { mutableStateOf<String?>(null) }
     var updatedGameState by remember { mutableStateOf(gameState) }
 
+    // Handle Android back button
+    BackHandler {
+        when (currentScreen) {
+            ShopScreen.MAIN -> onShopExit(updatedGameState)
+            else -> currentScreen = ShopScreen.MAIN
+        }
+    }
+
     Box(
         modifier = modifier
             .fillMaxSize()
@@ -100,11 +109,19 @@ fun WeaponShopScreen(
                 )
 
                 // Gold display
-                Text(
-                    text = "You have ${updatedGameState.character.gold} gold",
-                    style = MaterialTheme.typography.titleMedium,
-                    color = Color(0xFFFFD700)
-                )
+                Card(
+                    colors = CardDefaults.cardColors(
+                        containerColor = Color(0xFF1A1A1A)
+                    )
+                ) {
+                    Text(
+                        text = "You have ${updatedGameState.character.gold} gold",
+                        style = MaterialTheme.typography.titleMedium,
+                        color = Color(0xFFFFD700),
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.padding(8.dp)
+                    )
+                }
 
                 Spacer(modifier = Modifier.height(8.dp))
 
@@ -254,15 +271,25 @@ private fun WeaponItem(
         modifier = Modifier.fillMaxWidth(),
         enabled = canAfford,
         colors = ButtonDefaults.buttonColors(
-            containerColor = if (canAfford) MaterialTheme.colorScheme.secondary else Color.DarkGray
+            containerColor = if (canAfford) Color(0xFF1976D2) else Color(0xFF424242),
+            contentColor = Color.White,
+            disabledContainerColor = Color(0xFF424242),
+            disabledContentColor = Color(0xFF888888)
         )
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Text("${weapon.displayName} (+${weapon.attackBonus} AP)")
-            Text("${price}g", color = Color(0xFFFFD700))
+            Text(
+                text = "${weapon.displayName} (+${weapon.attackBonus} AP)",
+                color = Color.White
+            )
+            Text(
+                text = "${price}g",
+                color = Color(0xFFFFD700),
+                fontWeight = FontWeight.Bold
+            )
         }
     }
 }
@@ -309,15 +336,25 @@ private fun ArmorItem(
         modifier = Modifier.fillMaxWidth(),
         enabled = canAfford,
         colors = ButtonDefaults.buttonColors(
-            containerColor = if (canAfford) MaterialTheme.colorScheme.secondary else Color.DarkGray
+            containerColor = if (canAfford) Color(0xFF1976D2) else Color(0xFF424242),
+            contentColor = Color.White,
+            disabledContainerColor = Color(0xFF424242),
+            disabledContentColor = Color(0xFF888888)
         )
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Text("${armor.displayName} (+${armor.defenseBonus} DP)")
-            Text("${price}g", color = Color(0xFFFFD700))
+            Text(
+                text = "${armor.displayName} (+${armor.defenseBonus} DP)",
+                color = Color.White
+            )
+            Text(
+                text = "${price}g",
+                color = Color(0xFFFFD700),
+                fontWeight = FontWeight.Bold
+            )
         }
     }
 }

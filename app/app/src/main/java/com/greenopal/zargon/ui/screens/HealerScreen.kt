@@ -1,5 +1,6 @@
 package com.greenopal.zargon.ui.screens
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -43,6 +44,11 @@ fun HealerScreen(
     var message by remember { mutableStateOf<String?>(null) }
     var updatedGameState by remember { mutableStateOf(gameState) }
 
+    // Handle Android back button
+    BackHandler {
+        onHealerExit(updatedGameState)
+    }
+
     Box(
         modifier = modifier
             .fillMaxSize()
@@ -85,17 +91,31 @@ fun HealerScreen(
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.secondaryContainer
+                        containerColor = Color(0xFF2A2A2A)
                     )
                 ) {
                     Column(
                         modifier = Modifier.padding(16.dp),
                         verticalArrangement = Arrangement.spacedBy(4.dp)
                     ) {
-                        Text("Current Stats:", fontWeight = FontWeight.Bold)
-                        Text("HP: ${updatedGameState.character.currentDP}/${updatedGameState.character.maxDP}")
-                        Text("MP: ${updatedGameState.character.currentMP}/${updatedGameState.character.maxMP}")
-                        Text("Gold: ${updatedGameState.character.gold}", color = Color(0xFFFFD700))
+                        Text(
+                            text = "Current Stats:",
+                            fontWeight = FontWeight.Bold,
+                            color = Color.White
+                        )
+                        Text(
+                            text = "HP: ${updatedGameState.character.currentDP}/${updatedGameState.character.maxDP}",
+                            color = Color.White
+                        )
+                        Text(
+                            text = "MP: ${updatedGameState.character.currentMP}/${updatedGameState.character.maxMP}",
+                            color = Color.White
+                        )
+                        Text(
+                            text = "Gold: ${updatedGameState.character.gold}",
+                            color = Color(0xFFFFD700),
+                            fontWeight = FontWeight.Bold
+                        )
                     }
                 }
 
@@ -219,9 +239,15 @@ private fun HealingOption(
         modifier = Modifier.fillMaxWidth(),
         enabled = enabled,
         colors = ButtonDefaults.buttonColors(
-            containerColor = if (enabled) MaterialTheme.colorScheme.primary else Color.DarkGray
+            containerColor = if (enabled) Color(0xFF1976D2) else Color(0xFF424242),
+            contentColor = Color.White,
+            disabledContainerColor = Color(0xFF424242),
+            disabledContentColor = Color(0xFF888888)
         )
     ) {
-        Text("$number) $service  ${cost}gp")
+        Text(
+            text = "$number) $service  ${cost}gp",
+            color = if (enabled) Color.White else Color(0xFF888888)
+        )
     }
 }
