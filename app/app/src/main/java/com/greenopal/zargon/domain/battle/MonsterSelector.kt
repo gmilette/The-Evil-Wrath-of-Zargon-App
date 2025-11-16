@@ -23,6 +23,21 @@ class MonsterSelector @Inject constructor() {
     fun selectMonster(gameState: GameState): MonsterStats {
         val playerLevel = gameState.character.level
 
+        // Special case: ZARGON at the castle (Map 32)
+        // Castle is at world position (3, 2)
+        if (gameState.worldX == 3 && gameState.worldY == 2) {
+            // Castle occupies a 4x3 area, check if player is inside
+            if (gameState.characterX in 13..16 && gameState.characterY in 4..6) {
+                return MonsterStats(
+                    type = MonsterType.ZARGON,
+                    attackPower = 60,
+                    currentHP = 300,
+                    maxHP = 300,
+                    scalingFactor = 1
+                )
+            }
+        }
+
         // Special case: Kraken when in ship
         if (gameState.inShip) {
             return createMonster(MonsterType.KRAKEN, playerLevel, scalingFactor = 1)

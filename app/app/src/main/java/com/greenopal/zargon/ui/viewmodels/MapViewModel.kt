@@ -116,13 +116,26 @@ class MapViewModel @Inject constructor(
         }
 
         // Check if tile is walkable
-        if (!map.isWalkable(newX, newY)) {
+        val targetTile = map.getTile(newX, newY)
+        val hasShip = state.hasItem("ship")
+        val hasDynamite = state.hasItem("dynomite")
+
+        // Allow water tiles if player has ship, allow rocks if player has dynamite
+        val canMove = when {
+            targetTile == TileType.WATER && hasShip -> true
+            (targetTile == TileType.ROCK || targetTile == TileType.ROCK2) && hasDynamite -> true
+            targetTile == null -> false
+            else -> targetTile.isWalkable
+        }
+
+        if (!canMove) {
             // Hit obstacle - do nothing
             return
         }
 
-        // Move player
-        val newState = state.moveTo(newX, newY)
+        // Move player (update inShip status if on water)
+        val onWater = targetTile == TileType.WATER
+        val newState = state.moveTo(newX, newY).copy(inShip = onWater && hasShip)
         _gameState.value = newState
 
         // Set pending encounter flag (will be checked by screen)

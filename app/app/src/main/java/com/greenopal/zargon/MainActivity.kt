@@ -43,6 +43,7 @@ import com.greenopal.zargon.ui.screens.MenuScreen
 import com.greenopal.zargon.ui.screens.QuestProgressScreen
 import com.greenopal.zargon.ui.screens.StatsScreen
 import com.greenopal.zargon.ui.screens.TitleScreen
+import com.greenopal.zargon.ui.screens.VictoryScreen
 import com.greenopal.zargon.ui.screens.WeaponShopScreen
 import com.greenopal.zargon.ui.theme.ZargonTheme
 import com.greenopal.zargon.ui.viewmodels.GameViewModel
@@ -51,7 +52,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
 enum class ScreenState {
-    TITLE, MENU, MAP, BATTLE, STATS, QUEST_PROGRESS, DIALOG, WEAPON_SHOP, HEALER, GAME_OVER
+    TITLE, MENU, MAP, BATTLE, STATS, QUEST_PROGRESS, DIALOG, WEAPON_SHOP, HEALER, GAME_OVER, VICTORY
 }
 
 @AndroidEntryPoint
@@ -173,8 +174,13 @@ class MainActivity : ComponentActivity() {
                                             screenState = ScreenState.HEALER
                                         }
                                         is TileInteraction.Castle -> {
-                                            // TODO: Implement castle/final boss
-                                            screenState = ScreenState.MENU
+                                            // Trigger final boss battle with ZARGON
+                                            val bossState = gameState.copy(
+                                                character = gameState.character.copy()
+                                            )
+                                            viewModel.updateGameState(bossState)
+                                            isExplorationMode = false // Boss battle mode
+                                            screenState = ScreenState.BATTLE
                                         }
                                     }
                                 },
@@ -199,11 +205,16 @@ class MainActivity : ComponentActivity() {
                                     // Handle battle result based on outcome
                                     when (result) {
                                         is BattleResult.Victory -> {
-                                            // Return to map if exploring, menu if testing
-                                            screenState = if (isExplorationMode) {
-                                                ScreenState.MAP
-                                            } else {
-                                                ScreenState.MENU
+                                            // Check if ZARGON was defeated (player is at castle)
+                                            val defeatedZargon = updatedGameState.worldX == 3 &&
+                                                    updatedGameState.worldY == 2 &&
+                                                    updatedGameState.characterX in 13..16 &&
+                                                    updatedGameState.characterY in 4..6
+
+                                            screenState = when {
+                                                defeatedZargon -> ScreenState.VICTORY
+                                                isExplorationMode -> ScreenState.MAP
+                                                else -> ScreenState.MENU
                                             }
                                         }
                                         is BattleResult.Defeat -> {
@@ -338,6 +349,19 @@ class MainActivity : ComponentActivity() {
 
                         ScreenState.GAME_OVER -> {
                             GameOverScreen(
+                                finalGameState = gameState,
+                                onReturnToTitle = {
+                                    viewModel.newGame()
+                                    screenState = ScreenState.TITLE
+                                },
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .padding(innerPadding)
+                            )
+                        }
+
+                        ScreenState.VICTORY -> {
+                            VictoryScreen(
                                 finalGameState = gameState,
                                 onReturnToTitle = {
                                     viewModel.newGame()

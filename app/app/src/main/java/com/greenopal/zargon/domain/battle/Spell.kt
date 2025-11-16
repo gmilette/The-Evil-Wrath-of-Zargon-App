@@ -113,9 +113,54 @@ object Spells {
     )
 
     /**
+     * Restore spell - Enhanced healing
+     * MP cost: 15
+     * Heal: 20 + (1-10) + level
+     */
+    val RESTORE = Spell(
+        id = 6,
+        name = "Restore",
+        mpCost = 15,
+        requiredLevel = 6,
+        baseDamage = 20,
+        randomBonus = 10,
+        isHealing = true
+    )
+
+    /**
+     * Firestorm spell - Massive fire damage
+     * MP cost: 35
+     * Damage: 60 + (1-25) + level
+     */
+    val FIRESTORM = Spell(
+        id = 7,
+        name = "Firestorm",
+        mpCost = 35,
+        requiredLevel = 7,
+        baseDamage = 60,
+        randomBonus = 25,
+        isHealing = false
+    )
+
+    /**
+     * Divine Light spell - Ultimate damage
+     * MP cost: 50
+     * Damage: 100 + (1-30) + level
+     */
+    val DIVINE_LIGHT = Spell(
+        id = 8,
+        name = "Divine Light",
+        mpCost = 50,
+        requiredLevel = 10,
+        baseDamage = 100,
+        randomBonus = 30,
+        isHealing = false
+    )
+
+    /**
      * Get all spells in order
      */
-    val ALL = listOf(FLAME, CURE, WATER, LIGHTNING, BUBBLE_BLAST)
+    val ALL = listOf(FLAME, CURE, WATER, LIGHTNING, BUBBLE_BLAST, RESTORE, FIRESTORM, DIVINE_LIGHT)
 
     /**
      * Get spells available at a given level
