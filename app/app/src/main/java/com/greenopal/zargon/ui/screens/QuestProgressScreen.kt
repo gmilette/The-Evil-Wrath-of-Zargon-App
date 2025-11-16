@@ -226,19 +226,12 @@ private fun QuestItemRow(
                 modifier = Modifier.size(24.dp)
             )
 
-            Column {
-                Text(
-                    text = item.displayName,
-                    style = MaterialTheme.typography.bodyLarge,
-                    fontWeight = if (found) FontWeight.Bold else FontWeight.Normal,
-                    color = if (found) Color.White else Color(0xFF999999) // White or medium gray
-                )
-                Text(
-                    text = item.description,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = if (found) Color(0xFFCCCCCC) else Color(0xFF666666) // Light gray or darker gray
-                )
-            }
+            Text(
+                text = item.displayName,
+                style = MaterialTheme.typography.bodyLarge,
+                fontWeight = if (found) FontWeight.Bold else FontWeight.Normal,
+                color = if (found) Color.White else Color(0xFF999999) // White or medium gray
+            )
         }
 
         if (found) {
