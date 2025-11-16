@@ -142,6 +142,9 @@ class MainActivity : ComponentActivity() {
                                 onViewQuestProgress = {
                                     screenState = ScreenState.QUEST_PROGRESS
                                 },
+                                onBack = {
+                                    screenState = ScreenState.TITLE
+                                },
                                 modifier = Modifier
                                     .fillMaxSize()
                                     .padding(innerPadding)

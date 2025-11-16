@@ -33,6 +33,7 @@ fun MenuScreen(
     onStartBattleTest: () -> Unit,
     onViewStats: () -> Unit,
     onViewQuestProgress: () -> Unit,
+    onBack: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Box(
@@ -130,7 +131,23 @@ fun MenuScreen(
                     )
                 }
 
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(8.dp))
+
+                // Back to Title button
+                Button(
+                    onClick = onBack,
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color.DarkGray
+                    )
+                ) {
+                    Text(
+                        text = "0. Back to Title",
+                        style = MaterialTheme.typography.titleMedium
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(8.dp))
 
                 Text(
                     text = "Based on the 1998 QBASIC classic",
