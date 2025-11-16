@@ -31,10 +31,10 @@ enum class TileType(
 
     // Special
     GRAVE("G", Color(0xFF555555), isWalkable = false),
-    HUT("h", Color(0xFFAA5500), isWalkable = true, encounterRate = 0f),
-    WEAPON_SHOP("W", Color(0xFFAA5500), isWalkable = true, encounterRate = 0f),
-    HEALER("H", Color(0xFFAA5500), isWalkable = true, encounterRate = 0f),
-    CASTLE("C", Color(0xFFAAAAAA), isWalkable = true, encounterRate = 0f);
+    HUT("h", Color(0xFFAA5500), isWalkable = true, encounterRate = 0f),  // Brown - NPCs
+    WEAPON_SHOP("W", Color(0xFF8B4513), isWalkable = true, encounterRate = 0f),  // Saddle Brown - Shop
+    HEALER("H", Color(0xFFFF69B4), isWalkable = true, encounterRate = 0f),  // Hot Pink - Healer
+    CASTLE("C", Color(0xFF4B0082), isWalkable = true, encounterRate = 0f);  // Indigo - Castle
 
     companion object {
         fun fromCode(code: String): TileType {

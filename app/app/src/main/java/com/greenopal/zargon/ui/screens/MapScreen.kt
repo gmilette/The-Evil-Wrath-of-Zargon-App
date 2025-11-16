@@ -37,6 +37,9 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
+import androidx.compose.ui.graphics.nativeCanvas
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -46,6 +49,7 @@ import com.greenopal.zargon.data.models.GameState
 import com.greenopal.zargon.data.models.Item
 import com.greenopal.zargon.domain.graphics.Sprite
 import com.greenopal.zargon.domain.map.GameMap
+import com.greenopal.zargon.domain.map.TileType
 import com.greenopal.zargon.ui.viewmodels.MapViewModel
 import com.greenopal.zargon.ui.viewmodels.TileInteraction
 
@@ -102,6 +106,24 @@ fun MapScreen(
                     onOpenMenu = onOpenMenu,
                     modifier = Modifier.fillMaxWidth()
                 )
+
+                // Map legend
+                Card(
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.surfaceVariant
+                    ),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Row(
+                        modifier = Modifier.padding(8.dp),
+                        horizontalArrangement = Arrangement.SpaceEvenly
+                    ) {
+                        LegendItem("W", "Shop", Color(0xFF8B4513))
+                        LegendItem("H", "Healer", Color(0xFFFF69B4))
+                        LegendItem("h", "NPC", Color(0xFFAA5500))
+                        LegendItem("C", "Castle", Color(0xFF4B0082))
+                    }
+                }
 
                 // Map display
                 MapView(
@@ -279,6 +301,32 @@ private fun MapView(
                                 ),
                                 size = Size(tileSize, tileSize)
                             )
+
+                            // Draw labels for special tiles
+                            val label = when (tile) {
+                                TileType.WEAPON_SHOP -> "W"
+                                TileType.HEALER -> "H"
+                                TileType.HUT -> "h"
+                                TileType.CASTLE -> "C"
+                                else -> null
+                            }
+
+                            if (label != null && tileSize > 20f) {
+                                drawIntoCanvas { canvas ->
+                                    val paint = android.graphics.Paint().apply {
+                                        color = Color.White.toArgb()
+                                        textSize = (tileSize * 0.7f).coerceAtMost(24f)
+                                        textAlign = android.graphics.Paint.Align.CENTER
+                                        isFakeBoldText = true
+                                    }
+                                    canvas.nativeCanvas.drawText(
+                                        label,
+                                        offsetX + x * tileSize + tileSize / 2,
+                                        offsetY + y * tileSize + tileSize / 2 + paint.textSize / 3,
+                                        paint
+                                    )
+                                }
+                            }
                         }
                     }
                 }
@@ -510,6 +558,39 @@ private fun ItemFoundDialog(
         containerColor = MaterialTheme.colorScheme.surface,
         tonalElevation = 6.dp
     )
+}
+
+@Composable
+private fun LegendItem(
+    symbol: String,
+    label: String,
+    color: Color,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        horizontalArrangement = Arrangement.spacedBy(4.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = modifier
+    ) {
+        Box(
+            modifier = Modifier
+                .size(16.dp)
+                .background(color),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = symbol,
+                style = MaterialTheme.typography.labelSmall,
+                color = Color.White,
+                fontWeight = FontWeight.Bold
+            )
+        }
+        Text(
+            text = label,
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+    }
 }
 
 enum class Direction {
