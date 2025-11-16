@@ -87,11 +87,10 @@ fun StatsScreen(
                         // Stats
                         StatRow("Hit Points", "${gameState.character.currentDP} / ${gameState.character.maxDP}")
                         StatRow("Magic Points", "${gameState.character.currentMP} / ${gameState.character.maxMP}")
-                        StatRow("Attack Power", "${gameState.character.attack + gameState.character.weaponBonus}")
-                        StatRow("Defense Power", "${gameState.character.defense + gameState.character.armorBonus}")
+                        StatRow("Attack Power", "${gameState.character.totalAP}")
+                        StatRow("Defense Power", "${gameState.character.totalDefense}")
                         StatRow("Gold", "${gameState.character.gold}g", Color(0xFFFFD700))
                         StatRow("Experience", "${gameState.character.experience} / ${gameState.nextLevelXP}")
-                        StatRow("Spell Level", "${gameState.character.spellLevel}")
 
                         HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
 
