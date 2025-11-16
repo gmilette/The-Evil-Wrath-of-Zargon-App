@@ -1,5 +1,6 @@
 package com.greenopal.zargon.ui.screens
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -39,6 +40,11 @@ fun StatsScreen(
     onBack: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    // Handle back button
+    BackHandler {
+        onBack()
+    }
+
     Box(
         modifier = modifier
             .fillMaxSize()

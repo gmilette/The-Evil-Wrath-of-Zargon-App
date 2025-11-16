@@ -1,5 +1,6 @@
 package com.greenopal.zargon.ui.screens
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -42,6 +43,10 @@ fun QuestProgressScreen(
     onBack: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    // Handle back button
+    BackHandler {
+        onBack()
+    }
     // Define all quest items
     val questItems = listOf(
         QuestItem("dynomite", "Dynamite", "Blast through rocks"),
@@ -85,9 +90,9 @@ fun QuestProgressScreen(
             // Progress Summary Card
             Card(
                 colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer
+                    containerColor = Color(0xFF1A1A1A) // Dark background
                 ),
-                border = BorderStroke(2.dp, MaterialTheme.colorScheme.primary),
+                border = BorderStroke(2.dp, Color(0xFF4CAF50)), // Green border
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Column(
@@ -99,14 +104,14 @@ fun QuestProgressScreen(
                         text = "Game Completion",
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer
+                        color = Color.White
                     )
 
                     Text(
                         text = "$completionPercent%",
                         style = MaterialTheme.typography.displayMedium,
                         fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.primary
+                        color = Color(0xFF4CAF50) // Bright green
                     )
 
                     LinearProgressIndicator(
@@ -114,14 +119,14 @@ fun QuestProgressScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(12.dp),
-                        color = MaterialTheme.colorScheme.primary,
-                        trackColor = MaterialTheme.colorScheme.surfaceVariant
+                        color = Color(0xFF4CAF50), // Bright green
+                        trackColor = Color(0xFF424242) // Dark gray
                     )
 
                     Text(
                         text = "$foundItems / $totalItems Quest Items",
                         style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer
+                        color = Color.White
                     )
                 }
             }
@@ -129,9 +134,9 @@ fun QuestProgressScreen(
             // Quest Items List
             Card(
                 colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surface
+                    containerColor = Color(0xFF2A2A2A) // Dark background
                 ),
-                border = BorderStroke(2.dp, MaterialTheme.colorScheme.tertiary),
+                border = BorderStroke(2.dp, Color(0xFF2196F3)), // Blue border
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Column(
@@ -142,7 +147,7 @@ fun QuestProgressScreen(
                         text = "QUEST ITEMS",
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.tertiary
+                        color = Color(0xFF2196F3) // Bright blue
                     )
 
                     Spacer(modifier = Modifier.height(8.dp))
@@ -163,9 +168,9 @@ fun QuestProgressScreen(
             // Story Status
             Card(
                 colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceVariant
+                    containerColor = Color(0xFF1A1A1A) // Dark background
                 ),
-                border = BorderStroke(2.dp, MaterialTheme.colorScheme.secondary),
+                border = BorderStroke(2.dp, Color(0xFFFFD700)), // Gold border
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Column(
@@ -175,13 +180,13 @@ fun QuestProgressScreen(
                         text = "Story Progress: ${String.format("%.1f", gameState.storyStatus)}",
                         style = MaterialTheme.typography.titleSmall,
                         fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.secondary
+                        color = Color(0xFFFFD700) // Bright gold
                     )
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
                         text = getStoryStageDescription(gameState.storyStatus),
                         style = MaterialTheme.typography.bodyMedium,
-                        color = Color.LightGray
+                        color = Color.White
                     )
                 }
             }
@@ -226,12 +231,12 @@ private fun QuestItemRow(
                     text = item.displayName,
                     style = MaterialTheme.typography.bodyLarge,
                     fontWeight = if (found) FontWeight.Bold else FontWeight.Normal,
-                    color = if (found) MaterialTheme.colorScheme.primary else Color.Gray
+                    color = if (found) Color.White else Color(0xFF999999) // White or medium gray
                 )
                 Text(
                     text = item.description,
                     style = MaterialTheme.typography.bodySmall,
-                    color = if (found) Color.LightGray else Color.DarkGray
+                    color = if (found) Color(0xFFCCCCCC) else Color(0xFF666666) // Light gray or darker gray
                 )
             }
         }
