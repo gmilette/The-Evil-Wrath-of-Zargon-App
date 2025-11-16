@@ -43,6 +43,7 @@ class BattleViewModel @Inject constructor(
      * Start a new battle
      */
     fun startBattle(gameState: GameState) {
+        android.util.Log.d("BattleViewModel", "Starting battle - Character gold: ${gameState.character.gold}, XP: ${gameState.character.experience}")
         currentGameState = gameState
         val monster = monsterSelector.selectMonster(gameState)
         _battleState.value = BattleState(
@@ -85,6 +86,7 @@ class BattleViewModel @Inject constructor(
 
             // Check if monster is defeated
             if (!newMonster.isAlive) {
+                android.util.Log.d("BattleViewModel", "Monster defeated! Starting reward calculation...")
                 newState = newState.addMessage("${state.monster.name} is defeated!")
                 _battleState.value = newState
 
@@ -93,6 +95,7 @@ class BattleViewModel @Inject constructor(
                 calculateVictoryRewards(newState)
 
                 newState = newState.checkBattleEnd()
+                android.util.Log.d("BattleViewModel", "Setting battle result to: ${newState.battleResult}, rewards: ${_battleRewards.value}")
                 _battleState.value = newState
                 return@launch
             }

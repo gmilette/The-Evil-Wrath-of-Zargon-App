@@ -68,8 +68,9 @@ fun BattleScreen(
 
     // Show rewards dialog when battle is won and rewards are available
     LaunchedEffect(battleState?.battleResult, battleRewards) {
+        android.util.Log.d("BattleScreen", "LaunchedEffect triggered - Result: ${battleState?.battleResult}, Rewards: ${battleRewards}, ShowDialog: $showRewardsDialog")
         if (battleState?.battleResult == BattleResult.Victory && battleRewards != null) {
-            android.util.Log.d("BattleScreen", "Showing rewards dialog")
+            android.util.Log.d("BattleScreen", "Showing rewards dialog NOW!")
             showRewardsDialog = true
         }
     }
