@@ -94,7 +94,8 @@ class BattleViewModel @Inject constructor(
                 delay(500)
                 calculateVictoryRewards(newState)
 
-                newState = newState.checkBattleEnd()
+                // IMPORTANT: Get the UPDATED state from _battleState (which now has the gold/XP)
+                newState = _battleState.value!!.checkBattleEnd()
                 android.util.Log.d("BattleViewModel", "Setting battle result to: ${newState.battleResult}, rewards: ${_battleRewards.value}")
                 _battleState.value = newState
                 return@launch
@@ -238,7 +239,8 @@ class BattleViewModel @Inject constructor(
                     delay(500)
                     calculateVictoryRewards(newState)
 
-                    newState = newState.checkBattleEnd()
+                    // IMPORTANT: Get the UPDATED state from _battleState (which now has the gold/XP)
+                    newState = _battleState.value!!.checkBattleEnd()
                     _battleState.value = newState
                     return@launch
                 }
