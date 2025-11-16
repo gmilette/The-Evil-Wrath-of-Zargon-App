@@ -142,7 +142,6 @@ fun MapScreen(
                     playerX = currentGameState!!.characterX,
                     playerY = currentGameState!!.characterY,
                     playerSprite = playerSprite,
-                    tileSprites = tileSprites,
                     modifier = Modifier
                         .fillMaxWidth()
                         .weight(1f)
