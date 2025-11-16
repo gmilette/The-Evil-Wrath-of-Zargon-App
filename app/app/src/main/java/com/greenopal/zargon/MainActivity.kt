@@ -208,7 +208,9 @@ class MainActivity : ComponentActivity() {
                                 monsterSprites = monsterSprites,
                                 onBattleEnd = { result, updatedGameState ->
                                     // Update game state
+                                    android.util.Log.d("MainActivity", "Battle ended - Updated state gold: ${updatedGameState.character.gold}, XP: ${updatedGameState.character.experience}")
                                     viewModel.updateGameState(updatedGameState)
+                                    android.util.Log.d("MainActivity", "After updateGameState - ViewModel state gold: ${viewModel.gameState.value.character.gold}")
 
                                     // Handle battle result based on outcome
                                     when (result) {

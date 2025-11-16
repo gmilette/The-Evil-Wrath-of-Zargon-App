@@ -294,11 +294,15 @@ class BattleViewModel @Inject constructor(
             .gainExperience(xpGained)
             .gainGold(goldGained)
 
+        android.util.Log.d("BattleViewModel", "Gold before level check: ${updatedCharacter.gold}, XP: ${updatedCharacter.experience}")
+
         // Check for level up
         val (leveledCharacter, didLevelUp) = levelingSystem.checkAndApplyLevelUp(
             updatedCharacter,
             gameState.nextLevelXP
         )
+
+        android.util.Log.d("BattleViewModel", "After level check - Gold: ${leveledCharacter.gold}, Did level up: $didLevelUp")
 
         val rewards = if (didLevelUp) {
             // Character leveled up!
@@ -327,6 +331,7 @@ class BattleViewModel @Inject constructor(
 
         // Update battle state with new character stats
         val newState = state.updateCharacter(updatedCharacter)
+        android.util.Log.d("BattleViewModel", "Final character gold in battle state: ${newState.character.gold}")
         _battleState.value = newState
         _battleRewards.value = rewards
     }
@@ -339,7 +344,11 @@ class BattleViewModel @Inject constructor(
         val character = _battleState.value?.character ?: return null
         val rewards = _battleRewards.value
 
+        android.util.Log.d("BattleViewModel", "getUpdatedGameState - Character gold: ${character.gold}, XP: ${character.experience}")
+
         var updatedState = gameState.updateCharacter(character)
+
+        android.util.Log.d("BattleViewModel", "getUpdatedGameState - Updated state character gold: ${updatedState.character.gold}")
 
         // Add item to inventory if dropped
         rewards?.itemDropped?.let { item ->
