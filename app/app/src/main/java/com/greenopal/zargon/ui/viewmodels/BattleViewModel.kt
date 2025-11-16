@@ -282,6 +282,8 @@ class BattleViewModel @Inject constructor(
         val xpGained = rewardSystem.calculateXP(monster.type, monster.scalingFactor)
         val goldGained = rewardSystem.calculateGold(monster.type, monster.scalingFactor)
 
+        android.util.Log.d("BattleViewModel", "Rewards calculated - XP: $xpGained, Gold: $goldGained for ${monster.type}")
+
         // Check for special item drops
         val itemDropped = rewardSystem.getSpecialDrop(
             monster.type,
