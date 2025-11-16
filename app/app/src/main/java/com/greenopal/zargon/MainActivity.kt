@@ -298,7 +298,12 @@ class MainActivity : ComponentActivity() {
                             WeaponShopScreen(
                                 gameState = gameState,
                                 onShopExit = { updatedState ->
-                                    viewModel.updateGameState(updatedState)
+                                    // Move player one square down (outside the shop)
+                                    val exitState = updatedState.moveTo(
+                                        updatedState.characterX,
+                                        updatedState.characterY + 1
+                                    )
+                                    viewModel.updateGameState(exitState)
                                     screenState = ScreenState.MAP
                                 },
                                 modifier = Modifier
@@ -314,7 +319,12 @@ class MainActivity : ComponentActivity() {
                                     saveRepository.saveGame(gameState, 1)
                                 },
                                 onHealerExit = { updatedState ->
-                                    viewModel.updateGameState(updatedState)
+                                    // Move player one square down (outside the healer)
+                                    val exitState = updatedState.moveTo(
+                                        updatedState.characterX,
+                                        updatedState.characterY + 1
+                                    )
+                                    viewModel.updateGameState(exitState)
                                     screenState = ScreenState.MAP
                                 },
                                 modifier = Modifier
