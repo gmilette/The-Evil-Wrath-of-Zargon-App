@@ -31,6 +31,7 @@ import com.greenopal.zargon.data.repository.SaveGameRepository
 import com.greenopal.zargon.domain.battle.BattleResult
 import com.greenopal.zargon.domain.graphics.Sprite
 import com.greenopal.zargon.domain.graphics.SpriteParser
+import com.greenopal.zargon.domain.graphics.TileParser
 import com.greenopal.zargon.domain.story.NpcDialogProvider
 import com.greenopal.zargon.ui.components.SpriteView
 import com.greenopal.zargon.ui.components.StatsCard
@@ -59,6 +60,9 @@ enum class ScreenState {
 class MainActivity : ComponentActivity() {
     @Inject
     lateinit var spriteParser: SpriteParser
+
+    @Inject
+    lateinit var tileParser: TileParser
 
     @Inject
     lateinit var dialogProvider: NpcDialogProvider
@@ -156,6 +160,7 @@ class MainActivity : ComponentActivity() {
                             MapScreen(
                                 gameState = gameState,
                                 playerSprite = playerSprite,
+                                tileParser = tileParser,
                                 onEnterBattle = { encounterState ->
                                     // Update game state with encounter
                                     viewModel.updateGameState(encounterState)

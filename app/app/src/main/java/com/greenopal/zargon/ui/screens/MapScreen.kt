@@ -48,10 +48,12 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.greenopal.zargon.data.models.GameState
 import com.greenopal.zargon.data.models.Item
 import com.greenopal.zargon.domain.graphics.Sprite
+import com.greenopal.zargon.domain.graphics.TileParser
 import com.greenopal.zargon.domain.map.GameMap
 import com.greenopal.zargon.domain.map.TileType
 import com.greenopal.zargon.ui.viewmodels.MapViewModel
 import com.greenopal.zargon.ui.viewmodels.TileInteraction
+import javax.inject.Inject
 
 /**
  * Map exploration screen showing tile grid and player
@@ -61,6 +63,7 @@ import com.greenopal.zargon.ui.viewmodels.TileInteraction
 fun MapScreen(
     gameState: GameState,
     playerSprite: Sprite?,
+    tileParser: TileParser?,
     onEnterBattle: (GameState) -> Unit,
     onInteract: (TileInteraction) -> Unit,
     onOpenMenu: () -> Unit,
@@ -69,6 +72,14 @@ fun MapScreen(
 ) {
     // State for found item dialog
     var foundItem by remember { mutableStateOf<Item?>(null) }
+    var tileSprites by remember { mutableStateOf<Map<String, Sprite>>(emptyMap()) }
+
+    // Load tile sprites
+    LaunchedEffect(Unit) {
+        tileParser?.let {
+            tileSprites = it.parseAllTiles()
+        }
+    }
 
     // Initialize map
     LaunchedEffect(gameState.worldX, gameState.worldY) {
@@ -131,6 +142,7 @@ fun MapScreen(
                     playerX = currentGameState!!.characterX,
                     playerY = currentGameState!!.characterY,
                     playerSprite = playerSprite,
+                    tileSprites = tileSprites,
                     modifier = Modifier
                         .fillMaxWidth()
                         .weight(1f)
@@ -260,6 +272,7 @@ private fun MapView(
     playerX: Int,
     playerY: Int,
     playerSprite: Sprite?,
+    tileSprites: Map<String, Sprite> = emptyMap(),
     modifier: Modifier = Modifier
 ) {
     Card(
@@ -293,14 +306,30 @@ private fun MapView(
                     for (x in 0 until map.width) {
                         val tile = map.getTile(x, y)
                         if (tile != null) {
-                            drawRect(
-                                color = tile.displayColor,
-                                topLeft = Offset(
-                                    offsetX + x * tileSize,
-                                    offsetY + y * tileSize
-                                ),
-                                size = Size(tileSize, tileSize)
-                            )
+                            // Try to get sprite for this tile type
+                            val sprite = getTileSpriteForType(tile, tileSprites)
+
+                            if (sprite != null && tileSize >= 16f) {
+                                // Draw the sprite
+                                drawTileSprite(
+                                    sprite = sprite,
+                                    x = x,
+                                    y = y,
+                                    tileSize = tileSize,
+                                    offsetX = offsetX,
+                                    offsetY = offsetY
+                                )
+                            } else {
+                                // Fallback to colored rectangle
+                                drawRect(
+                                    color = tile.displayColor,
+                                    topLeft = Offset(
+                                        offsetX + x * tileSize,
+                                        offsetY + y * tileSize
+                                    ),
+                                    size = Size(tileSize, tileSize)
+                                )
+                            }
 
                             // Draw labels for special tiles
                             val label = when (tile) {
@@ -353,6 +382,50 @@ private fun MapView(
                 )
             }
         }
+    }
+}
+
+private fun DrawScope.drawTileSprite(
+    sprite: Sprite,
+    x: Int,
+    y: Int,
+    tileSize: Float,
+    offsetX: Float,
+    offsetY: Float
+) {
+    val startX = offsetX + x * tileSize
+    val startY = offsetY + y * tileSize
+
+    val pixelWidth = tileSize / sprite.width
+    val pixelHeight = tileSize / sprite.height
+
+    for (py in 0 until sprite.height) {
+        for (px in 0 until sprite.width) {
+            val color = sprite.getPixel(px, py)
+            // Skip transparent pixels
+            if (color.alpha > 0f) {
+                drawRect(
+                    color = color,
+                    topLeft = Offset(
+                        startX + px * pixelWidth,
+                        startY + py * pixelHeight
+                    ),
+                    size = Size(pixelWidth, pixelHeight)
+                )
+            }
+        }
+    }
+}
+
+private fun getTileSpriteForType(tile: TileType, sprites: Map<String, Sprite>): Sprite? {
+    return when (tile) {
+        TileType.GRASS -> sprites["GRASS"] ?: sprites["Grass"]
+        TileType.SAND -> sprites["SAND"] ?: sprites["Sand"]
+        TileType.TREE, TileType.TREE2 -> sprites["TREE"] ?: sprites["Trees1"]
+        TileType.ROCK, TileType.ROCK2 -> sprites["ROCK"] ?: sprites["Rock-1"]
+        TileType.WATER -> sprites["WATER"] ?: sprites["Water"]
+        TileType.GRAVE -> sprites["GRAVE"] ?: sprites["Gravestone"]
+        else -> null
     }
 }
 
