@@ -160,7 +160,8 @@ fun WeaponShopScreen(
                                 updatedGameState = updatedGameState.updateCharacter(
                                     updatedGameState.character.copy(
                                         gold = updatedGameState.character.gold - cost,
-                                        weaponBonus = weapon.attackBonus
+                                        weaponBonus = weapon.attackBonus,
+                                        weaponStatus = weapon.ordinal
                                     )
                                 )
                                 message = "Purchased ${weapon.displayName}!"
@@ -181,7 +182,8 @@ fun WeaponShopScreen(
                                 updatedGameState = updatedGameState.updateCharacter(
                                     updatedGameState.character.copy(
                                         gold = updatedGameState.character.gold - cost,
-                                        armorBonus = armor.defenseBonus
+                                        armorBonus = armor.defenseBonus,
+                                        armorStatus = armor.ordinal
                                     )
                                 )
                                 message = "Purchased ${armor.displayName}!"
@@ -404,4 +406,18 @@ enum class Armor(val displayName: String, val basePrice: Int, val defenseBonus: 
     PLATEMAIL("platemail", 279, 50),
     SPLINT_MAIL("Splint mail", 578, 80),
     RITE_OF_TOUGH_SKIN("Rite of tough skin", 1004, 120)
+}
+
+/**
+ * Get weapon name from weaponStatus ordinal
+ */
+fun getWeaponName(weaponStatus: Int): String {
+    return Weapon.values().getOrNull(weaponStatus)?.displayName ?: "None"
+}
+
+/**
+ * Get armor name from armorStatus ordinal
+ */
+fun getArmorName(armorStatus: Int): String {
+    return Armor.values().getOrNull(armorStatus)?.displayName ?: "None"
 }

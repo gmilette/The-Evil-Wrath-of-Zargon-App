@@ -100,6 +100,12 @@ fun StatsScreen(
 
                         HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
 
+                        // Equipment
+                        StatRow("Weapon", com.greenopal.zargon.ui.screens.getWeaponName(gameState.character.weaponStatus))
+                        StatRow("Armor", com.greenopal.zargon.ui.screens.getArmorName(gameState.character.armorStatus))
+
+                        HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+
                         // Story progress
                         StatRow("Story Progress", String.format("%.1f", gameState.storyStatus), MaterialTheme.colorScheme.secondary)
                         StatRow("Map Location", "World ${gameState.worldX}-${gameState.worldY}")
