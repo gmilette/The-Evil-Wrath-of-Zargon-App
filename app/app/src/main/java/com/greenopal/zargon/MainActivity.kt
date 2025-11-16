@@ -114,15 +114,17 @@ class MainActivity : ComponentActivity() {
                             TitleScreen(
                                 saveSlots = saveSlots,
                                 onNewGame = {
-                                    // Reset to new game state
+                                    // Reset to new game state and start exploration
                                     viewModel.newGame()
-                                    screenState = ScreenState.MENU
+                                    isExplorationMode = true
+                                    screenState = ScreenState.MAP
                                 },
                                 onContinue = { slot ->
-                                    // Load saved game
+                                    // Load saved game and start exploration
                                     saveRepository.loadGame(slot)?.let { savedState ->
                                         viewModel.updateGameState(savedState)
-                                        screenState = ScreenState.MENU
+                                        isExplorationMode = true
+                                        screenState = ScreenState.MAP
                                     }
                                 },
                                 modifier = Modifier
@@ -148,7 +150,8 @@ class MainActivity : ComponentActivity() {
                                     screenState = ScreenState.QUEST_PROGRESS
                                 },
                                 onBack = {
-                                    screenState = ScreenState.TITLE
+                                    // Return to map when closing menu
+                                    screenState = ScreenState.MAP
                                 },
                                 modifier = Modifier
                                     .fillMaxSize()

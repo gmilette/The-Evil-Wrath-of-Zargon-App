@@ -1,5 +1,6 @@
 package com.greenopal.zargon.ui.screens
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -25,7 +26,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 
 /**
- * Developer/Test menu for accessing different game modes
+ * In-game menu for viewing stats and quest progress
  */
 @Composable
 fun MenuScreen(
@@ -36,6 +37,11 @@ fun MenuScreen(
     onBack: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    // Handle back button
+    BackHandler {
+        onBack()
+    }
+
     Box(
         modifier = modifier
             .fillMaxSize()
@@ -60,59 +66,25 @@ fun MenuScreen(
             ) {
                 // Title
                 Text(
-                    text = "THE EVIL WRATH\nOF ZARGON",
+                    text = "MENU",
                     style = MaterialTheme.typography.headlineMedium,
                     color = MaterialTheme.colorScheme.primary,
                     fontWeight = FontWeight.Bold,
                     textAlign = TextAlign.Center
                 )
 
-                Text(
-                    text = "Developer Menu",
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.secondary
-                )
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                // Start Exploration button
-                Button(
-                    onClick = onStartExploration,
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.primary
-                    )
-                ) {
-                    Text(
-                        text = "1. Start Exploration",
-                        style = MaterialTheme.typography.titleMedium
-                    )
-                }
-
-                // Battle Test button
-                Button(
-                    onClick = onStartBattleTest,
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.secondary
-                    )
-                ) {
-                    Text(
-                        text = "2. Battle Test Mode",
-                        style = MaterialTheme.typography.titleMedium
-                    )
-                }
+                Spacer(modifier = Modifier.height(8.dp))
 
                 // View Stats button
                 Button(
                     onClick = onViewStats,
                     modifier = Modifier.fillMaxWidth(),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.tertiary
+                        containerColor = MaterialTheme.colorScheme.primary
                     )
                 ) {
                     Text(
-                        text = "3. View Character Stats",
+                        text = "View Character Stats",
                         style = MaterialTheme.typography.titleMedium
                     )
                 }
@@ -122,18 +94,18 @@ fun MenuScreen(
                     onClick = onViewQuestProgress,
                     modifier = Modifier.fillMaxWidth(),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFF9C27B0) // Purple
+                        containerColor = MaterialTheme.colorScheme.secondary
                     )
                 ) {
                     Text(
-                        text = "4. View Quest Progress",
+                        text = "View Quest Progress",
                         style = MaterialTheme.typography.titleMedium
                     )
                 }
 
                 Spacer(modifier = Modifier.height(8.dp))
 
-                // Back to Title button
+                // Close button
                 Button(
                     onClick = onBack,
                     modifier = Modifier.fillMaxWidth(),
@@ -142,18 +114,10 @@ fun MenuScreen(
                     )
                 ) {
                     Text(
-                        text = "0. Back to Title",
+                        text = "Close",
                         style = MaterialTheme.typography.titleMedium
                     )
                 }
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                Text(
-                    text = "Based on the 1998 QBASIC classic",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = Color.Gray
-                )
             }
         }
     }
