@@ -40,6 +40,7 @@ import com.greenopal.zargon.ui.screens.GameOverScreen
 import com.greenopal.zargon.ui.screens.HealerScreen
 import com.greenopal.zargon.ui.screens.MapScreen
 import com.greenopal.zargon.ui.screens.MenuScreen
+import com.greenopal.zargon.ui.screens.QuestProgressScreen
 import com.greenopal.zargon.ui.screens.StatsScreen
 import com.greenopal.zargon.ui.screens.TitleScreen
 import com.greenopal.zargon.ui.screens.WeaponShopScreen
@@ -50,7 +51,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
 enum class ScreenState {
-    TITLE, MENU, MAP, BATTLE, STATS, DIALOG, WEAPON_SHOP, HEALER, GAME_OVER
+    TITLE, MENU, MAP, BATTLE, STATS, QUEST_PROGRESS, DIALOG, WEAPON_SHOP, HEALER, GAME_OVER
 }
 
 @AndroidEntryPoint
@@ -138,6 +139,9 @@ class MainActivity : ComponentActivity() {
                                 onViewStats = {
                                     screenState = ScreenState.STATS
                                 },
+                                onViewQuestProgress = {
+                                    screenState = ScreenState.QUEST_PROGRESS
+                                },
                                 modifier = Modifier
                                     .fillMaxSize()
                                     .padding(innerPadding)
@@ -222,6 +226,16 @@ class MainActivity : ComponentActivity() {
 
                         ScreenState.STATS -> {
                             StatsScreen(
+                                gameState = gameState,
+                                onBack = { screenState = ScreenState.MENU },
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .padding(innerPadding)
+                            )
+                        }
+
+                        ScreenState.QUEST_PROGRESS -> {
+                            QuestProgressScreen(
                                 gameState = gameState,
                                 onBack = { screenState = ScreenState.MENU },
                                 modifier = Modifier

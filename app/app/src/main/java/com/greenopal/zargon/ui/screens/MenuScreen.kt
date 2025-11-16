@@ -32,6 +32,7 @@ fun MenuScreen(
     onStartExploration: () -> Unit,
     onStartBattleTest: () -> Unit,
     onViewStats: () -> Unit,
+    onViewQuestProgress: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Box(
@@ -111,6 +112,20 @@ fun MenuScreen(
                 ) {
                     Text(
                         text = "3. View Character Stats",
+                        style = MaterialTheme.typography.titleMedium
+                    )
+                }
+
+                // View Quest Progress button
+                Button(
+                    onClick = onViewQuestProgress,
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFF9C27B0) // Purple
+                    )
+                ) {
+                    Text(
+                        text = "4. View Quest Progress",
                         style = MaterialTheme.typography.titleMedium
                     )
                 }
