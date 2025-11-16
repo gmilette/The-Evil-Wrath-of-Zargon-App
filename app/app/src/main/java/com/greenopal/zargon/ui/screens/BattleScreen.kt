@@ -69,16 +69,19 @@ fun BattleScreen(
     // Show rewards dialog when battle is won and rewards are available
     LaunchedEffect(battleState?.battleResult, battleRewards) {
         if (battleState?.battleResult == BattleResult.Victory && battleRewards != null) {
+            android.util.Log.d("BattleScreen", "Showing rewards dialog")
             showRewardsDialog = true
         }
     }
 
     // Handle battle end after rewards dialog is dismissed
     fun handleBattleEnd() {
+        android.util.Log.d("BattleScreen", "handleBattleEnd called")
         val state = battleState
         if (state != null && state.battleResult != BattleResult.InProgress) {
             // Get updated game state with all rewards applied
             val updatedGameState = viewModel.getUpdatedGameState() ?: gameState
+            android.util.Log.d("BattleScreen", "Calling onBattleEnd with gold: ${updatedGameState.character.gold}")
             onBattleEnd(state.battleResult, updatedGameState)
         }
     }

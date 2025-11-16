@@ -156,7 +156,10 @@ fun BattleRewardsDialog(
                 Spacer(modifier = Modifier.height(16.dp))
 
                 Button(
-                    onClick = onDismiss,
+                    onClick = {
+                        android.util.Log.d("BattleRewardsDialog", "Continue button clicked - Gold gained: ${rewards.goldGained}")
+                        onDismiss()
+                    },
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Text("Continue")
