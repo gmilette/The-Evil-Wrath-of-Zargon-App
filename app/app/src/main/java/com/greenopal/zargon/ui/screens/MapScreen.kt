@@ -72,14 +72,14 @@ fun MapScreen(
 ) {
     // State for found item dialog
     var foundItem by remember { mutableStateOf<Item?>(null) }
-    var tileSprites by remember { mutableStateOf<Map<String, Sprite>>(emptyMap()) }
-
-    // Load tile sprites
-    LaunchedEffect(Unit) {
-        tileParser?.let {
-            tileSprites = it.parseAllTiles()
-        }
-    }
+    // Note: Tile sprites disabled for performance - pixel-by-pixel rendering was too slow
+    // TODO: Re-enable with optimized bitmap-based rendering
+    // var tileSprites by remember { mutableStateOf<Map<String, Sprite>>(emptyMap()) }
+    // LaunchedEffect(Unit) {
+    //     tileParser?.let {
+    //         tileSprites = it.parseAllTiles()
+    //     }
+    // }
 
     // Initialize map
     LaunchedEffect(gameState.worldX, gameState.worldY) {
@@ -306,30 +306,16 @@ private fun MapView(
                     for (x in 0 until map.width) {
                         val tile = map.getTile(x, y)
                         if (tile != null) {
-                            // Try to get sprite for this tile type
-                            val sprite = getTileSpriteForType(tile, tileSprites)
-
-                            if (sprite != null && tileSize >= 16f) {
-                                // Draw the sprite
-                                drawTileSprite(
-                                    sprite = sprite,
-                                    x = x,
-                                    y = y,
-                                    tileSize = tileSize,
-                                    offsetX = offsetX,
-                                    offsetY = offsetY
-                                )
-                            } else {
-                                // Fallback to colored rectangle
-                                drawRect(
-                                    color = tile.displayColor,
-                                    topLeft = Offset(
-                                        offsetX + x * tileSize,
-                                        offsetY + y * tileSize
-                                    ),
-                                    size = Size(tileSize, tileSize)
-                                )
-                            }
+                            // Use colored rectangles for tiles (pixel-by-pixel sprite rendering is too slow)
+                            // TODO: Optimize sprite rendering using Android Bitmap caching
+                            drawRect(
+                                color = tile.displayColor,
+                                topLeft = Offset(
+                                    offsetX + x * tileSize,
+                                    offsetY + y * tileSize
+                                ),
+                                size = Size(tileSize, tileSize)
+                            )
 
                             // Draw labels for special tiles
                             val label = when (tile) {
