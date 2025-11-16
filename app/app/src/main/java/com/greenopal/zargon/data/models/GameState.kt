@@ -11,10 +11,11 @@ data class GameState(
     val character: CharacterStats = CharacterStats(),
 
     // Map position (QBASIC: mapx, mapy, cx, cy)
-    val worldX: Int = 1,        // mapx - which world (1-4)
-    val worldY: Int = 1,        // mapy - which quadrant (1-4)
-    val characterX: Int = 10,   // cx - position within map
-    val characterY: Int = 5,    // cy - position within map
+    // Starting on Map 24 between the Weapon Shop and Healer
+    val worldX: Int = 2,        // mapx - which world (1-4)
+    val worldY: Int = 4,        // mapy - which quadrant (1-4)
+    val characterX: Int = 6,    // cx - position within map (between shop at x=2 and healer at x=10)
+    val characterY: Int = 7,    // cy - position within map (on the shop/healer row)
 
     // Inventory (QBASIC: items() array, max 10)
     val inventory: List<Item> = emptyList(),

@@ -90,10 +90,10 @@ class MainActivity : ComponentActivity() {
 
                     // Load monster sprites
                     monsterSprites = mapOf(
-                        "bat" to sprites["demon"], // Using demon sprite as placeholder
-                        "babble" to sprites["demon"],
-                        "spook" to sprites["demon"],
-                        "slime" to sprites["demon"],
+                        "bat" to spriteParser.createBatSprite(),
+                        "babble" to spriteParser.createBabbleSprite(),
+                        "spook" to spriteParser.createSpookSprite(),
+                        "slime" to spriteParser.createSlimeSprite(),
                         "demon" to sprites["demon"],
                         "snake" to sprites["snake"],
                         "necro" to sprites["necro"],
