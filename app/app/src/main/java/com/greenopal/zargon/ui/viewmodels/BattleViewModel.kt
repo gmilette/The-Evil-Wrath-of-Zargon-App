@@ -44,6 +44,7 @@ class BattleViewModel @Inject constructor(
      */
     fun startBattle(gameState: GameState) {
         android.util.Log.d("BattleViewModel", "Starting battle - Character gold: ${gameState.character.gold}, XP: ${gameState.character.experience}")
+        android.util.Log.d("BattleViewModel", "Battle position - World: (${gameState.worldX}, ${gameState.worldY}), Char: (${gameState.characterX}, ${gameState.characterY})")
         currentGameState = gameState
         val monster = monsterSelector.selectMonster(gameState)
         _battleState.value = BattleState(
@@ -352,6 +353,7 @@ class BattleViewModel @Inject constructor(
         val rewards = _battleRewards.value
 
         android.util.Log.d("BattleViewModel", "getUpdatedGameState - Character gold: ${character.gold}, XP: ${character.experience}")
+        android.util.Log.d("BattleViewModel", "getUpdatedGameState - Original position - World: (${gameState.worldX}, ${gameState.worldY}), Char: (${gameState.characterX}, ${gameState.characterY})")
 
         var updatedState = gameState.updateCharacter(character)
 
@@ -370,6 +372,8 @@ class BattleViewModel @Inject constructor(
             )
             updatedState = updatedState.copy(nextLevelXP = newNextLevelXP)
         }
+
+        android.util.Log.d("BattleViewModel", "getUpdatedGameState - Returning position - World: (${updatedState.worldX}, ${updatedState.worldY}), Char: (${updatedState.characterX}, ${updatedState.characterY})")
 
         return updatedState
     }
