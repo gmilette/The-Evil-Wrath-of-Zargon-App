@@ -59,6 +59,7 @@ class MapViewModel @Inject constructor(
      * Set the current game state
      */
     fun setGameState(state: GameState) {
+        android.util.Log.d("MapViewModel", "setGameState - Position: World (${state.worldX}, ${state.worldY}), Char (${state.characterX}, ${state.characterY})")
         _gameState.value = state
     }
 
@@ -100,6 +101,8 @@ class MapViewModel @Inject constructor(
         val state = _gameState.value ?: return
         val map = _currentMap.value ?: return
 
+        android.util.Log.d("MapViewModel", "movePlayer($direction) - Current position: World (${state.worldX}, ${state.worldY}), Char (${state.characterX}, ${state.characterY})")
+
         // Calculate new position
         val (newX, newY) = when (direction) {
             Direction.UP -> Pair(state.characterX, state.characterY - 1)
@@ -138,6 +141,8 @@ class MapViewModel @Inject constructor(
         val newState = state.moveTo(newX, newY).copy(inShip = onWater && hasShip)
         _gameState.value = newState
 
+        android.util.Log.d("MapViewModel", "movePlayer($direction) - New position: World (${newState.worldX}, ${newState.worldY}), Char (${newState.characterX}, ${newState.characterY})")
+
         // Set pending encounter flag (will be checked by screen)
         val encounterRate = map.getEncounterRate(newX, newY)
         if (encounterRate > 0f && Random.nextFloat() < encounterRate) {
@@ -163,6 +168,8 @@ class MapViewModel @Inject constructor(
      */
     private fun handleMapTransition(direction: Direction, state: GameState) {
         val map = _currentMap.value ?: return
+
+        android.util.Log.d("MapViewModel", "handleMapTransition($direction) - Current: World (${state.worldX}, ${state.worldY}), Char (${state.characterX}, ${state.characterY})")
 
         // Calculate new world coordinates and character position
         val (newWorldPos, newCharPos) = when (direction) {
@@ -205,6 +212,7 @@ class MapViewModel @Inject constructor(
         )
 
         _gameState.value = newState
+        android.util.Log.d("MapViewModel", "handleMapTransition($direction) - New: World (${newState.worldX}, ${newState.worldY}), Char (${newState.characterX}, ${newState.characterY})")
 
         // Load new map
         loadMap(newWorldPos.first, newWorldPos.second)
