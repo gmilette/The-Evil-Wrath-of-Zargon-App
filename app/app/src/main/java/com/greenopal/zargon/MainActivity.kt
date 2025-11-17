@@ -176,9 +176,11 @@ class MainActivity : ComponentActivity() {
                                             screenState = ScreenState.DIALOG
                                         }
                                         is TileInteraction.WeaponShop -> {
+                                            android.util.Log.d("MainActivity", "Entering shop - Position: World (${gameState.worldX}, ${gameState.worldY}), Char (${gameState.characterX}, ${gameState.characterY})")
                                             screenState = ScreenState.WEAPON_SHOP
                                         }
                                         is TileInteraction.Healer -> {
+                                            android.util.Log.d("MainActivity", "Entering healer - Position: World (${gameState.worldX}, ${gameState.worldY}), Char (${gameState.characterX}, ${gameState.characterY})")
                                             screenState = ScreenState.HEALER
                                         }
                                         is TileInteraction.Castle -> {
@@ -325,7 +327,10 @@ class MainActivity : ComponentActivity() {
                                 gameState = gameState,
                                 onShopExit = { updatedState ->
                                     // Return player to where they were before entering
+                                    android.util.Log.d("MainActivity", "Exiting shop - Position: World (${updatedState.worldX}, ${updatedState.worldY}), Char (${updatedState.characterX}, ${updatedState.characterY})")
+                                    android.util.Log.d("MainActivity", "Exiting shop - Gold: ${updatedState.character.gold}")
                                     viewModel.updateGameState(updatedState)
+                                    android.util.Log.d("MainActivity", "After shop exit - Position: World (${viewModel.gameState.value.worldX}, ${viewModel.gameState.value.worldY}), Char (${viewModel.gameState.value.characterX}, ${viewModel.gameState.value.characterY})")
                                     screenState = ScreenState.MAP
                                 },
                                 modifier = Modifier
@@ -342,7 +347,10 @@ class MainActivity : ComponentActivity() {
                                 },
                                 onHealerExit = { updatedState ->
                                     // Return player to where they were before entering
+                                    android.util.Log.d("MainActivity", "Exiting healer - Position: World (${updatedState.worldX}, ${updatedState.worldY}), Char (${updatedState.characterX}, ${updatedState.characterY})")
+                                    android.util.Log.d("MainActivity", "Exiting healer - HP: ${updatedState.character.currentDP}/${updatedState.character.maxDP}")
                                     viewModel.updateGameState(updatedState)
+                                    android.util.Log.d("MainActivity", "After healer exit - Position: World (${viewModel.gameState.value.worldX}, ${viewModel.gameState.value.worldY}), Char (${viewModel.gameState.value.characterX}, ${viewModel.gameState.value.characterY})")
                                     screenState = ScreenState.MAP
                                 },
                                 modifier = Modifier
