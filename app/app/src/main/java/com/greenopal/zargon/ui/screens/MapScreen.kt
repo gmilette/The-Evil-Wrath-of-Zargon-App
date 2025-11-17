@@ -69,6 +69,7 @@ fun MapScreen(
     onEnterBattle: (GameState) -> Unit,
     onInteract: (TileInteraction) -> Unit,
     onOpenMenu: () -> Unit,
+    onPositionChanged: (GameState) -> Unit = {},
     modifier: Modifier = Modifier,
     viewModel: MapViewModel = hiltViewModel()
 ) {
@@ -92,9 +93,13 @@ fun MapScreen(
     val currentMap by viewModel.currentMap.collectAsState()
     val currentGameState by viewModel.gameState.collectAsState()
 
-    // Check for random encounters
+    // Sync position changes back to MainActivity
     LaunchedEffect(currentGameState) {
         currentGameState?.let { state ->
+            android.util.Log.d("MapScreen", "Position changed in MapViewModel - notifying MainActivity: World (${state.worldX}, ${state.worldY}), Char (${state.characterX}, ${state.characterY})")
+            onPositionChanged(state)
+
+            // Check for random encounters
             viewModel.checkForEncounter(state)?.let { encounterState ->
                 onEnterBattle(encounterState)
             }
@@ -153,7 +158,13 @@ fun MapScreen(
                 val currentInteraction = viewModel.getCurrentInteraction()
                 if (currentInteraction != null) {
                     Button(
-                        onClick = { onInteract(currentInteraction) },
+                        onClick = {
+                            // Sync the updated position back to MainActivity before interacting
+                            currentGameState?.let { updatedState ->
+                                android.util.Log.d("MapScreen", "Interact button clicked - MapViewModel position: World (${updatedState.worldX}, ${updatedState.worldY}), Char (${updatedState.characterX}, ${updatedState.characterY})")
+                            }
+                            onInteract(currentInteraction)
+                        },
                         modifier = Modifier.fillMaxWidth(),
                         colors = ButtonDefaults.buttonColors(
                             containerColor = MaterialTheme.colorScheme.tertiary

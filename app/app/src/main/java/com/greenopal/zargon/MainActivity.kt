@@ -197,6 +197,11 @@ class MainActivity : ComponentActivity() {
                                 onOpenMenu = {
                                     screenState = ScreenState.MENU
                                 },
+                                onPositionChanged = { updatedState ->
+                                    // Sync position changes from MapViewModel back to GameViewModel
+                                    android.util.Log.d("MainActivity", "Position updated from MapViewModel: World (${updatedState.worldX}, ${updatedState.worldY}), Char (${updatedState.characterX}, ${updatedState.characterY})")
+                                    viewModel.updateGameState(updatedState)
+                                },
                                 modifier = Modifier
                                     .fillMaxSize()
                                     .padding(innerPadding)
