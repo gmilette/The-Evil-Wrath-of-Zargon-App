@@ -70,6 +70,9 @@ class MainActivity : ComponentActivity() {
     @Inject
     lateinit var saveRepository: SaveGameRepository
 
+    @Inject
+    lateinit var tileBitmapCache: com.greenopal.zargon.domain.graphics.TileBitmapCache
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -164,6 +167,7 @@ class MainActivity : ComponentActivity() {
                                 gameState = gameState,
                                 playerSprite = playerSprite,
                                 tileParser = tileParser,
+                                tileBitmapCache = tileBitmapCache,
                                 onEnterBattle = { encounterState ->
                                     // Update game state with encounter
                                     viewModel.updateGameState(encounterState)

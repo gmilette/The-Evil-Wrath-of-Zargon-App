@@ -66,6 +66,7 @@ fun MapScreen(
     gameState: GameState,
     playerSprite: Sprite?,
     tileParser: TileParser?,
+    tileBitmapCache: com.greenopal.zargon.domain.graphics.TileBitmapCache?,
     onEnterBattle: (GameState) -> Unit,
     onInteract: (TileInteraction) -> Unit,
     onOpenMenu: () -> Unit,
@@ -75,14 +76,11 @@ fun MapScreen(
 ) {
     // State for found item dialog
     var foundItem by remember { mutableStateOf<Item?>(null) }
-    // Note: Tile sprites disabled for performance - pixel-by-pixel rendering was too slow
-    // TODO: Re-enable with optimized bitmap-based rendering
-    // var tileSprites by remember { mutableStateOf<Map<String, Sprite>>(emptyMap()) }
-    // LaunchedEffect(Unit) {
-    //     tileParser?.let {
-    //         tileSprites = it.parseAllTiles()
-    //     }
-    // }
+
+    // Preload tile bitmaps for better performance
+    LaunchedEffect(tileBitmapCache) {
+        tileBitmapCache?.preloadCommonTiles(32)
+    }
 
     // Initialize map
     LaunchedEffect(gameState.worldX, gameState.worldY) {
@@ -149,6 +147,7 @@ fun MapScreen(
                     playerX = currentGameState!!.characterX,
                     playerY = currentGameState!!.characterY,
                     playerSprite = playerSprite,
+                    tileBitmapCache = tileBitmapCache,
                     modifier = Modifier
                         .fillMaxWidth()
                         .weight(1f)
@@ -287,7 +286,7 @@ private fun MapView(
     playerX: Int,
     playerY: Int,
     playerSprite: Sprite?,
-    tileSprites: Map<String, Sprite> = emptyMap(),
+    tileBitmapCache: com.greenopal.zargon.domain.graphics.TileBitmapCache? = null,
     modifier: Modifier = Modifier
 ) {
     Card(
@@ -321,16 +320,32 @@ private fun MapView(
                     for (x in 0 until map.width) {
                         val tile = map.getTile(x, y)
                         if (tile != null) {
-                            // Use colored rectangles for tiles (pixel-by-pixel sprite rendering is too slow)
-                            // TODO: Optimize sprite rendering using Android Bitmap caching
-                            drawRect(
-                                color = tile.displayColor,
-                                topLeft = Offset(
-                                    offsetX + x * tileSize,
-                                    offsetY + y * tileSize
-                                ),
-                                size = Size(tileSize, tileSize)
-                            )
+                            // Try to use textured bitmap from cache, fall back to colored rectangle
+                            val tileBitmap = tileBitmapCache?.getBitmap(tile.name, tileSize.toInt())
+
+                            if (tileBitmap != null) {
+                                // Draw textured bitmap tile
+                                drawIntoCanvas { canvas ->
+                                    val left = offsetX + x * tileSize
+                                    val top = offsetY + y * tileSize
+                                    canvas.nativeCanvas.drawBitmap(
+                                        tileBitmap,
+                                        left,
+                                        top,
+                                        null
+                                    )
+                                }
+                            } else {
+                                // Fallback to colored rectangle if bitmap not available
+                                drawRect(
+                                    color = tile.displayColor,
+                                    topLeft = Offset(
+                                        offsetX + x * tileSize,
+                                        offsetY + y * tileSize
+                                    ),
+                                    size = Size(tileSize, tileSize)
+                                )
+                            }
 
                             // Draw labels for special tiles
                             val label = when (tile) {
