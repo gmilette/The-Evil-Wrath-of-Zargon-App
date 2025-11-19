@@ -57,7 +57,9 @@ data class Dialog(
     val answer2: String,
     val question3: String,
     val answer3: String,
-    val storyAction: StoryAction? = null
+    val storyAction: StoryAction? = null,  // Action for question3 (legacy)
+    val action1: StoryAction? = null,       // Action for question1
+    val action2: StoryAction? = null        // Action for question2
 )
 
 sealed class StoryAction {
@@ -66,6 +68,8 @@ sealed class StoryAction {
     data class TakeItem(val itemName: String) : StoryAction()
     object BuildBoat : StoryAction()
     object ResurrectBoatman : StoryAction()
+    object HealPlayer : StoryAction()
+    data class MultiAction(val actions: List<StoryAction>) : StoryAction()
 }
 
 /**

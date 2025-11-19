@@ -303,6 +303,26 @@ class MainActivity : ComponentActivity() {
                                                     )
                                                 )
                                             }
+                                            is StoryAction.TakeItem -> {
+                                                // Remove item from inventory
+                                                val itemToRemove = updatedState.inventory.find {
+                                                    it.name.equals(storyAction.itemName, ignoreCase = true)
+                                                }
+                                                if (itemToRemove != null) {
+                                                    updatedState.removeItem(itemToRemove)
+                                                } else {
+                                                    updatedState
+                                                }
+                                            }
+                                            is StoryAction.HealPlayer -> {
+                                                // Fully restore HP and MP
+                                                val healedCharacter = updatedState.character.copy(
+                                                    currentDP = updatedState.character.maxDP,
+                                                    currentMP = updatedState.character.maxMP
+                                                )
+                                                android.util.Log.d("MainActivity", "Fountain healing - HP: ${healedCharacter.currentDP}/${healedCharacter.maxDP}, MP: ${healedCharacter.currentMP}/${healedCharacter.maxMP}")
+                                                updatedState.updateCharacter(healedCharacter)
+                                            }
                                             is StoryAction.BuildBoat -> {
                                                 updatedState
                                                     .updateStory(5.5f)
@@ -316,6 +336,39 @@ class MainActivity : ComponentActivity() {
                                             }
                                             is StoryAction.ResurrectBoatman -> {
                                                 updatedState.updateStory(5.0f)
+                                            }
+                                            is StoryAction.MultiAction -> {
+                                                // Process multiple actions in sequence
+                                                storyAction.actions.fold(updatedState) { currentState, action ->
+                                                    when (action) {
+                                                        is StoryAction.AdvanceStory -> currentState.updateStory(action.newStatus)
+                                                        is StoryAction.GiveItem -> currentState.addItem(
+                                                            com.greenopal.zargon.data.models.Item(
+                                                                name = action.itemName,
+                                                                description = "Story item",
+                                                                type = com.greenopal.zargon.data.models.ItemType.KEY_ITEM
+                                                            )
+                                                        )
+                                                        is StoryAction.TakeItem -> {
+                                                            val itemToRemove = currentState.inventory.find {
+                                                                it.name.equals(action.itemName, ignoreCase = true)
+                                                            }
+                                                            if (itemToRemove != null) currentState.removeItem(itemToRemove) else currentState
+                                                        }
+                                                        is StoryAction.HealPlayer -> {
+                                                            val healedChar = currentState.character.copy(
+                                                                currentDP = currentState.character.maxDP,
+                                                                currentMP = currentState.character.maxMP
+                                                            )
+                                                            currentState.updateCharacter(healedChar)
+                                                        }
+                                                        is StoryAction.BuildBoat -> currentState.updateStory(5.5f).addItem(
+                                                            com.greenopal.zargon.data.models.Item(name = "ship", description = "Allows travel on the river", type = com.greenopal.zargon.data.models.ItemType.KEY_ITEM)
+                                                        )
+                                                        is StoryAction.ResurrectBoatman -> currentState.updateStory(5.0f)
+                                                        else -> currentState
+                                                    }
+                                                }
                                             }
                                             else -> updatedState
                                         }

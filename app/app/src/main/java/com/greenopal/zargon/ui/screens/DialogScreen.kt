@@ -112,15 +112,22 @@ fun DialogScreen(
                         Button(
                             onClick = {
                                 currentAnswer = dialog.answer1
+                                selectedAction = dialog.action1
                             },
                             modifier = Modifier.fillMaxWidth(),
                             colors = ButtonDefaults.buttonColors(
-                                containerColor = MaterialTheme.colorScheme.primary
+                                containerColor = if (dialog.action1 != null) {
+                                    MaterialTheme.colorScheme.tertiary
+                                } else {
+                                    MaterialTheme.colorScheme.primary
+                                },
+                                contentColor = Color.White
                             )
                         ) {
                             Text(
                                 text = "1. ${dialog.question1}",
-                                style = MaterialTheme.typography.bodyMedium
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = Color.White
                             )
                         }
                     }
@@ -129,15 +136,22 @@ fun DialogScreen(
                         Button(
                             onClick = {
                                 currentAnswer = dialog.answer2
+                                selectedAction = dialog.action2
                             },
                             modifier = Modifier.fillMaxWidth(),
                             colors = ButtonDefaults.buttonColors(
-                                containerColor = MaterialTheme.colorScheme.primary
+                                containerColor = if (dialog.action2 != null) {
+                                    MaterialTheme.colorScheme.tertiary
+                                } else {
+                                    MaterialTheme.colorScheme.primary
+                                },
+                                contentColor = Color.White
                             )
                         ) {
                             Text(
                                 text = "2. ${dialog.question2}",
-                                style = MaterialTheme.typography.bodyMedium
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = Color.White
                             )
                         }
                     }
@@ -154,12 +168,14 @@ fun DialogScreen(
                                     MaterialTheme.colorScheme.tertiary
                                 } else {
                                     MaterialTheme.colorScheme.primary
-                                }
+                                },
+                                contentColor = Color.White
                             )
                         ) {
                             Text(
                                 text = "3. ${dialog.question3}",
-                                style = MaterialTheme.typography.bodyMedium
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = Color.White
                             )
                         }
                     }
@@ -173,10 +189,14 @@ fun DialogScreen(
                         },
                         modifier = Modifier.fillMaxWidth(),
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = Color.DarkGray
+                            containerColor = Color.DarkGray,
+                            contentColor = Color.White
                         )
                     ) {
-                        Text("0. Leave")
+                        Text(
+                            text = "0. Leave",
+                            color = Color.White
+                        )
                     }
                 }
             }

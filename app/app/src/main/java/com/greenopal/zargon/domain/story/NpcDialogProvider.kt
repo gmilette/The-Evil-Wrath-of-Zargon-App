@@ -48,7 +48,10 @@ class NpcDialogProvider @Inject constructor() {
                         answer2 = "blast me out of here!!.. use the dynamite, the sandman knows where it is, i think..",
                         question3 = "(use the dynamite)",
                         answer3 = "**BOOM!** The rocks explode! The boatman is free! 'Thank you!' he says. 'I can help you escape this land - I'm a boat master!'",
-                        storyAction = StoryAction.AdvanceStory(2.0f)
+                        storyAction = StoryAction.MultiAction(listOf(
+                            StoryAction.TakeItem("dynomite"),
+                            StoryAction.AdvanceStory(2.0f)
+                        ))
                     )
                 } else {
                     // Player doesn't have dynamite yet
@@ -294,11 +297,13 @@ class NpcDialogProvider @Inject constructor() {
     private fun getFountainDialog(): Dialog {
         return Dialog(
             question1 = "drink from fountain",
-            answer1 = "You drink the cool refreshing water. You feel revitalized! (HP and MP restored)",
+            answer1 = "You drink the cool refreshing water. You feel revitalized! HP and MP restored!",
+            action1 = StoryAction.HealPlayer,
             question2 = "bathe in fountain",
-            answer2 = "You bathe in the fountain. The water cleanses your wounds! (HP and MP restored)",
-            question3 = "save game",
-            answer3 = "You rest by the fountain and save your progress."
+            answer2 = "You bathe in the fountain. The water cleanses your wounds! HP and MP restored!",
+            action2 = StoryAction.HealPlayer,
+            question3 = "leave",
+            answer3 = "You walk away from the fountain feeling refreshed."
         )
     }
 }
