@@ -39,16 +39,28 @@ class NpcDialogProvider @Inject constructor() {
         return when {
             // Stage 1: Trapped boatman
             status < 2f -> {
-                val question2 = if (status == 1.5f) "use the dynamite" else "how can i help?"
-                Dialog(
-                    question1 = "what happened??",
-                    answer1 = "monsters attacked me, but their mage blasted down these rocks...now i am stuck, please help!!!",
-                    question2 = question2,
-                    answer2 = "blast me out of here!!.. use the dynamite, the sandman knows where it is, i think..",
-                    question3 = "why should i help you?",
-                    answer3 = "because i am a boat master.. i can build you a boat!!!! ooo ouch! help!",
-                    storyAction = if (status == 1.5f) StoryAction.AdvanceStory(2.0f) else null
-                )
+                if (status == 1.5f) {
+                    // Player has dynamite - show option to rescue him
+                    Dialog(
+                        question1 = "what happened??",
+                        answer1 = "monsters attacked me, but their mage blasted down these rocks...now i am stuck, please help!!!",
+                        question2 = "how can i help?",
+                        answer2 = "blast me out of here!!.. use the dynamite, the sandman knows where it is, i think..",
+                        question3 = "(use the dynamite)",
+                        answer3 = "**BOOM!** The rocks explode! The boatman is free! 'Thank you!' he says. 'I can help you escape this land - I'm a boat master!'",
+                        storyAction = StoryAction.AdvanceStory(2.0f)
+                    )
+                } else {
+                    // Player doesn't have dynamite yet
+                    Dialog(
+                        question1 = "what happened??",
+                        answer1 = "monsters attacked me, but their mage blasted down these rocks...now i am stuck, please help!!!",
+                        question2 = "how can i help?",
+                        answer2 = "blast me out of here!!.. use the dynamite, the sandman knows where it is, i think..",
+                        question3 = "why should i help you?",
+                        answer3 = "because i am a boat master.. i can build you a boat!!!! ooo ouch! help!"
+                    )
+                }
             }
 
             // Stage 2: Freed boatman, needs materials
@@ -124,19 +136,28 @@ class NpcDialogProvider @Inject constructor() {
         return when {
             // Early game
             status < 3f -> {
-                Dialog(
-                    question1 = "how can i escape?",
-                    answer1 = "the only way i know of is through the river",
-                    question2 = if (status == 1f) "(ask him about the dynamite)" else "what's up with this place?",
-                    answer2 = if (status == 1f) {
-                        "the dynamite? hmm.. it lies on the east side of the TWO GREAT ROCKS OF THE UNIVERSE, but beware, monsters tend to spurt out, be careful, may the sands be with u"
-                    } else {
-                        "This is the land of Gef. The great river splits the forest of the land from the rocks and mountains. In the middle of the island is the castle where the elves used to live, i have no knowledge of what is going on there now"
-                    },
-                    question3 = "do you dig the sand?",
-                    answer3 = "yea it rules man.",
-                    storyAction = if (status == 1f) StoryAction.AdvanceStory(1.5f) else null
-                )
+                if (status == 1f) {
+                    // Beginning - player can ask about dynamite
+                    Dialog(
+                        question1 = "how can i escape?",
+                        answer1 = "the only way i know of is through the river",
+                        question2 = "what's up with this place?",
+                        answer2 = "This is the land of Gef. The great river splits the forest of the land from the rocks and mountains. In the middle of the island is the castle where the elves used to live, i have no knowledge of what is going on there now",
+                        question3 = "(ask him about the dynamite)",
+                        answer3 = "the dynamite? hmm.. it lies on the east side of the TWO GREAT ROCKS OF THE UNIVERSE, but beware, monsters tend to spurt out, be careful, may the sands be with u",
+                        storyAction = StoryAction.AdvanceStory(1.5f)
+                    )
+                } else {
+                    // After learning about dynamite
+                    Dialog(
+                        question1 = "how can i escape?",
+                        answer1 = "the only way i know of is through the river",
+                        question2 = "what's up with this place?",
+                        answer2 = "This is the land of Gef. The great river splits the forest of the land from the rocks and mountains. In the middle of the island is the castle where the elves used to live, i have no knowledge of what is going on there now",
+                        question3 = "do you dig the sand?",
+                        answer3 = "yea it rules man."
+                    )
+                }
             }
 
             // Mid game: collecting boat materials
