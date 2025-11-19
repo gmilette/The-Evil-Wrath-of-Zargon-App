@@ -55,11 +55,20 @@ class BattleViewModel @Inject constructor(
         _battleRewards.value = null
     }
 
+    // Flag to prevent concurrent action processing
+    private var isProcessingAction = false
+
     /**
      * Handle player action
      */
     fun onAction(action: BattleAction) {
         val state = _battleState.value ?: return
+
+        // Prevent concurrent actions (except showing magic menu)
+        if (action !is BattleAction.Magic && isProcessingAction) {
+            android.util.Log.w("BattleViewModel", "Ignoring action - already processing")
+            return
+        }
 
         when (action) {
             is BattleAction.Attack -> performAttack(state)
@@ -74,39 +83,47 @@ class BattleViewModel @Inject constructor(
      */
     private fun performAttack(state: BattleState) {
         viewModelScope.launch {
-            // Calculate damage: cAP + wgain (weapon bonus)
-            val damage = state.character.totalAP
+            isProcessingAction = true
+            try {
+                // Calculate damage: cAP + wgain (weapon bonus)
+                val damage = state.character.totalAP
 
-            // Apply damage to monster
-            val newMonster = state.monster.takeDamage(damage)
+                // Apply damage to monster
+                val newMonster = state.monster.takeDamage(damage)
 
-            // Add message
-            var newState = state
-                .updateMonster(newMonster)
-                .addMessage("You hit ${state.monster.name} for $damage damage!")
+                // Add message
+                var newState = state
+                    .updateMonster(newMonster)
+                    .addMessage("You hit ${state.monster.name} for $damage damage!")
 
-            // Check if monster is defeated
-            if (!newMonster.isAlive) {
-                android.util.Log.d("BattleViewModel", "Monster defeated! Starting reward calculation...")
-                newState = newState.addMessage("${state.monster.name} is defeated!")
+                // Check if monster is defeated
+                if (!newMonster.isAlive) {
+                    android.util.Log.d("BattleViewModel", "Monster defeated! Starting reward calculation...")
+                    newState = newState.addMessage("${state.monster.name} is defeated!")
+                    _battleState.value = newState
+
+                    // Calculate rewards
+                    delay(500)
+                    calculateVictoryRewards(newState)
+
+                    // Get the UPDATED state (safe version)
+                    val updatedState = _battleState.value
+                    if (updatedState != null) {
+                        newState = updatedState.checkBattleEnd()
+                        android.util.Log.d("BattleViewModel", "Setting battle result to: ${newState.battleResult}, rewards: ${_battleRewards.value}")
+                        _battleState.value = newState
+                    }
+                    return@launch
+                }
+
                 _battleState.value = newState
 
-                // Calculate rewards
+                // Monster counterattack after delay
                 delay(500)
-                calculateVictoryRewards(newState)
-
-                // IMPORTANT: Get the UPDATED state from _battleState (which now has the gold/XP)
-                newState = _battleState.value!!.checkBattleEnd()
-                android.util.Log.d("BattleViewModel", "Setting battle result to: ${newState.battleResult}, rewards: ${_battleRewards.value}")
-                _battleState.value = newState
-                return@launch
+                monsterCounterattack(newState)
+            } finally {
+                isProcessingAction = false
             }
-
-            _battleState.value = newState
-
-            // Monster counterattack after delay
-            delay(500)
-            monsterCounterattack(newState)
         }
     }
 
@@ -117,7 +134,12 @@ class BattleViewModel @Inject constructor(
         viewModelScope.launch {
             // Calculate damage: mAP - defense + random(monster level equivalent)
             // In QBASIC: mloss = INT(RND * whatlev)
-            val randomFactor = Random.nextInt(0, state.monster.scalingFactor + 1)
+            // Fix: Handle scalingFactor == 0 to prevent crash
+            val randomFactor = if (state.monster.scalingFactor > 0) {
+                Random.nextInt(0, state.monster.scalingFactor + 1)
+            } else {
+                0
+            }
             val rawDamage = state.monster.attackPower - state.character.totalDefense + randomFactor
             val damage = maxOf(1, rawDamage) // Minimum 1 damage
 
@@ -141,21 +163,26 @@ class BattleViewModel @Inject constructor(
      */
     private fun attemptRun(state: BattleState) {
         viewModelScope.launch {
-            // 25% chance to escape (QBASIC: Ch = INT(RND * 4) + 1; IF Ch = 1)
-            val escaped = Random.nextInt(1, 5) == 1
+            isProcessingAction = true
+            try {
+                // 25% chance to escape (QBASIC: Ch = INT(RND * 4) + 1; IF Ch = 1)
+                val escaped = Random.nextInt(1, 5) == 1
 
-            if (escaped) {
-                val newState = state
-                    .addMessage("You run away!")
-                    .copy(battleResult = BattleResult.Fled)
-                _battleState.value = newState
-            } else {
-                val newState = state.addMessage("Can't escape!")
-                _battleState.value = newState
+                if (escaped) {
+                    val newState = state
+                        .addMessage("You run away!")
+                        .copy(battleResult = BattleResult.Fled)
+                    _battleState.value = newState
+                } else {
+                    val newState = state.addMessage("Can't escape!")
+                    _battleState.value = newState
 
-                // Monster gets free attack
-                delay(500)
-                monsterCounterattack(newState)
+                    // Monster gets free attack
+                    delay(500)
+                    monsterCounterattack(newState)
+                }
+            } finally {
+                isProcessingAction = false
             }
         }
     }
@@ -172,85 +199,93 @@ class BattleViewModel @Inject constructor(
      */
     private fun castSpell(state: BattleState, spellIndex: Int) {
         viewModelScope.launch {
-            // Get the spell (convert 1-based index to 0-based)
-            val spell = com.greenopal.zargon.domain.battle.Spells.getByIndex(spellIndex)
+            isProcessingAction = true
+            try {
+                // Get the spell (convert 1-based index to 0-based)
+                val spell = com.greenopal.zargon.domain.battle.Spells.getByIndex(spellIndex)
 
-            if (spell == null) {
-                // Invalid spell index
-                val newState = state
-                    .copy(showMagicMenu = false)
-                    .addMessage("Invalid spell!")
-                _battleState.value = newState
-                return@launch
-            }
-
-            // Check if player has unlocked this spell
-            val availableSpells = com.greenopal.zargon.domain.battle.Spells.getAvailableSpells(state.character.level)
-            if (spell !in availableSpells) {
-                val newState = state
-                    .addMessage("Spell not yet learned!")
-                _battleState.value = newState
-                return@launch
-            }
-
-            // Check MP cost
-            if (!spell.canCast(state.character.currentMP)) {
-                val newState = state
-                    .addMessage("Not enough MP!")
-                _battleState.value = newState
-                return@launch
-            }
-
-            // Close magic menu
-            var newState = state.copy(showMagicMenu = false)
-
-            // Deduct MP cost
-            val newCharacter = state.character.useMagic(spell.mpCost)
-            newState = newState.updateCharacter(newCharacter)
-
-            if (spell.isHealing) {
-                // Cure spell - heal player
-                val healAmount = spell.calculateEffect(state.character.level)
-                val healedCharacter = newCharacter.heal(healAmount)
-                newState = newState
-                    .updateCharacter(healedCharacter)
-                    .addMessage("${spell.name} restores $healAmount HP!")
-
-                _battleState.value = newState
-
-                // Monster counterattack after healing
-                delay(500)
-                monsterCounterattack(newState)
-            } else {
-                // Damage spell - attack monster
-                val damage = spell.calculateEffect(state.character.level)
-                val damagedMonster = state.monster.takeDamage(damage)
-
-                newState = newState
-                    .updateMonster(damagedMonster)
-                    .addMessage("${spell.name} deals $damage damage!")
-
-                // Check if monster is defeated
-                if (!damagedMonster.isAlive) {
-                    newState = newState
-                        .addMessage("${state.monster.name} is defeated!")
-                    _battleState.value = newState
-
-                    // Calculate rewards
-                    delay(500)
-                    calculateVictoryRewards(newState)
-
-                    // IMPORTANT: Get the UPDATED state from _battleState (which now has the gold/XP)
-                    newState = _battleState.value!!.checkBattleEnd()
+                if (spell == null) {
+                    // Invalid spell index
+                    val newState = state
+                        .copy(showMagicMenu = false)
+                        .addMessage("Invalid spell!")
                     _battleState.value = newState
                     return@launch
                 }
 
-                _battleState.value = newState
+                // Check if player has unlocked this spell
+                val availableSpells = com.greenopal.zargon.domain.battle.Spells.getAvailableSpells(state.character.level)
+                if (spell !in availableSpells) {
+                    val newState = state
+                        .addMessage("Spell not yet learned!")
+                    _battleState.value = newState
+                    return@launch
+                }
 
-                // Monster counterattack
-                delay(500)
-                monsterCounterattack(newState)
+                // Check MP cost
+                if (!spell.canCast(state.character.currentMP)) {
+                    val newState = state
+                        .addMessage("Not enough MP!")
+                    _battleState.value = newState
+                    return@launch
+                }
+
+                // Close magic menu
+                var newState = state.copy(showMagicMenu = false)
+
+                // Deduct MP cost
+                val newCharacter = state.character.useMagic(spell.mpCost)
+                newState = newState.updateCharacter(newCharacter)
+
+                if (spell.isHealing) {
+                    // Cure spell - heal player
+                    val healAmount = spell.calculateEffect(state.character.level)
+                    val healedCharacter = newCharacter.heal(healAmount)
+                    newState = newState
+                        .updateCharacter(healedCharacter)
+                        .addMessage("${spell.name} restores $healAmount HP!")
+
+                    _battleState.value = newState
+
+                    // Monster counterattack after healing
+                    delay(500)
+                    monsterCounterattack(newState)
+                } else {
+                    // Damage spell - attack monster
+                    val damage = spell.calculateEffect(state.character.level)
+                    val damagedMonster = state.monster.takeDamage(damage)
+
+                    newState = newState
+                        .updateMonster(damagedMonster)
+                        .addMessage("${spell.name} deals $damage damage!")
+
+                    // Check if monster is defeated
+                    if (!damagedMonster.isAlive) {
+                        newState = newState
+                            .addMessage("${state.monster.name} is defeated!")
+                        _battleState.value = newState
+
+                        // Calculate rewards
+                        delay(500)
+                        calculateVictoryRewards(newState)
+
+                        // Get the UPDATED state (safe version)
+                        val updatedState = _battleState.value
+                        if (updatedState != null) {
+                            newState = updatedState.checkBattleEnd()
+                            _battleState.value = newState
+                        }
+                        return@launch
+                    }
+
+                    _battleState.value = newState
+
+                    // Monster counterattack
+                    delay(500)
+                    monsterCounterattack(newState)
+                }
+            } finally {
+                isProcessingAction = false
             }
         }
     }
