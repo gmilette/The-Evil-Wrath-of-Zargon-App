@@ -35,11 +35,12 @@ class NpcDialogProvider @Inject constructor() {
     private fun getBoatmanDialog(gameState: GameState): Dialog {
         val status = gameState.storyStatus
         val hasWood = gameState.hasItem("wood")
+        val hasDynamite = gameState.hasItem("dynamite")
 
         return when {
             // Stage 1: Trapped boatman
             status < 2f -> {
-                if (status == 1.5f) {
+                if (status == 1.5f && hasDynamite) {
                     // Player has dynamite - show option to rescue him
                     Dialog(
                         question1 = "what happened??",
