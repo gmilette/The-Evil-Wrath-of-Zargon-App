@@ -2426,6 +2426,77 @@ IF stealgraphics = 1 THEN
   DO: LOOP UNTIL INKEY$ <> ""
 END IF
 
+'Add textures to tiles
+'Textured sand - add grain pattern
+CLS
+PUT (0, 0), sand, PSET
+FOR i = 1 TO 40
+  px = INT(RND * 28) + 1
+  py = INT(RND * 28) + 1
+  c = INT(RND * 2)
+  IF c = 0 THEN PSET (px, py), 12 ELSE PSET (px, py), 14
+NEXT i
+GET (0, 0)-(30, 30), sand
+
+'Textured trees - add bark lines
+CLS
+PUT (0, 0), tree, PSET
+FOR i = 5 TO 25 STEP 3
+  IF i MOD 2 = 0 THEN
+    PSET (10, i), 8
+    PSET (11, i), 8
+    PSET (18, i + 1), 8
+    PSET (19, i + 1), 8
+  END IF
+NEXT i
+GET (0, 0)-(30, 30), tree
+
+CLS
+PUT (0, 0), tree2, PSET
+FOR i = 5 TO 25 STEP 3
+  IF i MOD 2 = 0 THEN
+    PSET (10, i), 8
+    PSET (11, i), 8
+    PSET (18, i + 1), 8
+    PSET (19, i + 1), 8
+  END IF
+NEXT i
+GET (0, 0)-(30, 30), tree2
+
+'Textured rocks - add rough surface
+CLS
+PUT (0, 0), rock, PSET
+FOR i = 1 TO 25
+  px = INT(RND * 28) + 1
+  py = INT(RND * 28) + 1
+  c = INT(RND * 3)
+  IF c = 0 THEN PSET (px, py), 7
+  IF c = 1 THEN PSET (px, py), 8
+NEXT i
+GET (0, 0)-(30, 30), rock
+
+CLS
+PUT (0, 0), rock2, PSET
+FOR i = 1 TO 25
+  px = INT(RND * 28) + 1
+  py = INT(RND * 28) + 1
+  c = INT(RND * 3)
+  IF c = 0 THEN PSET (px, py), 7
+  IF c = 1 THEN PSET (px, py), 8
+NEXT i
+GET (0, 0)-(30, 30), rock2
+
+'Textured grass - add variation
+CLS
+PUT (0, 0), grass, PSET
+FOR i = 1 TO 30
+  px = INT(RND * 28) + 1
+  py = INT(RND * 28) + 1
+  c = INT(RND * 2)
+  IF c = 0 THEN PSET (px, py), 2
+NEXT i
+GET (0, 0)-(30, 30), grass
+
 END SUB
 
 SUB instructions
