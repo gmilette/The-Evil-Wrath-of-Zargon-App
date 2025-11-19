@@ -49,7 +49,7 @@ fun QuestProgressScreen(
     }
     // Define all quest items
     val questItems = listOf(
-        QuestItem("dynomite", "Dynamite", "Blast through rocks"),
+        QuestItem("dynamite", "Dynamite", "Blast through rocks"),
         QuestItem("dead wood", "Dead Wood", "Material for ship"),
         QuestItem("rutter", "Rutter", "Navigation tool"),
         QuestItem("cloth", "Cloth", "Sail material"),

@@ -49,7 +49,7 @@ class NpcDialogProvider @Inject constructor() {
                         question3 = "(use the dynamite)",
                         answer3 = "**BOOM!** The rocks explode! The boatman is free! 'Thank you!' he says. 'I can help you escape this land - I'm a boat master!'",
                         storyAction = StoryAction.MultiAction(listOf(
-                            StoryAction.TakeItem("dynomite"),
+                            StoryAction.TakeItem("dynamite"),
                             StoryAction.AdvanceStory(2.0f)
                         ))
                     )

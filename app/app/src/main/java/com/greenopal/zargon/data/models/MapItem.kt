@@ -26,7 +26,7 @@ object MapItems {
             spotX = 15,
             spotY = 6,
             item = Item(
-                name = "dynomite",
+                name = "dynamite",
                 description = "Used to blast through rocks",
                 type = ItemType.KEY_ITEM
             )

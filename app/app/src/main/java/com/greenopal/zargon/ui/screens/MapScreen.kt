@@ -571,7 +571,7 @@ private fun MovementControls(
                     containerColor = MaterialTheme.colorScheme.tertiary
                 )
             ) {
-                Text("SEARCH (S)")
+                Text("SEARCH")
             }
         }
     }
