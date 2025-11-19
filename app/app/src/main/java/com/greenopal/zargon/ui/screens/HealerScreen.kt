@@ -11,12 +11,16 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -37,12 +41,13 @@ import com.greenopal.zargon.data.models.GameState
 @Composable
 fun HealerScreen(
     gameState: GameState,
-    onSaveGame: () -> Unit,
+    onSaveGame: (GameState) -> Unit,
     onHealerExit: (GameState) -> Unit,
     modifier: Modifier = Modifier
 ) {
     var message by remember { mutableStateOf<String?>(null) }
     var updatedGameState by remember { mutableStateOf(gameState) }
+    var showMessageDialog by remember { mutableStateOf(false) }
 
     // Handle Android back button
     BackHandler {
@@ -67,7 +72,8 @@ fun HealerScreen(
             Column(
                 modifier = Modifier
                     .padding(24.dp)
-                    .fillMaxWidth(),
+                    .fillMaxWidth()
+                    .verticalScroll(rememberScrollState()),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
@@ -119,27 +125,6 @@ fun HealerScreen(
                     }
                 }
 
-                // Message display
-                if (message != null) {
-                    Card(
-                        modifier = Modifier.fillMaxWidth(),
-                        colors = CardDefaults.cardColors(
-                            containerColor = if (message!!.contains("sure")) {
-                                MaterialTheme.colorScheme.tertiaryContainer
-                            } else {
-                                MaterialTheme.colorScheme.errorContainer
-                            }
-                        )
-                    ) {
-                        Text(
-                            text = message!!,
-                            modifier = Modifier.padding(12.dp),
-                            style = MaterialTheme.typography.bodyMedium,
-                            textAlign = TextAlign.Center
-                        )
-                    }
-                }
-
                 Spacer(modifier = Modifier.height(8.dp))
 
                 Text(
@@ -162,6 +147,7 @@ fun HealerScreen(
                         )
                         updatedGameState = updatedGameState.updateCharacter(newChar)
                         message = "sure my son"
+                        showMessageDialog = true
                     }
                 )
 
@@ -178,6 +164,7 @@ fun HealerScreen(
                         )
                         updatedGameState = updatedGameState.updateCharacter(newChar)
                         message = "sure my son"
+                        showMessageDialog = true
                     }
                 )
 
@@ -196,13 +183,15 @@ fun HealerScreen(
                         )
                         updatedGameState = updatedGameState.updateCharacter(newChar)
                         message = "sure my son"
+                        showMessageDialog = true
                     }
                 )
 
                 Button(
                     onClick = {
-                        onSaveGame()
+                        onSaveGame(updatedGameState)
                         message = "Game saved!"
+                        showMessageDialog = true
                     },
                     modifier = Modifier.fillMaxWidth(),
                     colors = ButtonDefaults.buttonColors(
@@ -224,6 +213,31 @@ fun HealerScreen(
                     Text("5. i've had enough of this guy")
                 }
             }
+        }
+
+        // Message dialog popup
+        if (showMessageDialog && message != null) {
+            AlertDialog(
+                onDismissRequest = { showMessageDialog = false },
+                title = {
+                    Text(
+                        text = "Healer",
+                        style = MaterialTheme.typography.titleLarge
+                    )
+                },
+                text = {
+                    Text(
+                        text = message!!,
+                        style = MaterialTheme.typography.bodyLarge
+                    )
+                },
+                confirmButton = {
+                    TextButton(onClick = { showMessageDialog = false }) {
+                        Text("OK")
+                    }
+                },
+                containerColor = MaterialTheme.colorScheme.surface
+            )
         }
     }
 }

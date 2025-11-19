@@ -351,8 +351,10 @@ class MainActivity : ComponentActivity() {
                         ScreenState.HEALER -> {
                             HealerScreen(
                                 gameState = gameState,
-                                onSaveGame = {
-                                    saveRepository.saveGame(gameState, 1)
+                                onSaveGame = { stateToSave ->
+                                    // Save the current state from healer (including updated HP/MP)
+                                    android.util.Log.d("MainActivity", "Saving game - HP: ${stateToSave.character.currentDP}/${stateToSave.character.maxDP}, MP: ${stateToSave.character.currentMP}/${stateToSave.character.maxMP}")
+                                    saveRepository.saveGame(stateToSave, 1)
                                 },
                                 onHealerExit = { updatedState ->
                                     // Return player to where they were before entering
