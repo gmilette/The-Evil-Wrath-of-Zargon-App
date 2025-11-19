@@ -37,6 +37,7 @@ import com.greenopal.zargon.ui.components.SpriteView
 import com.greenopal.zargon.ui.components.StatsCard
 import com.greenopal.zargon.ui.screens.BattleScreen
 import com.greenopal.zargon.ui.screens.DialogScreen
+import com.greenopal.zargon.ui.screens.FountainScreen
 import com.greenopal.zargon.ui.screens.GameOverScreen
 import com.greenopal.zargon.ui.screens.HealerScreen
 import com.greenopal.zargon.ui.screens.MapScreen
@@ -53,7 +54,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
 enum class ScreenState {
-    TITLE, MENU, MAP, BATTLE, STATS, QUEST_PROGRESS, DIALOG, WEAPON_SHOP, HEALER, GAME_OVER, VICTORY
+    TITLE, MENU, MAP, BATTLE, STATS, QUEST_PROGRESS, DIALOG, WEAPON_SHOP, HEALER, FOUNTAIN, GAME_OVER, VICTORY
 }
 
 @AndroidEntryPoint
@@ -176,8 +177,14 @@ class MainActivity : ComponentActivity() {
                                 onInteract = { interaction ->
                                     when (interaction) {
                                         is TileInteraction.NpcDialog -> {
-                                            currentNpcType = interaction.npcType
-                                            screenState = ScreenState.DIALOG
+                                            // Check if it's a fountain - use fountain screen instead
+                                            if (interaction.npcType == NpcType.FOUNTAIN) {
+                                                android.util.Log.d("MainActivity", "Entering fountain - Position: World (${gameState.worldX}, ${gameState.worldY}), Char (${gameState.characterX}, ${gameState.characterY})")
+                                                screenState = ScreenState.FOUNTAIN
+                                            } else {
+                                                currentNpcType = interaction.npcType
+                                                screenState = ScreenState.DIALOG
+                                            }
                                         }
                                         is TileInteraction.WeaponShop -> {
                                             android.util.Log.d("MainActivity", "Entering shop - Position: World (${gameState.worldX}, ${gameState.worldY}), Char (${gameState.characterX}, ${gameState.characterY})")
@@ -415,6 +422,28 @@ class MainActivity : ComponentActivity() {
                                     android.util.Log.d("MainActivity", "Exiting healer - HP: ${updatedState.character.currentDP}/${updatedState.character.maxDP}")
                                     viewModel.updateGameState(updatedState)
                                     android.util.Log.d("MainActivity", "After healer exit - Position: World (${viewModel.gameState.value.worldX}, ${viewModel.gameState.value.worldY}), Char (${viewModel.gameState.value.characterX}, ${viewModel.gameState.value.characterY})")
+                                    screenState = ScreenState.MAP
+                                },
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .padding(innerPadding)
+                            )
+                        }
+
+                        ScreenState.FOUNTAIN -> {
+                            FountainScreen(
+                                gameState = gameState,
+                                onSaveGame = { stateToSave ->
+                                    // Save the current state from fountain (including updated HP/MP)
+                                    android.util.Log.d("MainActivity", "Saving game at fountain - Position: World (${stateToSave.worldX}, ${stateToSave.worldY}), Char (${stateToSave.characterX}, ${stateToSave.characterY})")
+                                    android.util.Log.d("MainActivity", "Saving game - HP: ${stateToSave.character.currentDP}/${stateToSave.character.maxDP}, MP: ${stateToSave.character.currentMP}/${stateToSave.character.maxMP}")
+                                    saveRepository.saveGame(stateToSave, 1)
+                                },
+                                onFountainExit = { updatedState ->
+                                    // Return player to where they were before entering
+                                    android.util.Log.d("MainActivity", "Exiting fountain - Position: World (${updatedState.worldX}, ${updatedState.worldY}), Char (${updatedState.characterX}, ${updatedState.characterY})")
+                                    android.util.Log.d("MainActivity", "Exiting fountain - HP: ${updatedState.character.currentDP}/${updatedState.character.maxDP}")
+                                    viewModel.updateGameState(updatedState)
                                     screenState = ScreenState.MAP
                                 },
                                 modifier = Modifier

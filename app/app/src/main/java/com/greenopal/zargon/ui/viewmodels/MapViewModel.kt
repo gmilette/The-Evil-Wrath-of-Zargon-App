@@ -215,6 +215,23 @@ class MapViewModel @Inject constructor(
             }
         }
 
+        // Check if target tile in new map is walkable before transitioning
+        val targetMap = mapParser.parseMap(newWorldPos.first, newWorldPos.second)
+        val targetTile = targetMap.getTile(newCharPos.first, newCharPos.second)
+        val hasShip = state.hasItem("ship")
+
+        // Check walkability using same logic as normal movement
+        val canTransition = when {
+            targetTile == null -> false
+            targetTile == TileType.WATER -> hasShip
+            else -> targetTile.isWalkable
+        }
+
+        if (!canTransition) {
+            android.util.Log.d("MapViewModel", "Map transition blocked - target tile: $targetTile at (${newCharPos.first}, ${newCharPos.second}) is not walkable")
+            return
+        }
+
         // Update game state with new map and position
         val newState = state.changeMap(
             worldX = newWorldPos.first,
