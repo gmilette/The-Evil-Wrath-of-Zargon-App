@@ -133,6 +133,11 @@ class MapViewModel @Inject constructor(
             else -> targetTile.isWalkable
         }
 
+        // Debug logging for map24 (healer area) movement
+        if (state.worldX == 2 && state.worldY == 4) {
+            android.util.Log.d("MapViewModel", "Map24 Movement: from (${state.characterX}, ${state.characterY}) to ($newX, $newY), tile=${targetTile?.name}, walkable=${targetTile?.isWalkable}, canMove=$canMove")
+        }
+
         if (!canMove) {
             // Hit obstacle - log and return
             android.util.Log.d("MapViewModel", "Movement blocked - tile: $targetTile, hasShip: $hasShip")
