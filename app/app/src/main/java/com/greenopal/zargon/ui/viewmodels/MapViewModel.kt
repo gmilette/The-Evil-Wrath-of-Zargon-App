@@ -262,6 +262,8 @@ class MapViewModel @Inject constructor(
     fun searchForItem(): Item? {
         val state = _gameState.value ?: return null
 
+        android.util.Log.d("MapViewModel", "Searching at Map${state.worldX}${state.worldY} position (${state.characterX}, ${state.characterY})")
+
         // Check if item exists at this location and not already in inventory
         val foundItem = MapItems.getItemAt(
             worldX = state.worldX,
@@ -270,13 +272,19 @@ class MapViewModel @Inject constructor(
             spotY = state.characterY
         )
 
+        android.util.Log.d("MapViewModel", "Found item: ${foundItem?.name ?: "nothing"}")
+
         // Only return item if player doesn't already have it
         return if (foundItem != null && !state.hasItem(foundItem.name)) {
             // Add item to game state
             val newState = state.addItem(foundItem)
             _gameState.value = newState
+            android.util.Log.d("MapViewModel", "Added ${foundItem.name} to inventory. Inventory size: ${newState.inventory.size}")
             foundItem
         } else {
+            if (foundItem != null && state.hasItem(foundItem.name)) {
+                android.util.Log.d("MapViewModel", "Player already has ${foundItem.name}")
+            }
             null
         }
     }

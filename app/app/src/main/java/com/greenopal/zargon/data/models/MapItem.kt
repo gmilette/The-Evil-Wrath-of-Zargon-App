@@ -20,10 +20,11 @@ object MapItems {
     private val allItems = listOf(
         // Item 1: Dynamite - Map 44 (World 4, Quadrant 4)
         // QBASIC Line 1463-1465
+        // Location: map44.lvl line 135 = tile 134 = position (14, 6)
         MapItem(
             worldX = 4,
             worldY = 4,
-            spotX = 15,
+            spotX = 14,
             spotY = 6,
             item = Item(
                 name = "dynamite",
