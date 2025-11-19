@@ -121,22 +121,21 @@ class MapViewModel @Inject constructor(
         // Check if tile is walkable
         val targetTile = map.getTile(newX, newY)
         val hasShip = state.hasItem("ship")
-        val hasDynamite = state.hasItem("dynomite")
 
         // Movement validation with explicit water handling
+        // Note: Dynamite is NOT used for general rock traversal - it's only used
+        // in a specific story event (rescuing the boatman in ZARGON.BAS:2026-2046)
         val canMove = when {
             targetTile == null -> false  // Out of bounds
             // Deep water requires ship (not walkable without it)
             targetTile == TileType.WATER -> hasShip
-            // Rocks require dynamite
-            (targetTile == TileType.ROCK || targetTile == TileType.ROCK2) -> hasDynamite
-            // All other tiles (including SHALLOW_WATER) use standard walkability
+            // All other tiles (rocks, trees, graves, etc.) use standard walkability
             else -> targetTile.isWalkable
         }
 
         if (!canMove) {
             // Hit obstacle - log and return
-            android.util.Log.d("MapViewModel", "Movement blocked - tile: $targetTile, hasShip: $hasShip, hasDynamite: $hasDynamite")
+            android.util.Log.d("MapViewModel", "Movement blocked - tile: $targetTile, hasShip: $hasShip")
             return
         }
 
