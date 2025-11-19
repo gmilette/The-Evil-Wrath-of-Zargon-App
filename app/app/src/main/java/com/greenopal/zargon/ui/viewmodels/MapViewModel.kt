@@ -123,22 +123,30 @@ class MapViewModel @Inject constructor(
         val hasShip = state.hasItem("ship")
         val hasDynamite = state.hasItem("dynomite")
 
-        // Allow water tiles if player has ship, allow rocks if player has dynamite
+        // Movement validation with explicit water handling
         val canMove = when {
-            targetTile == TileType.WATER && hasShip -> true
-            (targetTile == TileType.ROCK || targetTile == TileType.ROCK2) && hasDynamite -> true
-            targetTile == null -> false
+            targetTile == null -> false  // Out of bounds
+            // Deep water requires ship (not walkable without it)
+            targetTile == TileType.WATER -> hasShip
+            // Rocks require dynamite
+            (targetTile == TileType.ROCK || targetTile == TileType.ROCK2) -> hasDynamite
+            // All other tiles (including SHALLOW_WATER) use standard walkability
             else -> targetTile.isWalkable
         }
 
         if (!canMove) {
-            // Hit obstacle - do nothing
+            // Hit obstacle - log and return
+            android.util.Log.d("MapViewModel", "Movement blocked - tile: $targetTile, hasShip: $hasShip, hasDynamite: $hasDynamite")
             return
         }
 
-        // Move player (update inShip status if on water)
-        val onWater = targetTile == TileType.WATER
-        val newState = state.moveTo(newX, newY).copy(inShip = onWater && hasShip)
+        // Move player
+        // Update inShip status: true when on deep water OR shallow water with ship
+        val isOnDeepWater = targetTile == TileType.WATER
+        val isOnShallowWater = targetTile == TileType.SHALLOW_WATER
+        val shouldBeInShip = (isOnDeepWater || (isOnShallowWater && hasShip))
+
+        val newState = state.moveTo(newX, newY).copy(inShip = shouldBeInShip)
         _gameState.value = newState
 
         android.util.Log.d("MapViewModel", "movePlayer($direction) - New position: World (${newState.worldX}, ${newState.worldY}), Char (${newState.characterX}, ${newState.characterY})")
