@@ -296,9 +296,13 @@ class MainActivity : ComponentActivity() {
                                     dialog = dialog,
                                     gameState = gameState,
                                     onDialogEnd = { updatedState, storyAction ->
+                                        android.util.Log.d("MainActivity", "Dialog ended with story action: $storyAction")
+                                        android.util.Log.d("MainActivity", "Current story status: ${updatedState.storyStatus}")
+
                                         // Handle story actions
                                         val finalState = when (storyAction) {
                                             is StoryAction.AdvanceStory -> {
+                                                android.util.Log.d("MainActivity", "Advancing story from ${updatedState.storyStatus} to ${storyAction.newStatus}")
                                                 updatedState.updateStory(storyAction.newStatus)
                                             }
                                             is StoryAction.GiveItem -> {
@@ -379,6 +383,7 @@ class MainActivity : ComponentActivity() {
                                             }
                                             else -> updatedState
                                         }
+                                        android.util.Log.d("MainActivity", "Final story status after actions: ${finalState.storyStatus}")
                                         viewModel.updateGameState(finalState)
                                         screenState = ScreenState.MAP
                                     },

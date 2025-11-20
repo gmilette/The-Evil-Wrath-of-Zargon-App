@@ -112,7 +112,8 @@ fun DialogScreen(
                         Button(
                             onClick = {
                                 currentAnswer = dialog.answer1
-                                selectedAction = dialog.action1
+                                // Only update selectedAction if there's a new non-null action
+                                dialog.action1?.let { selectedAction = it }
                             },
                             modifier = Modifier.fillMaxWidth(),
                             colors = ButtonDefaults.buttonColors(
@@ -136,7 +137,8 @@ fun DialogScreen(
                         Button(
                             onClick = {
                                 currentAnswer = dialog.answer2
-                                selectedAction = dialog.action2
+                                // Only update selectedAction if there's a new non-null action
+                                dialog.action2?.let { selectedAction = it }
                             },
                             modifier = Modifier.fillMaxWidth(),
                             colors = ButtonDefaults.buttonColors(
@@ -160,7 +162,8 @@ fun DialogScreen(
                         Button(
                             onClick = {
                                 currentAnswer = dialog.answer3
-                                selectedAction = dialog.storyAction
+                                // Only update selectedAction if there's a new non-null action
+                                dialog.storyAction?.let { selectedAction = it }
                             },
                             modifier = Modifier.fillMaxWidth(),
                             colors = ButtonDefaults.buttonColors(
