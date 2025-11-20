@@ -28,13 +28,22 @@ class SaveGameRepository @Inject constructor(
      */
     fun saveGame(gameState: GameState, slot: Int = 1): Boolean {
         return try {
+            android.util.Log.d("SaveGameRepository", "Saving game to slot $slot:")
+            android.util.Log.d("SaveGameRepository", "  Story Status: ${gameState.storyStatus}")
+            android.util.Log.d("SaveGameRepository", "  Position: Map ${gameState.worldX}${gameState.worldY} at (${gameState.characterX}, ${gameState.characterY})")
+            android.util.Log.d("SaveGameRepository", "  HP: ${gameState.character.currentDP}/${gameState.character.maxDP}, MP: ${gameState.character.currentMP}/${gameState.character.maxMP}")
+            android.util.Log.d("SaveGameRepository", "  Inventory (${gameState.inventory.size} items): ${gameState.inventory.map { it.name }}")
+
             val jsonString = json.encodeToString(gameState)
             sharedPrefs.edit()
                 .putString("save_slot_$slot", jsonString)
                 .putLong("save_time_$slot", System.currentTimeMillis())
                 .apply()
+
+            android.util.Log.d("SaveGameRepository", "Game saved successfully")
             true
         } catch (e: Exception) {
+            android.util.Log.e("SaveGameRepository", "Failed to save game", e)
             e.printStackTrace()
             false
         }
@@ -45,9 +54,19 @@ class SaveGameRepository @Inject constructor(
      */
     fun loadGame(slot: Int = 1): GameState? {
         return try {
+            android.util.Log.d("SaveGameRepository", "Loading game from slot $slot")
             val jsonString = sharedPrefs.getString("save_slot_$slot", null) ?: return null
-            json.decodeFromString<GameState>(jsonString)
+            val gameState = json.decodeFromString<GameState>(jsonString)
+
+            android.util.Log.d("SaveGameRepository", "Game loaded successfully:")
+            android.util.Log.d("SaveGameRepository", "  Story Status: ${gameState.storyStatus}")
+            android.util.Log.d("SaveGameRepository", "  Position: Map ${gameState.worldX}${gameState.worldY} at (${gameState.characterX}, ${gameState.characterY})")
+            android.util.Log.d("SaveGameRepository", "  HP: ${gameState.character.currentDP}/${gameState.character.maxDP}, MP: ${gameState.character.currentMP}/${gameState.character.maxMP}")
+            android.util.Log.d("SaveGameRepository", "  Inventory (${gameState.inventory.size} items): ${gameState.inventory.map { it.name }}")
+
+            gameState
         } catch (e: Exception) {
+            android.util.Log.e("SaveGameRepository", "Failed to load game from slot $slot", e)
             e.printStackTrace()
             null
         }
