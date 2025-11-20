@@ -37,11 +37,14 @@ class NpcDialogProvider @Inject constructor() {
         val hasWood = gameState.hasItem("wood")
         val hasDynamite = gameState.hasItem("dynamite")
 
+        android.util.Log.d("NpcDialogProvider", "Boatman dialog - Story status: $status, Has dynamite: $hasDynamite, Inventory: ${gameState.inventory.map { it.name }}")
+
         return when {
             // Stage 1: Trapped boatman
             status < 2f -> {
                 if (status == 1.5f && hasDynamite) {
                     // Player has dynamite - show option to rescue him
+                    android.util.Log.d("NpcDialogProvider", "Showing dynamite rescue option")
                     Dialog(
                         question1 = "what happened??",
                         answer1 = "monsters attacked me, but their mage blasted down these rocks...now i am stuck, please help!!!",
@@ -55,7 +58,8 @@ class NpcDialogProvider @Inject constructor() {
                         ))
                     )
                 } else {
-                    // Player doesn't have dynamite yet
+                    // Player doesn't have dynamite yet or hasn't talked to Sandman
+                    android.util.Log.d("NpcDialogProvider", "Showing basic boatman dialog (no dynamite option)")
                     Dialog(
                         question1 = "what happened??",
                         answer1 = "monsters attacked me, but their mage blasted down these rocks...now i am stuck, please help!!!",
@@ -136,6 +140,8 @@ class NpcDialogProvider @Inject constructor() {
      */
     private fun getSandmanDialog(gameState: GameState): Dialog {
         val status = gameState.storyStatus
+
+        android.util.Log.d("NpcDialogProvider", "Sandman dialog - Story status: $status")
 
         return when {
             // Early game
