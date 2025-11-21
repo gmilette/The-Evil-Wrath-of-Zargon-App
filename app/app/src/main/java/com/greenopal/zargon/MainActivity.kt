@@ -117,9 +117,10 @@ class MainActivity : ComponentActivity() {
                             val saveSlots = remember { saveRepository.getAllSaves() }
                             TitleScreen(
                                 saveSlots = saveSlots,
-                                onNewGame = {
+                                onNewGame = { slot ->
                                     // Reset to new game state and start exploration
-                                    viewModel.newGame()
+                                    android.util.Log.d("MainActivity", "Starting new game in slot $slot")
+                                    viewModel.newGame(slot)
                                     isExplorationMode = true
                                     screenState = ScreenState.MAP
                                 },
@@ -418,8 +419,8 @@ class MainActivity : ComponentActivity() {
                                 gameState = gameState,
                                 onSaveGame = { stateToSave ->
                                     // Save the current state from healer (including updated HP/MP)
-                                    android.util.Log.d("MainActivity", "Saving game - HP: ${stateToSave.character.currentDP}/${stateToSave.character.maxDP}, MP: ${stateToSave.character.currentMP}/${stateToSave.character.maxMP}")
-                                    saveRepository.saveGame(stateToSave, 1)
+                                    android.util.Log.d("MainActivity", "Saving game to slot ${stateToSave.saveSlot} - HP: ${stateToSave.character.currentDP}/${stateToSave.character.maxDP}, MP: ${stateToSave.character.currentMP}/${stateToSave.character.maxMP}")
+                                    saveRepository.saveGame(stateToSave, stateToSave.saveSlot)
                                 },
                                 onHealerExit = { updatedState ->
                                     // Return player to where they were before entering
@@ -440,9 +441,9 @@ class MainActivity : ComponentActivity() {
                                 gameState = gameState,
                                 onSaveGame = { stateToSave ->
                                     // Save the current state from fountain (including updated HP/MP)
-                                    android.util.Log.d("MainActivity", "Saving game at fountain - Position: World (${stateToSave.worldX}, ${stateToSave.worldY}), Char (${stateToSave.characterX}, ${stateToSave.characterY})")
+                                    android.util.Log.d("MainActivity", "Saving game to slot ${stateToSave.saveSlot} at fountain - Position: World (${stateToSave.worldX}, ${stateToSave.worldY}), Char (${stateToSave.characterX}, ${stateToSave.characterY})")
                                     android.util.Log.d("MainActivity", "Saving game - HP: ${stateToSave.character.currentDP}/${stateToSave.character.maxDP}, MP: ${stateToSave.character.currentMP}/${stateToSave.character.maxMP}")
-                                    saveRepository.saveGame(stateToSave, 1)
+                                    saveRepository.saveGame(stateToSave, stateToSave.saveSlot)
                                 },
                                 onFountainExit = { updatedState ->
                                     // Return player to where they were before entering

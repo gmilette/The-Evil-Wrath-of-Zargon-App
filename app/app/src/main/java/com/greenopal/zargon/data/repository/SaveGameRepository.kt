@@ -24,7 +24,7 @@ class SaveGameRepository @Inject constructor(
     private val sharedPrefs = context.getSharedPreferences("zargon_saves", Context.MODE_PRIVATE)
 
     /**
-     * Save game to a slot (1-3)
+     * Save game to a slot (1-4)
      */
     fun saveGame(gameState: GameState, slot: Int = 1): Boolean {
         return try {
@@ -100,7 +100,7 @@ class SaveGameRepository @Inject constructor(
      * Get all save slots with metadata
      */
     fun getAllSaves(): List<SaveSlotInfo> {
-        return (1..3).map { slot ->
+        return (1..4).map { slot ->
             SaveSlotInfo(
                 slot = slot,
                 exists = hasSave(slot),
