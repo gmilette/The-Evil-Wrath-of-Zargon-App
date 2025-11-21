@@ -66,13 +66,6 @@ fun TitleScreen(
                     textAlign = TextAlign.Center
                 )
 
-                Text(
-                    text = "A Classic QBASIC Adventure",
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.secondary,
-                    textAlign = TextAlign.Center
-                )
-
                 Spacer(modifier = Modifier.height(24.dp))
 
                 // New Game button
@@ -115,16 +108,6 @@ fun TitleScreen(
                         }
                     }
                 }
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                // Credits
-                Text(
-                    text = "Original Game by Snappahed Software 98\nAndroid Port 2024",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = Color.Gray,
-                    textAlign = TextAlign.Center
-                )
             }
         }
     }
