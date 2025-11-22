@@ -33,6 +33,7 @@ import com.greenopal.zargon.domain.graphics.Sprite
 import com.greenopal.zargon.domain.graphics.SpriteParser
 import com.greenopal.zargon.domain.graphics.TileParser
 import com.greenopal.zargon.domain.story.NpcDialogProvider
+import com.greenopal.zargon.domain.story.StoryProgressionChecker
 import com.greenopal.zargon.ui.components.SpriteView
 import com.greenopal.zargon.ui.components.StatsCard
 import com.greenopal.zargon.ui.screens.BattleScreen
@@ -307,13 +308,15 @@ class MainActivity : ComponentActivity() {
                                                 updatedState.updateStory(storyAction.newStatus)
                                             }
                                             is StoryAction.GiveItem -> {
-                                                updatedState.addItem(
+                                                val stateWithItem = updatedState.addItem(
                                                     com.greenopal.zargon.data.models.Item(
                                                         name = storyAction.itemName,
                                                         description = "Story item",
                                                         type = com.greenopal.zargon.data.models.ItemType.KEY_ITEM
                                                     )
                                                 )
+                                                // Check if story should auto-advance
+                                                StoryProgressionChecker.checkAndAdvanceStory(stateWithItem)
                                             }
                                             is StoryAction.TakeItem -> {
                                                 // Remove item from inventory
@@ -336,7 +339,7 @@ class MainActivity : ComponentActivity() {
                                                 updatedState.updateCharacter(healedCharacter)
                                             }
                                             is StoryAction.BuildBoat -> {
-                                                updatedState
+                                                val stateWithShip = updatedState
                                                     .updateStory(5.5f)
                                                     .addItem(
                                                         com.greenopal.zargon.data.models.Item(
@@ -345,22 +348,28 @@ class MainActivity : ComponentActivity() {
                                                             type = com.greenopal.zargon.data.models.ItemType.KEY_ITEM
                                                         )
                                                     )
+                                                // Check if story should auto-advance
+                                                StoryProgressionChecker.checkAndAdvanceStory(stateWithShip)
                                             }
                                             is StoryAction.ResurrectBoatman -> {
                                                 updatedState.updateStory(5.0f)
                                             }
                                             is StoryAction.MultiAction -> {
                                                 // Process multiple actions in sequence
-                                                storyAction.actions.fold(updatedState) { currentState, action ->
+                                                val finalMultiState = storyAction.actions.fold(updatedState) { currentState, action ->
                                                     when (action) {
                                                         is StoryAction.AdvanceStory -> currentState.updateStory(action.newStatus)
-                                                        is StoryAction.GiveItem -> currentState.addItem(
-                                                            com.greenopal.zargon.data.models.Item(
-                                                                name = action.itemName,
-                                                                description = "Story item",
-                                                                type = com.greenopal.zargon.data.models.ItemType.KEY_ITEM
+                                                        is StoryAction.GiveItem -> {
+                                                            val withItem = currentState.addItem(
+                                                                com.greenopal.zargon.data.models.Item(
+                                                                    name = action.itemName,
+                                                                    description = "Story item",
+                                                                    type = com.greenopal.zargon.data.models.ItemType.KEY_ITEM
+                                                                )
                                                             )
-                                                        )
+                                                            // Check story progression after giving item
+                                                            StoryProgressionChecker.checkAndAdvanceStory(withItem)
+                                                        }
                                                         is StoryAction.TakeItem -> {
                                                             val itemToRemove = currentState.inventory.find {
                                                                 it.name.equals(action.itemName, ignoreCase = true)
@@ -374,13 +383,19 @@ class MainActivity : ComponentActivity() {
                                                             )
                                                             currentState.updateCharacter(healedChar)
                                                         }
-                                                        is StoryAction.BuildBoat -> currentState.updateStory(5.5f).addItem(
-                                                            com.greenopal.zargon.data.models.Item(name = "ship", description = "Allows travel on the river", type = com.greenopal.zargon.data.models.ItemType.KEY_ITEM)
-                                                        )
+                                                        is StoryAction.BuildBoat -> {
+                                                            val withShip = currentState.updateStory(5.5f).addItem(
+                                                                com.greenopal.zargon.data.models.Item(name = "ship", description = "Allows travel on the river", type = com.greenopal.zargon.data.models.ItemType.KEY_ITEM)
+                                                            )
+                                                            // Check story progression after building boat
+                                                            StoryProgressionChecker.checkAndAdvanceStory(withShip)
+                                                        }
                                                         is StoryAction.ResurrectBoatman -> currentState.updateStory(5.0f)
                                                         else -> currentState
                                                     }
                                                 }
+                                                // Final story progression check after all multi-actions
+                                                StoryProgressionChecker.checkAndAdvanceStory(finalMultiState)
                                             }
                                             else -> updatedState
                                         }

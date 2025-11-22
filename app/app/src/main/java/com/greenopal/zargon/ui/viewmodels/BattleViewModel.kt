@@ -11,6 +11,7 @@ import com.greenopal.zargon.domain.battle.MonsterSelector
 import com.greenopal.zargon.domain.progression.BattleRewards
 import com.greenopal.zargon.domain.progression.LevelingSystem
 import com.greenopal.zargon.domain.progression.RewardSystem
+import com.greenopal.zargon.domain.story.StoryProgressionChecker
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -397,6 +398,10 @@ class BattleViewModel @Inject constructor(
         // Add item to inventory if dropped
         rewards?.itemDropped?.let { item ->
             updatedState = updatedState.addItem(item)
+            android.util.Log.d("BattleViewModel", "Item added: ${item.name} - Checking story progression")
+
+            // Check if story should auto-advance based on inventory
+            updatedState = StoryProgressionChecker.checkAndAdvanceStory(updatedState)
         }
 
         // Update next level XP if leveled up
