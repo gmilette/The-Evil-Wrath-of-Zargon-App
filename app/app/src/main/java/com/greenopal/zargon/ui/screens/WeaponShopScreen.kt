@@ -175,6 +175,7 @@ fun WeaponShopScreen(
                     ShopScreen.WEAPONS -> WeaponList(
                         mood = mood,
                         currentGold = updatedGameState.character.gold,
+                        currentWeaponStatus = updatedGameState.character.weaponStatus,
                         onPurchase = { weapon ->
                             val cost = (weapon.basePrice * mood.priceMultiplier).toInt()
                             if (updatedGameState.character.gold >= cost) {
@@ -197,6 +198,7 @@ fun WeaponShopScreen(
                     ShopScreen.ARMOR -> ArmorList(
                         mood = mood,
                         currentGold = updatedGameState.character.gold,
+                        currentArmorStatus = updatedGameState.character.armorStatus,
                         onPurchase = { armor ->
                             val cost = (armor.basePrice * mood.priceMultiplier).toInt()
                             if (updatedGameState.character.gold >= cost) {
@@ -266,6 +268,7 @@ private fun MainMenu(
 private fun WeaponList(
     mood: ShopMood,
     currentGold: Int,
+    currentWeaponStatus: Int,
     onPurchase: (Weapon) -> Unit,
     onBack: () -> Unit
 ) {
@@ -277,7 +280,13 @@ private fun WeaponList(
 
         Weapon.values().forEach { weapon ->
             val adjustedPrice = (weapon.basePrice * mood.priceMultiplier).toInt()
-            WeaponItem(weapon, adjustedPrice, currentGold >= adjustedPrice) {
+            val isEquipped = weapon.ordinal == currentWeaponStatus
+            WeaponItem(
+                weapon = weapon,
+                price = adjustedPrice,
+                canAfford = currentGold >= adjustedPrice,
+                isEquipped = isEquipped
+            ) {
                 onPurchase(weapon)
             }
         }
@@ -300,17 +309,25 @@ private fun WeaponItem(
     weapon: Weapon,
     price: Int,
     canAfford: Boolean,
+    isEquipped: Boolean,
     onPurchase: () -> Unit
 ) {
     Button(
         onClick = onPurchase,
         modifier = Modifier.fillMaxWidth(),
-        enabled = canAfford,
+        enabled = canAfford && !isEquipped,
         colors = ButtonDefaults.buttonColors(
-            containerColor = if (canAfford) Color(0xFF1976D2) else Color(0xFF424242),
+            containerColor = when {
+                isEquipped -> Color(0xFF4CAF50) // Green for equipped
+                canAfford -> Color(0xFF1976D2)   // Blue for affordable
+                else -> Color(0xFF424242)        // Dark gray for too expensive
+            },
             contentColor = Color.White,
-            disabledContainerColor = Color(0xFF424242),
-            disabledContentColor = Color(0xFF888888)
+            disabledContainerColor = when {
+                isEquipped -> Color(0xFF4CAF50) // Keep green when equipped
+                else -> Color(0xFF424242)
+            },
+            disabledContentColor = Color.White
         )
     ) {
         Row(
@@ -318,14 +335,20 @@ private fun WeaponItem(
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Text(
-                text = "${weapon.displayName} (+${weapon.attackBonus} AP)",
+                text = if (isEquipped) {
+                    "${weapon.displayName} (+${weapon.attackBonus} AP) [EQUIPPED]"
+                } else {
+                    "${weapon.displayName} (+${weapon.attackBonus} AP)"
+                },
                 color = Color.White
             )
-            Text(
-                text = "${price}g",
-                color = Color(0xFFFFD700),
-                fontWeight = FontWeight.Bold
-            )
+            if (!isEquipped) {
+                Text(
+                    text = "${price}g",
+                    color = Color(0xFFFFD700),
+                    fontWeight = FontWeight.Bold
+                )
+            }
         }
     }
 }
@@ -334,6 +357,7 @@ private fun WeaponItem(
 private fun ArmorList(
     mood: ShopMood,
     currentGold: Int,
+    currentArmorStatus: Int,
     onPurchase: (Armor) -> Unit,
     onBack: () -> Unit
 ) {
@@ -345,7 +369,13 @@ private fun ArmorList(
 
         Armor.values().forEach { armor ->
             val adjustedPrice = (armor.basePrice * mood.priceMultiplier).toInt()
-            ArmorItem(armor, adjustedPrice, currentGold >= adjustedPrice) {
+            val isEquipped = armor.ordinal == currentArmorStatus
+            ArmorItem(
+                armor = armor,
+                price = adjustedPrice,
+                canAfford = currentGold >= adjustedPrice,
+                isEquipped = isEquipped
+            ) {
                 onPurchase(armor)
             }
         }
@@ -368,17 +398,25 @@ private fun ArmorItem(
     armor: Armor,
     price: Int,
     canAfford: Boolean,
+    isEquipped: Boolean,
     onPurchase: () -> Unit
 ) {
     Button(
         onClick = onPurchase,
         modifier = Modifier.fillMaxWidth(),
-        enabled = canAfford,
+        enabled = canAfford && !isEquipped,
         colors = ButtonDefaults.buttonColors(
-            containerColor = if (canAfford) Color(0xFF1976D2) else Color(0xFF424242),
+            containerColor = when {
+                isEquipped -> Color(0xFF4CAF50) // Green for equipped
+                canAfford -> Color(0xFF1976D2)   // Blue for affordable
+                else -> Color(0xFF424242)        // Dark gray for too expensive
+            },
             contentColor = Color.White,
-            disabledContainerColor = Color(0xFF424242),
-            disabledContentColor = Color(0xFF888888)
+            disabledContainerColor = when {
+                isEquipped -> Color(0xFF4CAF50) // Keep green when equipped
+                else -> Color(0xFF424242)
+            },
+            disabledContentColor = Color.White
         )
     ) {
         Row(
@@ -386,14 +424,20 @@ private fun ArmorItem(
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Text(
-                text = "${armor.displayName} (+${armor.defenseBonus} DP)",
+                text = if (isEquipped) {
+                    "${armor.displayName} (+${armor.defenseBonus} DP) [EQUIPPED]"
+                } else {
+                    "${armor.displayName} (+${armor.defenseBonus} DP)"
+                },
                 color = Color.White
             )
-            Text(
-                text = "${price}g",
-                color = Color(0xFFFFD700),
-                fontWeight = FontWeight.Bold
-            )
+            if (!isEquipped) {
+                Text(
+                    text = "${price}g",
+                    color = Color(0xFFFFD700),
+                    fontWeight = FontWeight.Bold
+                )
+            }
         }
     }
 }
