@@ -129,6 +129,8 @@ class MapViewModel @Inject constructor(
             targetTile == null -> false  // Out of bounds
             // Deep water requires ship (not walkable without it)
             targetTile == TileType.WATER -> hasShip
+            // Shallow water requires ship (not walkable without it)
+            targetTile == TileType.SHALLOW_WATER -> hasShip
             // All other tiles (rocks, trees, graves, etc.) use standard walkability
             else -> targetTile.isWalkable
         }
@@ -224,6 +226,7 @@ class MapViewModel @Inject constructor(
         val canTransition = when {
             targetTile == null -> false
             targetTile == TileType.WATER -> hasShip
+            targetTile == TileType.SHALLOW_WATER -> hasShip
             else -> targetTile.isWalkable
         }
 
