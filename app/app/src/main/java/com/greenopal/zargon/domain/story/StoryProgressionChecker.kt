@@ -13,47 +13,51 @@ object StoryProgressionChecker {
 
     /**
      * Check and update story status based on inventory
-     * Based on QBASIC lines 3194-3201
+     * Based on QBASIC lines 3194-3201, but made inventory-dependent
+     * rather than strictly sequential.
+     *
+     * Story progression is now based on what items you have, not the order you got them.
      */
     fun checkAndAdvanceStory(gameState: GameState): GameState {
         val status = gameState.storyStatus
         var newStatus = status
 
-        // QBASIC line 3198: IF items(7) = "trapped soul" AND storystatus = 4 THEN storystatus = 4.3
-        if (gameState.hasItem("trapped soul") && status == 4.0f) {
-            newStatus = 4.3f
-        }
-
-        // QBASIC line 3199: IF items(7) = "trapped soul(used)" AND storystatus = 4.3 THEN storystatus = 5
-        // Note: This is handled by Necromancer dialog's ResurrectBoatman action
-
-        // QBASIC line 3200: IF items(8) = "ship" AND storystatus = 5 THEN storystatus = 5.5
-        if (gameState.hasItem("ship") && status == 5.0f) {
-            newStatus = 5.5f
-        }
-
-        // QBASIC line 3195: IF items(3) = "boat list" AND storystatus = 3 THEN storystatus = 3.2
-        // Note: "boat list" renamed to "boat plans" in Android version
-        if (gameState.hasItem("boat plans") && status == 3.0f) {
-            newStatus = 3.2f
-        }
-
-        // QBASIC line 3196: IF items(4) <> "" AND items(5) <> "" AND items(6) <> "" AND storystatus = 3.2 THEN storystatus = 3.8
+        // Check inventory items
+        val hasBoatPlans = gameState.hasItem("boat plans")
         val hasRutter = gameState.hasItem("rutter")
         val hasCloth = gameState.hasItem("cloth")
         val hasWood = gameState.hasItem("wood")
-        if (hasRutter && hasCloth && hasWood && status == 3.2f) {
+        val hasAllBoatMaterials = hasRutter && hasCloth && hasWood
+        val hasTrappedSoul = gameState.hasItem("trapped soul")
+        val hasShip = gameState.hasItem("ship")
+
+        // Determine appropriate story level based on inventory
+        // Work backwards from highest to lowest to find the right level
+
+        // If you have ship, you should be at 5.5 (unless you've progressed further)
+        if (hasShip && status < 5.5f) {
+            newStatus = 5.5f
+        }
+        // If you have trapped soul, you should be at least 4.3 (ready for necromancer)
+        else if (hasTrappedSoul && status < 4.3f) {
+            newStatus = 4.3f
+        }
+        // If you have boat plans + all materials, you should be at least 4.0 (need necromancer)
+        else if (hasBoatPlans && hasAllBoatMaterials && status < 4.0f) {
+            newStatus = 4.0f
+        }
+        // If you have all boat materials (but no plans yet), you should be at least 3.8
+        else if (hasAllBoatMaterials && status < 3.8f) {
             newStatus = 3.8f
         }
-
-        // QBASIC line 3197: IF items(3) = "boat plans" AND storystatus = 3.8 THEN storystatus = 4
-        if (gameState.hasItem("boat plans") && status == 3.8f) {
-            newStatus = 4.0f
+        // If you have boat plans (but not all materials), you should be at least 3.2
+        else if (hasBoatPlans && status < 3.2f) {
+            newStatus = 3.2f
         }
 
         // Return updated game state if status changed
         return if (newStatus != status) {
-            android.util.Log.d("StoryProgressionChecker", "Auto-advancing story from $status to $newStatus")
+            android.util.Log.d("StoryProgressionChecker", "Auto-advancing story from $status to $newStatus based on inventory")
             gameState.copy(storyStatus = newStatus)
         } else {
             gameState
@@ -62,14 +66,9 @@ object StoryProgressionChecker {
 
     /**
      * Specific check for when trapped soul is obtained
-     * This ensures story advances immediately when soul is picked up
+     * Now redundant with inventory-based checking, but kept for backwards compatibility
      */
     fun checkTrappedSoulProgress(gameState: GameState): GameState {
-        // If player just got trapped soul and is at status 4.0, advance to 4.3
-        if (gameState.hasItem("trapped soul") && gameState.storyStatus == 4.0f) {
-            android.util.Log.d("StoryProgressionChecker", "Trapped soul obtained - advancing from 4.0 to 4.3")
-            return gameState.copy(storyStatus = 4.3f)
-        }
-        return gameState
+        return checkAndAdvanceStory(gameState)
     }
 }

@@ -2,6 +2,7 @@ package com.greenopal.zargon.data.repository
 
 import android.content.Context
 import com.greenopal.zargon.data.models.GameState
+import com.greenopal.zargon.domain.story.StoryProgressionChecker
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -56,13 +57,20 @@ class SaveGameRepository @Inject constructor(
         return try {
             android.util.Log.d("SaveGameRepository", "Loading game from slot $slot")
             val jsonString = sharedPrefs.getString("save_slot_$slot", null) ?: return null
-            val gameState = json.decodeFromString<GameState>(jsonString)
+            val loadedState = json.decodeFromString<GameState>(jsonString)
 
             android.util.Log.d("SaveGameRepository", "Game loaded successfully:")
-            android.util.Log.d("SaveGameRepository", "  Story Status: ${gameState.storyStatus}")
-            android.util.Log.d("SaveGameRepository", "  Position: Map ${gameState.worldX}${gameState.worldY} at (${gameState.characterX}, ${gameState.characterY})")
-            android.util.Log.d("SaveGameRepository", "  HP: ${gameState.character.currentDP}/${gameState.character.maxDP}, MP: ${gameState.character.currentMP}/${gameState.character.maxMP}")
-            android.util.Log.d("SaveGameRepository", "  Inventory (${gameState.inventory.size} items): ${gameState.inventory.map { it.name }}")
+            android.util.Log.d("SaveGameRepository", "  Story Status (saved): ${loadedState.storyStatus}")
+            android.util.Log.d("SaveGameRepository", "  Position: Map ${loadedState.worldX}${loadedState.worldY} at (${loadedState.characterX}, ${loadedState.characterY})")
+            android.util.Log.d("SaveGameRepository", "  HP: ${loadedState.character.currentDP}/${loadedState.character.maxDP}, MP: ${loadedState.character.currentMP}/${loadedState.character.maxMP}")
+            android.util.Log.d("SaveGameRepository", "  Inventory (${loadedState.inventory.size} items): ${loadedState.inventory.map { it.name }}")
+
+            // Auto-advance story based on inventory (in case items were obtained out of order)
+            val gameState = StoryProgressionChecker.checkAndAdvanceStory(loadedState)
+
+            if (gameState.storyStatus != loadedState.storyStatus) {
+                android.util.Log.d("SaveGameRepository", "  Story Status (corrected): ${gameState.storyStatus}")
+            }
 
             gameState
         } catch (e: Exception) {
