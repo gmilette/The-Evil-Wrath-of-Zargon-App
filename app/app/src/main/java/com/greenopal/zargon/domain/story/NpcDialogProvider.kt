@@ -225,7 +225,9 @@ class NpcDialogProvider @Inject constructor() {
      */
     private fun getNecromancerDialog(gameState: GameState): Dialog {
         val status = gameState.storyStatus
-        val hasSoul = gameState.hasItem("soul")
+        val hasSoul = gameState.hasItem("trapped soul")
+
+        android.util.Log.d("NpcDialogProvider", "Necromancer dialog - Story status: $status, Has trapped soul: $hasSoul")
 
         return when {
             status < 4f || status >= 5f -> {
@@ -240,7 +242,7 @@ class NpcDialogProvider @Inject constructor() {
             }
 
             status >= 4f && status < 5f -> {
-                if (status == 4.3f && hasSoul) {
+                if (hasSoul) {
                     Dialog(
                         question1 = "hello mr. necromancer, i have to ask you for something",
                         answer1 = "WHAT DO YOU WANT? YOU PATHETIC MORTALS?",
@@ -248,7 +250,10 @@ class NpcDialogProvider @Inject constructor() {
                         answer2 = "WHAT?.. you are asking quite a favor, you know how many pathetic creatures come to me and ask me that same question? Well i am a nice guy, so OCCASIONALLY i will do it, but ya see i aint gunna do it no more, it has made me too weak. NO.. the answer is NO!",
                         question3 = "(give him the soul)",
                         answer3 = "ahhhhh yes, fresh blood...there, i will restore your friend..hopefully he'll do the same for you when you die MAHAHAHAHAAA!!",
-                        storyAction = StoryAction.ResurrectBoatman
+                        storyAction = StoryAction.MultiAction(listOf(
+                            StoryAction.TakeItem("trapped soul"),
+                            StoryAction.AdvanceStory(5.0f)
+                        ))
                     )
                 } else {
                     Dialog(
