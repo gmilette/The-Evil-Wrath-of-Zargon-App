@@ -33,6 +33,7 @@ fun TitleScreen(
     saveSlots: List<SaveSlotInfo>,
     onNewGame: (Int) -> Unit,  // Now takes slot number
     onContinue: (Int) -> Unit,
+    onShowHints: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Box(
@@ -123,6 +124,24 @@ fun TitleScreen(
                             }
                         }
                     }
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Hints button
+                Button(
+                    onClick = onShowHints,
+                    modifier = Modifier.fillMaxWidth(0.7f),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFFFFD700)
+                    )
+                ) {
+                    Text(
+                        text = "MAP GUIDE & HINTS",
+                        style = MaterialTheme.typography.titleSmall,
+                        color = Color.Black,
+                        fontWeight = FontWeight.Bold
+                    )
                 }
             }
         }

@@ -41,6 +41,7 @@ import com.greenopal.zargon.ui.screens.DialogScreen
 import com.greenopal.zargon.ui.screens.FountainScreen
 import com.greenopal.zargon.ui.screens.GameOverScreen
 import com.greenopal.zargon.ui.screens.HealerScreen
+import com.greenopal.zargon.ui.screens.HintsScreen
 import com.greenopal.zargon.ui.screens.MapScreen
 import com.greenopal.zargon.ui.screens.MenuScreen
 import com.greenopal.zargon.ui.screens.QuestProgressScreen
@@ -55,7 +56,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
 enum class ScreenState {
-    TITLE, MENU, MAP, BATTLE, STATS, QUEST_PROGRESS, DIALOG, WEAPON_SHOP, HEALER, FOUNTAIN, GAME_OVER, VICTORY
+    TITLE, MENU, MAP, BATTLE, STATS, QUEST_PROGRESS, DIALOG, WEAPON_SHOP, HEALER, FOUNTAIN, GAME_OVER, VICTORY, HINTS
 }
 
 @AndroidEntryPoint
@@ -132,6 +133,9 @@ class MainActivity : ComponentActivity() {
                                         isExplorationMode = true
                                         screenState = ScreenState.MAP
                                     }
+                                },
+                                onShowHints = {
+                                    screenState = ScreenState.HINTS
                                 },
                                 modifier = Modifier
                                     .fillMaxSize()
@@ -498,6 +502,17 @@ class MainActivity : ComponentActivity() {
                                     viewModel.updateGameState(updatedGameState)
                                     // Return to map screen
                                     screenState = ScreenState.MAP
+                                },
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .padding(innerPadding)
+                            )
+                        }
+
+                        ScreenState.HINTS -> {
+                            HintsScreen(
+                                onBack = {
+                                    screenState = ScreenState.TITLE
                                 },
                                 modifier = Modifier
                                     .fillMaxSize()
