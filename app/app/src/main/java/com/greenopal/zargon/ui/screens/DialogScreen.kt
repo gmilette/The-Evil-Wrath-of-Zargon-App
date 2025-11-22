@@ -101,10 +101,14 @@ fun DialogScreen(
                         onClick = { currentAnswer = null },
                         modifier = Modifier.fillMaxWidth(),
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = MaterialTheme.colorScheme.secondary
+                            containerColor = MaterialTheme.colorScheme.secondary,
+                            contentColor = Color.White
                         )
                     ) {
-                        Text("Continue...")
+                        Text(
+                            text = "Continue...",
+                            color = Color.White
+                        )
                     }
                 } else {
                     // Question buttons
