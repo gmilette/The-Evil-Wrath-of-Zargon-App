@@ -122,7 +122,7 @@ fun DialogScreen(
                             modifier = Modifier.fillMaxWidth(),
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = if (dialog.action1 != null) {
-                                    MaterialTheme.colorScheme.tertiary
+                                    Color(0xFF1565C0) // Dark blue for action buttons
                                 } else {
                                     MaterialTheme.colorScheme.primary
                                 },
@@ -147,7 +147,7 @@ fun DialogScreen(
                             modifier = Modifier.fillMaxWidth(),
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = if (dialog.action2 != null) {
-                                    MaterialTheme.colorScheme.tertiary
+                                    Color(0xFF1565C0) // Dark blue for action buttons
                                 } else {
                                     MaterialTheme.colorScheme.primary
                                 },
@@ -172,7 +172,7 @@ fun DialogScreen(
                             modifier = Modifier.fillMaxWidth(),
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = if (dialog.storyAction != null) {
-                                    MaterialTheme.colorScheme.tertiary
+                                    Color(0xFF1565C0) // Dark blue for action buttons
                                 } else {
                                     MaterialTheme.colorScheme.primary
                                 },
