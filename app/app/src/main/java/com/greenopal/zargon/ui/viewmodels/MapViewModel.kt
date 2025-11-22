@@ -127,8 +127,8 @@ class MapViewModel @Inject constructor(
         // in a specific story event (rescuing the boatman in ZARGON.BAS:2026-2046)
         val canMove = when {
             targetTile == null -> false  // Out of bounds
-            // Deep water requires ship (not walkable without it)
-            targetTile == TileType.WATER -> hasShip
+            // Deep water is never walkable (too deep even for ship)
+            targetTile == TileType.WATER -> false
             // Shallow water requires ship (not walkable without it)
             targetTile == TileType.SHALLOW_WATER -> hasShip
             // All other tiles (rocks, trees, graves, etc.) use standard walkability
@@ -147,10 +147,9 @@ class MapViewModel @Inject constructor(
         }
 
         // Move player
-        // Update inShip status: true when on deep water OR shallow water with ship
-        val isOnDeepWater = targetTile == TileType.WATER
+        // Update inShip status: true only when on shallow water with ship
         val isOnShallowWater = targetTile == TileType.SHALLOW_WATER
-        val shouldBeInShip = (isOnDeepWater || (isOnShallowWater && hasShip))
+        val shouldBeInShip = (isOnShallowWater && hasShip)
 
         val newState = state.moveTo(newX, newY).copy(inShip = shouldBeInShip)
         _gameState.value = newState
@@ -225,7 +224,9 @@ class MapViewModel @Inject constructor(
         // Check walkability using same logic as normal movement
         val canTransition = when {
             targetTile == null -> false
-            targetTile == TileType.WATER -> hasShip
+            // Deep water is never walkable (too deep even for ship)
+            targetTile == TileType.WATER -> false
+            // Shallow water requires ship
             targetTile == TileType.SHALLOW_WATER -> hasShip
             else -> targetTile.isWalkable
         }
