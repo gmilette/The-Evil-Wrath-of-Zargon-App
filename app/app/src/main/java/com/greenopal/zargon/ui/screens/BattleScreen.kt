@@ -365,7 +365,8 @@ private fun MessageBox(
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
         ) {
-            messages.forEach { message ->
+            // Display messages in reverse order (latest at top)
+            messages.asReversed().forEach { message ->
                 Text(
                     text = message,
                     style = MaterialTheme.typography.bodySmall,
