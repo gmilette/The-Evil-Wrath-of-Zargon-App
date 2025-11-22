@@ -29,6 +29,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.greenopal.zargon.data.models.GameState
+import com.greenopal.zargon.data.models.Item
+import com.greenopal.zargon.data.models.ItemType
 import kotlinx.coroutines.delay
 
 /**
@@ -38,6 +40,7 @@ import kotlinx.coroutines.delay
 fun VictoryScreen(
     finalGameState: GameState,
     onReturnToTitle: () -> Unit,
+    onReturnToGEF: (GameState) -> Unit,
     modifier: Modifier = Modifier
 ) {
     var showText by remember { mutableStateOf(false) }
@@ -146,12 +149,48 @@ fun VictoryScreen(
 
                     Spacer(modifier = Modifier.height(16.dp))
 
-                    // Return button
+                    // Return to GEF button
+                    Button(
+                        onClick = {
+                            // Warp to healer location (Map 2,4 at coordinates 15,8)
+                            // Add "Zargon" trophy item to inventory
+                            val zargonTrophy = Item(
+                                name = "Zargon",
+                                description = "Trophy of your victory over the evil overlord",
+                                type = ItemType.KEY_ITEM
+                            )
+
+                            val updatedState = finalGameState
+                                .copy(
+                                    worldX = 2,
+                                    worldY = 4,
+                                    characterX = 15,
+                                    characterY = 8
+                                )
+                                .addItem(zargonTrophy)
+
+                            onReturnToGEF(updatedState)
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = Color(0xFF4CAF50) // Green for continue
+                        )
+                    ) {
+                        Text(
+                            text = "Return to GEF",
+                            style = MaterialTheme.typography.titleMedium,
+                            color = Color.White
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    // Return to title button
                     Button(
                         onClick = onReturnToTitle,
                         modifier = Modifier.fillMaxWidth(),
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = MaterialTheme.colorScheme.primary
+                            containerColor = MaterialTheme.colorScheme.secondary
                         )
                     ) {
                         Text(

@@ -493,6 +493,12 @@ class MainActivity : ComponentActivity() {
                                     viewModel.newGame()
                                     screenState = ScreenState.TITLE
                                 },
+                                onReturnToGEF = { updatedGameState ->
+                                    // Update game state with new position and Zargon trophy
+                                    viewModel.updateGameState(updatedGameState)
+                                    // Return to map screen
+                                    screenState = ScreenState.MAP
+                                },
                                 modifier = Modifier
                                     .fillMaxSize()
                                     .padding(innerPadding)
