@@ -21,7 +21,7 @@ enum class TileType(
 
     // Water
     WATER("w", Color(0xFF0000AA), isWalkable = false),
-    SHALLOW_WATER("4", Color(0xFF5555FF), isWalkable = true, encounterRate = 0.05f),
+    SHALLOW_WATER("4", Color(0xFF5555FF), isWalkable = false),
 
     // Ground
     GRASS("1", Color(0xFF55FF55), isWalkable = true, encounterRate = 0.1f),
