@@ -109,6 +109,7 @@ private fun MapGuideContent() {
         QuestItem("WOOD", "Map 22 (2,2)", "(10, 4)", "Ship hull material")
         QuestItem("DEAD WOOD", "Map 14 (1,4)", "(3, 8)", "Boat construction material")
         QuestItem("CLOTH", "Map 13 (1,3)", "(7, 6)", "Sail material")
+        QuestItem("TRAPPED SOUL", "Map 24 (2,4)", "Near Boatman hut", "Appears after giving all materials to Boatman")
 
         SectionHeader("KEY LOCATIONS")
         LocationItem("Healer", "Map 24 (2,4)", "Paid healing + Save")
@@ -136,10 +137,10 @@ private fun MapGuideContent() {
                • Dead Wood (Map 14 at 3,8)
                • Cloth (Map 13 at 7,6)
             5. Give materials to Boatman → Get boat plans
-            6. Boatman dies → Collect trapped soul
+            6. Boatman dies! → SEARCH near his hut to find "trapped soul"
             7. Visit Mountain Jack (Map 43) → Learn about Necromancer
-            8. Visit Necromancer (Map 41) → Give soul
-            9. Return to Boatman → Get ship
+            8. Visit Necromancer (Map 41) → Give soul to resurrect Boatman
+            9. Return to Boatman (Map 24) → Get ship!
             10. Travel river to Castle Island (Map 32)
             11. Defeat ZARGON!
             """.trimIndent()
@@ -172,6 +173,8 @@ private fun MapGuideContent() {
             • Level up before exploring dangerous areas
             • Stock up on potions from Weapon Shop
             • Check Quest Progress in menu to track items
+            • IMPORTANT: After giving boat materials to Boatman,
+              SEARCH near his hut to find the "trapped soul"
             """.trimIndent()
         )
     }
