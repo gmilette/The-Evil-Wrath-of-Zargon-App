@@ -55,6 +55,8 @@ import com.greenopal.zargon.domain.map.GameMap
 import com.greenopal.zargon.domain.map.TileType
 import com.greenopal.zargon.ui.viewmodels.MapViewModel
 import com.greenopal.zargon.ui.viewmodels.TileInteraction
+import com.greenopal.zargon.ui.components.WorldMagicMenu
+import com.greenopal.zargon.domain.world.WorldSpell
 import javax.inject.Inject
 
 /**
@@ -76,6 +78,10 @@ fun MapScreen(
 ) {
     // State for found item dialog
     var foundItem by remember { mutableStateOf<Item?>(null) }
+
+    // State for spell casting
+    var showSpellMenu by remember { mutableStateOf(false) }
+    var spellResultMessage by remember { mutableStateOf<String?>(null) }
 
     // Preload tile bitmaps for better performance
     LaunchedEffect(tileBitmapCache) {
@@ -194,6 +200,9 @@ fun MapScreen(
                             foundItem = Item("", "Nothing found here", type = com.greenopal.zargon.data.models.ItemType.MISC)
                         }
                     },
+                    onCast = {
+                        showSpellMenu = true
+                    },
                     modifier = Modifier.fillMaxWidth()
                 )
             }
@@ -216,6 +225,52 @@ fun MapScreen(
             ItemFoundDialog(
                 item = foundItem!!,
                 onDismiss = { foundItem = null }
+            )
+        }
+
+        // Spell casting menu
+        if (showSpellMenu && currentGameState != null) {
+            WorldMagicMenu(
+                spellLevel = currentGameState!!.character.level,
+                currentMP = currentGameState!!.character.currentMP,
+                onSpellSelected = { spell ->
+                    val (updatedState, message) = spell.cast(currentGameState!!)
+                    viewModel.setGameState(updatedState)
+                    onPositionChanged(updatedState)
+                    showSpellMenu = false
+                    spellResultMessage = message
+                },
+                onCancel = { showSpellMenu = false }
+            )
+        }
+
+        // Spell result dialog
+        if (spellResultMessage != null) {
+            AlertDialog(
+                onDismissRequest = { spellResultMessage = null },
+                title = {
+                    Text(
+                        text = "Spell Cast",
+                        style = MaterialTheme.typography.titleLarge,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                },
+                text = {
+                    Text(
+                        text = spellResultMessage!!,
+                        style = MaterialTheme.typography.bodyLarge,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                },
+                confirmButton = {
+                    TextButton(onClick = { spellResultMessage = null }) {
+                        Text("OK")
+                    }
+                },
+                containerColor = MaterialTheme.colorScheme.surface,
+                tonalElevation = 6.dp
             )
         }
     }
@@ -514,6 +569,7 @@ private fun DrawScope.drawGrid(
 private fun MovementControls(
     onMove: (Direction) -> Unit,
     onSearch: () -> Unit,
+    onCast: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Card(
@@ -563,15 +619,30 @@ private fun MovementControls(
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            // Search button
-            Button(
-                onClick = onSearch,
-                modifier = Modifier.fillMaxWidth(0.7f),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.tertiary
-                )
+            // Search and Cast buttons
+            Row(
+                modifier = Modifier.fillMaxWidth(0.9f),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                Text("SEARCH")
+                Button(
+                    onClick = onSearch,
+                    modifier = Modifier.weight(1f),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.tertiary
+                    )
+                ) {
+                    Text("SEARCH")
+                }
+
+                Button(
+                    onClick = onCast,
+                    modifier = Modifier.weight(1f),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFF6A1B9A) // Purple for magic
+                    )
+                ) {
+                    Text("CAST")
+                }
             }
         }
     }
