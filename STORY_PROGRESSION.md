@@ -180,7 +180,7 @@ The game uses a `storyStatus` float value to track progression. This guide shows
 | Dynamite | Map 44 | (14, 6) | Used to blast through rocks trapping Boatman |
 | Dead Wood | Map 14 | (3, 8) | Boat construction material |
 | Rutter | Map 24 | (9, 1) | Navigation tool for ship |
-| Cloth | Map 13 | (7, 5) | Sail material for ship |
+| Cloth | Map 13 | (7, 6) | Sail material for ship |
 | Wood | Map 22 | (10, 4) | Ship hull material |
 | Soul | Graveyard (northeast) | TBD | Payment for Necromancer |
 

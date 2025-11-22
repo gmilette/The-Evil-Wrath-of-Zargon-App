@@ -51,7 +51,7 @@ The game world consists of 16 maps (4×4 grid) forming an 80×40 tile landscape.
    (Southwest)    (Forest-South)  (River-South)   (Mountain)
  ┌─────────────┼─────────────┼─────────────┼─────────────┐
  │ **CLOTH**   │   Dense     │    River    │ Mtn. Jack   │
- │  (7, 5)     │   Forest    │   & Water   │   (Hut-h)   │
+ │  (7, 6)     │   Forest    │   & Water   │   (Hut-h)   │
  │  Trees      │  (Monsters) │  (Shallow)  │ (Story 4.0+)│
  └─────────────┼─────────────┼─────────────┼─────────────┤
     MAP 14          MAP 24          MAP 34          MAP 44
@@ -108,7 +108,7 @@ The game world consists of 16 maps (4×4 grid) forming an 80×40 tile landscape.
    - Map 24: Rutter (9, 1)
    - Map 22: Wood (10, 4)
    - Map 14: Dead Wood (3, 8)
-   - Map 13: Cloth (7, 5)
+   - Map 13: Cloth (7, 6)
 6. **Late Game**: Map 41 - Necromancer for boat quest
 7. **Castle**: Map 11 - Final area (requires boat/ship)
 
@@ -234,7 +234,7 @@ The game world consists of 16 interconnected maps arranged in a 4×4 grid. Each 
 <tr>
 <td>
 <strong>Cloth Location</strong><br/>
-• <strong>CLOTH (7,5)</strong><br/>
+• <strong>CLOTH (7,6)</strong><br/>
 • Dense forest<br/>
 • Grass paths<br/>
 • Sandy areas south<br/>
@@ -324,7 +324,7 @@ The game world consists of 16 interconnected maps arranged in a 4×4 grid. Each 
 | **Rutter** | Map 24 (2,4) | (9, 1) | Navigation tool for ship |
 | **Wood** | Map 22 (2,2) | (10, 4) | Ship hull material |
 | **Dead Wood** | Map 14 (1,4) | (3, 8) | Boat construction material |
-| **Cloth** | Map 13 (1,3) | (7, 5) | Sail material |
+| **Cloth** | Map 13 (1,3) | (7, 6) | Sail material |
 
 ### NPC Locations Summary
 
@@ -347,7 +347,7 @@ Below are detailed ASCII maps for key locations with item spawn points.
 ## Map 13 - Cloth Location
 
 **World Coordinates:** (1, 3)
-**Item:** Cloth at position (7, 5)
+**Item:** Cloth at position (7, 6)
 **Spawn Position:** (0, 0)
 
 ```
@@ -357,8 +357,8 @@ Below are detailed ASCII maps for key locations with item spawn points.
   2: T  1  T  T  t  t  t  T  t  t  T  t  t  t  t  t  t  t  1  1
   3: T  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1
   4: T  1  T  T  T  t  t  t  T  T  1  t  t  t  t  t  t  t  1  1
-  5: t  1  T  T  T  t  1 [*] t  t  t  t  t  t  1  t  t  t  1  1
-  6: t  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1
+  5: t  1  T  T  T  t  1  t  t  t  t  t  t  t  1  t  t  t  1  1
+  6: t  1  1  1  1  1  1 [*] 1  1  1  1  1  1  1  1  1  1  1  1
   7: t  1  T  T  T  T  t  t  t  t  t  t  t  t  t  t  t  t  t  t
   8: t  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1  1
   9: t  t  t  t  t  t  2  2  t  t  t  2  2  t  t  t  2  2  t  t
@@ -498,7 +498,7 @@ Row 4:  Map 14      Map 24      Map 34      Map 44
 
 | Map | World Coords | Contains | Notes |
 |-----|--------------|----------|-------|
-| Map 13 | (1, 3) | **Cloth** at (7, 5) | Forest area with trees |
+| Map 13 | (1, 3) | **Cloth** at (7, 6) | Forest area with trees |
 | Map 14 | (1, 4) | **Dead Wood** at (3, 8)<br>**Sandman** hut | Northwest corner, sandy desert |
 | Map 22 | (2, 2) | **Wood** at (10, 4) | Forest between two great forests |
 | Map 24 | (2, 4) | **Rutter** at (9, 1)<br>**Boatman** hut<br>Healer, Weapon Shop | Starting area, river access |
@@ -526,7 +526,7 @@ Row 4:  Map 14      Map 24      Map 34      Map 44
 4. **Collect Boat Materials:**
    - Wood (Map 22 at 10,4)
    - Dead Wood (Map 14 at 3,8)
-   - Cloth (Map 13 at 7,5)
+   - Cloth (Map 13 at 7,6)
    - Rutter (Map 24 at 9,1)
 5. **Give materials to Boatman** → Receive boat plans
 6. **Continue main quest** → See STORY_PROGRESSION.md for full walkthrough

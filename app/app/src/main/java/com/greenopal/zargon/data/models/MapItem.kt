@@ -63,11 +63,12 @@ object MapItems {
 
         // Item 5: Cloth - Map 13 (World 1, Quadrant 3)
         // QBASIC Line 1472-1474, coordinates from map13.lvl
+        // Updated to (7, 6) - moved down one to walkable grass tile
         MapItem(
             worldX = 1,
             worldY = 3,
             spotX = 7,
-            spotY = 5,
+            spotY = 6,
             item = Item(
                 name = "cloth",
                 description = "Sail material for ship",
