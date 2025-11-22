@@ -81,7 +81,7 @@ fun HintsScreen(
                     .fillMaxWidth()
                     .padding(top = 16.dp)
             ) {
-                Text("BACK TO TITLE")
+                Text("BACK TO MENU")
             }
         }
     }

@@ -134,9 +134,6 @@ class MainActivity : ComponentActivity() {
                                         screenState = ScreenState.MAP
                                     }
                                 },
-                                onShowHints = {
-                                    screenState = ScreenState.HINTS
-                                },
                                 modifier = Modifier
                                     .fillMaxSize()
                                     .padding(innerPadding)
@@ -158,6 +155,9 @@ class MainActivity : ComponentActivity() {
                                 },
                                 onViewQuestProgress = {
                                     screenState = ScreenState.QUEST_PROGRESS
+                                },
+                                onViewHints = {
+                                    screenState = ScreenState.HINTS
                                 },
                                 onBack = {
                                     // Return to map when closing menu
@@ -512,7 +512,7 @@ class MainActivity : ComponentActivity() {
                         ScreenState.HINTS -> {
                             HintsScreen(
                                 onBack = {
-                                    screenState = ScreenState.TITLE
+                                    screenState = ScreenState.MENU
                                 },
                                 modifier = Modifier
                                     .fillMaxSize()
