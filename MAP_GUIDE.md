@@ -26,6 +26,114 @@ This guide shows ASCII visualizations of key game maps with item locations marke
 
 ---
 
+## Complete World Map Overview
+
+The game world consists of 16 maps (4×4 grid) forming an 80×40 tile landscape. Below is a simplified overview showing major terrain types and key locations.
+
+### World Layout (4×4 Map Grid)
+
+```
+    MAP 11          MAP 21          MAP 31          MAP 41
+  (Northwest)     (North-Mid)    (Northeast)   (Necromancer)
+ ┌─────────────┬─────────────┬─────────────┬─────────────┐
+ │ Castle (C)  │  Forest &   │   Water &   │ Graveyard & │
+ │  Fountain   │   Grass     │   River     │  Necromancer│
+ │  (Healing)  │  (Monsters) │  (Shallow)  │   (Hut-h)   │
+ └─────────────┼─────────────┼─────────────┼─────────────┤
+    MAP 12          MAP 22          MAP 32          MAP 42
+   (West-Mid)     (Forest-Mid)   (River-Mid)      (East-Mid)
+ ┌─────────────┼─────────────┼─────────────┼─────────────┐
+ │ Mixed       │ **WOOD**    │  Fountain & │   Rocky     │
+ │ Forest &    │  (10, 4)    │   River     │  Mountains  │
+ │  Grass      │   Trees     │  (Healing)  │  (Monsters) │
+ └─────────────┼─────────────┼─────────────┼─────────────┤
+    MAP 13          MAP 23          MAP 33          MAP 43
+   (Southwest)    (Forest-South)  (River-South)   (Mountain)
+ ┌─────────────┼─────────────┼─────────────┼─────────────┐
+ │ **CLOTH**   │   Dense     │    River    │ Mtn. Jack   │
+ │  (7, 5)     │   Forest    │   & Water   │   (Hut-h)   │
+ │  Trees      │  (Monsters) │  (Shallow)  │ (Story 4.0+)│
+ └─────────────┼─────────────┼─────────────┼─────────────┤
+    MAP 14          MAP 24          MAP 34          MAP 44
+  (Sandman)       (START)        (River-South)    (Dynamite)
+ ┌─────────────┼─────────────┼─────────────┼─────────────┐
+ │ **DEADWOOD**│ **RUTTER**  │    River    │ **DYNAMITE**│
+ │  (3, 8)     │  (9, 1)     │   & Water   │  (14, 6)    │
+ │ Sandman-h   │ Boatman-h   │  (Shallow)  │ Old Man-h   │
+ │  Desert     │ Healer-H    │             │   Rocks     │
+ │             │ Weapon-W    │             │             │
+ └─────────────┴─────────────┴─────────────┴─────────────┘
+
+  Y-Axis: Row 1 (top) → Row 4 (bottom)
+  X-Axis: Column 1 (left) → Column 4 (right)
+```
+
+### Terrain Distribution
+
+**Northwest Quadrant (Maps 11-14):**
+- Mix of forest, grass, sand, and castle
+- **Map 11**: Castle with fountain (healing/save point)
+- **Map 12**: Mixed forest and grass terrain
+- **Map 13**: Dense forest with **Cloth** item
+- **Map 14**: Sandy desert with **Dead Wood**, Sandman's hut
+
+**North-Mid Quadrant (Maps 21-24):**
+- Heavy forest coverage with river
+- **Map 21**: Forest and grass, monster encounters
+- **Map 22**: Forest with **Wood** item for boat
+- **Map 23**: Dense forest, high encounter rate
+- **Map 24**: **STARTING AREA** - Boatman (trapped), Healer, Weapon Shop, **Rutter**
+
+**Northeast Quadrant (Maps 31-34):**
+- River system running north-south
+- **Map 31**: Shallow water and river areas
+- **Map 32**: Fountain (healing/save point) and river
+- **Map 33**: River and water passages
+- **Map 34**: Southern river, shallow water areas
+
+**East Quadrant (Maps 41-44):**
+- Rocky mountains and graveyard
+- **Map 41**: Graveyard with **Necromancer** (story 4.0+)
+- **Map 42**: Rocky mountains, monster territory
+- **Map 43**: Mountains with **Mountain Jack** (story 4.0+)
+- **Map 44**: Rocky area with **Dynamite** and Old Man
+
+### Critical Path Through World
+
+1. **Start**: Map 24 (2, 4) - Between Healer and Weapon Shop
+2. **Northwest**: Map 14 (1, 4) - Visit Sandman to learn about dynamite
+3. **Southeast**: Map 44 (4, 4) - Find Dynamite at (14, 6)
+4. **Return**: Map 24 - Use dynamite on Boatman
+5. **Collect Items**:
+   - Map 24: Rutter (9, 1)
+   - Map 22: Wood (10, 4)
+   - Map 14: Dead Wood (3, 8)
+   - Map 13: Cloth (7, 5)
+6. **Late Game**: Map 41 - Necromancer for boat quest
+7. **Castle**: Map 11 - Final area (requires boat/ship)
+
+### Save & Healing Locations
+
+| Location | Map | Type | Notes |
+|----------|-----|------|-------|
+| Healer | Map 24 (2, 4) | Paid healing + Save | Starting area |
+| Fountain | Map 11 (1, 1) | Free healing + Save | Northwest |
+| Fountain | Map 32 (3, 2) | Free healing + Save | River area |
+
+### Shop Locations
+
+| Shop | Map | Coordinates | Services |
+|------|-----|-------------|----------|
+| Weapon Shop | Map 24 | (2, 7) | Weapons & Armor, prices vary by Gothox's mood |
+
+---
+
+## Detailed Map Sections
+
+Below are detailed ASCII maps for key locations with item spawn points.
+
+---
+
 ## Map 13 - Cloth Location
 
 **World Coordinates:** (1, 3)
