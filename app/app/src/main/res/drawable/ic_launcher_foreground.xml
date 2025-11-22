@@ -4,80 +4,54 @@
     android:viewportWidth="108"
     android:viewportHeight="108">
 
-    <!-- ZARGON - Supreme Evil Overlord -->
+    <!-- Evil ZARGON "Z" -->
 
-    <!-- Crown/Spiky top (evil king) -->
+    <!-- Main Z shape with jagged/sharp edges -->
     <path
-        android:fillColor="#8B0000"
-        android:pathData="M54,20 L48,30 L42,25 L40,32 L36,28 L34,35 L54,35 Z" />
-    <path
-        android:fillColor="#8B0000"
-        android:pathData="M54,20 L60,30 L66,25 L68,32 L72,28 L74,35 L54,35 Z" />
+        android:fillColor="#CC0000"
+        android:pathData="M30,30 L78,30 L80,34 L42,34 L80,70 L78,78 L30,78 L28,74 L66,74 L28,38 Z" />
 
-    <!-- Skull/head (skeletal demon lord) -->
-    <path
-        android:fillColor="#EEEEEE"
-        android:pathData="M54,38 m-24,0 a24,26 0,1,1 48,0 a24,26 0,1,1 -48,0" />
-
-    <!-- Dark eye sockets -->
-    <path
-        android:fillColor="#000000"
-        android:pathData="M42,46 m-6,0 a6,8 0,1,1 12,0 a6,8 0,1,1 -12,0" />
-    <path
-        android:fillColor="#000000"
-        android:pathData="M66,46 m-6,0 a6,8 0,1,1 12,0 a6,8 0,1,1 -12,0" />
-
-    <!-- Glowing red eyes inside sockets -->
+    <!-- Sharp spikes on top bar -->
     <path
         android:fillColor="#FF0000"
-        android:pathData="M42,47 m-3,0 a3,4 0,1,1 6,0 a3,4 0,1,1 -6,0" />
+        android:pathData="M38,30 L40,22 L42,30 Z" />
     <path
         android:fillColor="#FF0000"
-        android:pathData="M66,47 m-3,0 a3,4 0,1,1 6,0 a3,4 0,1,1 -6,0" />
+        android:pathData="M50,30 L52,20 L54,30 Z" />
+    <path
+        android:fillColor="#FF0000"
+        android:pathData="M62,30 L64,22 L66,30 Z" />
 
-    <!-- Nose cavity -->
+    <!-- Sharp spikes on bottom bar -->
     <path
-        android:fillColor="#000000"
-        android:pathData="M54,56 L50,62 L54,61 L58,62 Z" />
+        android:fillColor="#FF0000"
+        android:pathData="M38,78 L40,86 L42,78 Z" />
+    <path
+        android:fillColor="#FF0000"
+        android:pathData="M50,78 L52,88 L54,78 Z" />
+    <path
+        android:fillColor="#FF0000"
+        android:pathData="M62,78 L64,86 L66,78 Z" />
 
-    <!-- Upper jaw/teeth -->
-    <path
-        android:fillColor="#CCCCCC"
-        android:pathData="M38,64 L38,66 L40,68 L42,66 L42,64 Z" />
-    <path
-        android:fillColor="#CCCCCC"
-        android:pathData="M44,64 L44,66 L46,69 L48,66 L48,64 Z" />
-    <path
-        android:fillColor="#CCCCCC"
-        android:pathData="M50,64 L50,66 L52,70 L54,66 L54,64 Z" />
-    <path
-        android:fillColor="#CCCCCC"
-        android:pathData="M56,64 L56,66 L58,70 L60,66 L60,64 Z" />
-    <path
-        android:fillColor="#CCCCCC"
-        android:pathData="M62,64 L62,66 L64,69 L66,66 L66,64 Z" />
-    <path
-        android:fillColor="#CCCCCC"
-        android:pathData="M68,64 L68,66 L70,68 L72,66 L72,64 Z" />
-
-    <!-- Large curved horns -->
-    <path
-        android:fillColor="#2a0505"
-        android:pathData="M30,35 Q25,30 22,38 Q20,45 24,48 L30,44 Q28,40 30,35 Z" />
-    <path
-        android:fillColor="#2a0505"
-        android:pathData="M78,35 Q83,30 86,38 Q88,45 84,48 L78,44 Q80,40 78,35 Z" />
-
-    <!-- "Z" symbol on forehead -->
+    <!-- Blood drips -->
     <path
         android:fillColor="#8B0000"
-        android:pathData="M46,38 L56,38 L46,44 L56,44"
-        android:strokeWidth="1.5"
-        android:strokeColor="#8B0000" />
-
-    <!-- Shadowy aura around head -->
+        android:pathData="M70,78 L72,82 L74,78 L74,86 L70,86 Z" />
     <path
-        android:fillColor="#1a0000"
-        android:fillAlpha="0.3"
-        android:pathData="M54,36 m-28,0 a28,30 0,1,1 56,0 a28,30 0,1,1 -56,0" />
+        android:fillColor="#8B0000"
+        android:pathData="M32,78 L34,82 L36,78 L36,85 L32,85 Z" />
+
+    <!-- Shadow/depth on diagonal -->
+    <path
+        android:fillColor="#660000"
+        android:fillAlpha="0.5"
+        android:pathData="M42,34 L45,37 L76,70 L80,70 Z" />
+
+    <!-- Glowing red aura -->
+    <path
+        android:strokeColor="#FF0000"
+        android:strokeWidth="3"
+        android:fillColor="#00000000"
+        android:strokeAlpha="0.3"
+        android:pathData="M30,30 L78,30 L80,34 L42,34 L80,70 L78,78 L30,78 L28,74 L66,74 L28,38 Z" />
 </vector>
