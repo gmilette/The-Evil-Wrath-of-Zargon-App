@@ -35,12 +35,21 @@ data class GameState(
 ) {
     /**
      * Add item to inventory (max 10 items)
+     * Prevents duplicate items - only one of each item allowed
      */
     fun addItem(item: Item): GameState {
-        return if (inventory.size < 10) {
+        // Check if item already exists (case-insensitive)
+        val alreadyHasItem = inventory.any { it.name.equals(item.name, ignoreCase = true) }
+
+        return if (alreadyHasItem) {
+            // Already have this item, don't add duplicate
+            this
+        } else if (inventory.size < 10) {
+            // Add item to inventory
             copy(inventory = inventory + item)
         } else {
-            this  // Inventory full
+            // Inventory full
+            this
         }
     }
 
