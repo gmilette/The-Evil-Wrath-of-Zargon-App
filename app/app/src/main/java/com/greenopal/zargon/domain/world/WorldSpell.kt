@@ -95,51 +95,12 @@ sealed class WorldSpell(
     }
 
     /**
-     * Maximize spell (ZARGON.BAS:799-804)
-     * MP cost: 5
-     * Effect: Increases max DP by 1 (up to base DP + 30)
-     */
-    object Maximize : WorldSpell(
-        id = 3,
-        name = "Maximize",
-        mpCost = 5,
-        requiredSpellLevel = 6,
-        description = "Increase maximum HP"
-    ) {
-        override fun cast(gameState: GameState): Pair<GameState, String> {
-            // QBASIC: IF cDP + damage < (BcDP + 30) THEN cDP = cDP + damage
-            // Note: In original game, this temporarily boosts current HP, not max HP
-            // The max allowed is baseDP + 30
-            val originalBaseDP = gameState.character.baseDP
-            val maxAllowed = originalBaseDP + 30
-
-            return if (gameState.character.currentDP + 1 < maxAllowed) {
-                val updatedState = gameState.copy(
-                    character = gameState.character.copy(
-                        currentDP = gameState.character.currentDP + 1,
-                        baseDP = gameState.character.baseDP + 1, // Increase base to increase max
-                        currentMP = gameState.character.currentMP - mpCost
-                    )
-                )
-                updatedState to "Maximum HP increased by 1!"
-            } else {
-                val updatedState = gameState.copy(
-                    character = gameState.character.copy(
-                        currentMP = gameState.character.currentMP - mpCost
-                    )
-                )
-                updatedState to "No effect - already at maximum!"
-            }
-        }
-    }
-
-    /**
      * Warp spell (ZARGON.BAS:805-812)
      * MP cost: 7
      * Effect: Teleport to healer location (Map 2,4 at coordinates 15,8)
      */
     object Warp : WorldSpell(
-        id = 4,
+        id = 3,
         name = "Warp",
         mpCost = 7,
         requiredSpellLevel = 8,
@@ -165,7 +126,7 @@ sealed class WorldSpell(
         /**
          * All available world spells
          */
-        val ALL = listOf(Cure, Restore, Maximize, Warp)
+        val ALL = listOf(Cure, Restore, Warp)
 
         /**
          * Get spells available at a given spell level
