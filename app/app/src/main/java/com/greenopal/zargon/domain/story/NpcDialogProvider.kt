@@ -35,9 +35,13 @@ class NpcDialogProvider @Inject constructor() {
     private fun getBoatmanDialog(gameState: GameState): Dialog {
         val status = gameState.storyStatus
         val hasWood = gameState.hasItem("wood")
+        val hasDeadWood = gameState.hasItem("dead wood")
+        val hasCloth = gameState.hasItem("cloth")
+        val hasRutter = gameState.hasItem("rutter")
         val hasDynamite = gameState.hasItem("dynamite")
+        val hasAllBoatMaterials = hasWood && hasDeadWood && hasCloth && hasRutter
 
-        android.util.Log.d("NpcDialogProvider", "Boatman dialog - Story status: $status, Has dynamite: $hasDynamite, Inventory: ${gameState.inventory.map { it.name }}")
+        android.util.Log.d("NpcDialogProvider", "Boatman dialog - Story status: $status, Has dynamite: $hasDynamite, Has all materials: $hasAllBoatMaterials, Inventory: ${gameState.inventory.map { it.name }}")
 
         return when {
             // Stage 1: Trapped boatman
@@ -73,24 +77,33 @@ class NpcDialogProvider @Inject constructor() {
 
             // Stage 2: Freed boatman, needs materials
             status >= 2f && status < 3f -> {
-                if (status == 2.5f && hasWood) {
+                if (hasAllBoatMaterials) {
+                    // Player has all materials - give boat plans and advance story
                     Dialog(
                         question1 = "how can we get out of here?",
                         answer1 = "well there used to be a warper, in the old castle, but it is currently overrun by monsters, the island is the only way out",
                         question2 = "how can we get to this island?",
                         answer2 = "duh? i am a boatmaker, i guess i could make you a boat seeing that you saved my life and all.. i'll need some materials though..",
-                        question3 = "(give him the wood)",
-                        answer3 = "ahh yes thankyou, i will build you the boat soon enough, but i am tired, and i need to get some rest, so please excuse me, oh here is what i need (he gives you the boat plans)",
-                        storyAction = StoryAction.GiveItem("boat plans")
+                        question3 = "(give him the materials)",
+                        answer3 = "ahh yes thankyou! The wood, dead wood, cloth, and rutter - perfect! I will build you the boat soon enough, but i am tired, and i need to get some rest, so please excuse me, oh here are the plans (he gives you the boat plans)",
+                        storyAction = StoryAction.MultiAction(listOf(
+                            StoryAction.TakeItem("wood"),
+                            StoryAction.TakeItem("dead wood"),
+                            StoryAction.TakeItem("cloth"),
+                            StoryAction.TakeItem("rutter"),
+                            StoryAction.GiveItem("boat plans"),
+                            StoryAction.AdvanceStory(3.0f)
+                        ))
                     )
                 } else {
+                    // Still collecting materials
                     Dialog(
                         question1 = "how can we get out of here?",
                         answer1 = "well there used to be a warper, in the old castle, but it is currently overrun by monsters, the island is the only way out",
                         question2 = "how can we get to this island?",
                         answer2 = "duh? i am a boatmaker, i guess i could make you a boat seeing that you saved my life and all.. i'll need some materials though..",
                         question3 = "what do you need and where do i find it?",
-                        answer3 = "i'll need wood first, but not any old wood..it has to be nearly dead and dried. Almost as if the sand had blown its strength into it"
+                        answer3 = "I need 4 things: WOOD (strong wood for the hull), DEAD WOOD (dried by the sands), CLOTH (for the sail), and a RUTTER (for navigation). Bring me all of these!"
                     )
                 }
             }
