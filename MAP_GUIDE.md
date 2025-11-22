@@ -134,187 +134,123 @@ The game world consists of 16 interconnected maps arranged in a 4×4 grid. Each 
 
 ### Full World Visualization
 
-<table>
-<tr>
-<th>MAP 11<br/>(Northwest)</th>
-<th>MAP 21<br/>(North-Mid)</th>
-<th>MAP 31<br/>(Northeast)</th>
-<th>MAP 41<br/>(Necromancer)</th>
-</tr>
-<tr>
-<td>
-<strong>Castle Area</strong><br/>
-• Fountain (h) - Healing/Save<br/>
-• Dense forest (T,t)<br/>
-• Grass clearings (1)<br/>
-• Castle in northeast<br/>
-<br/>
-<em>Spawn: (17,7)</em>
-</td>
-<td>
-<strong>Forest</strong><br/>
-• Heavy tree coverage<br/>
-• Grass paths<br/>
-• Monster encounters<br/>
-• Sandy patches south<br/>
-<br/>
-<em>Spawn: (0,0)</em>
-</td>
-<td>
-<strong>River North</strong><br/>
-• Shallow water (a)<br/>
-• Deep water (w)<br/>
-• Rocks (R,r)<br/>
-• Graves (G)<br/>
-<br/>
-<em>Spawn: (19,1)</em>
-</td>
-<td>
-<strong>Graveyard</strong><br/>
-• <strong>Necromancer (h)</strong><br/>
-• Many graves (G)<br/>
-• Rocky terrain<br/>
-• Water on west edge<br/>
-<br/>
-<em>Spawn: (1,7)</em>
-</td>
-</tr>
+#### MAP 11 (Northwest) - Castle Area
+- Fountain (h) - Healing/Save
+- Dense forest (T,t)
+- Grass clearings (1)
+- Castle in northeast
+- _Spawn: (17,7)_
 
-<tr>
-<th>MAP 12<br/>(West-Mid)</th>
-<th>MAP 22<br/>(Forest-Mid)</th>
-<th>MAP 32<br/>(River-Mid)</th>
-<th>MAP 42<br/>(East-Mid)</th>
-</tr>
-<tr>
-<td>
-<strong>Mixed Forest</strong><br/>
-• Forest & grass mix<br/>
-• Small trees (t)<br/>
-• Monster encounters<br/>
-<br/>
-<br/>
-<em>Spawn: (0,0)</em>
-</td>
-<td>
-<strong>Wood Location</strong><br/>
-• <strong>WOOD (10,4)</strong><br/>
-• Dense forest<br/>
-• Grass clearings<br/>
-• Trees & small trees<br/>
-<br/>
-<em>Spawn: (0,0)</em>
-</td>
-<td>
-<strong>Castle Island</strong><br/>
-• <strong>Fountain (h)</strong><br/>
-• Castle (C) 4×4<br/>
-• River surrounds<br/>
-• Shallow water<br/>
-<br/>
-<em>Spawn: (19,8)</em>
-</td>
-<td>
-<strong>Rocky Mountains</strong><br/>
-• Two huts (h)<br/>
-• Large rocks (R)<br/>
-• Small rocks (r)<br/>
-• Graves (G)<br/>
-<br/>
-<em>Spawn: (17,2)</em>
-</td>
-</tr>
+#### MAP 21 (North-Mid) - Forest
+- Heavy tree coverage
+- Grass paths
+- Monster encounters
+- Sandy patches south
+- _Spawn: (0,0)_
 
-<tr>
-<th>MAP 13<br/>(Southwest)</th>
-<th>MAP 23<br/>(Forest-South)</th>
-<th>MAP 33<br/>(River-South)</th>
-<th>MAP 43<br/>(Mountain)</th>
-</tr>
-<tr>
-<td>
-<strong>Cloth Location</strong><br/>
-• <strong>CLOTH (7,6)</strong><br/>
-• Dense forest<br/>
-• Grass paths<br/>
-• Sandy areas south<br/>
-<br/>
-<em>Spawn: (0,0)</em>
-</td>
-<td>
-<strong>Dense Forest</strong><br/>
-• Heavy trees<br/>
-• High encounter rate<br/>
-• Grass paths<br/>
-• Sand transitions<br/>
-<br/>
-<em>Spawn: (0,0)</em>
-</td>
-<td>
-<strong>River Crossing</strong><br/>
-• Deep water (w)<br/>
-• Shallow water (a)<br/>
-• Sandy banks (2)<br/>
-• Rocky outcrops<br/>
-<br/>
-<em>Spawn: (0,0)</em>
-</td>
-<td>
-<strong>Mountain Jack</strong><br/>
-• <strong>Mountain Jack (h)</strong><br/>
-• Rocky mountains<br/>
-• Large boulders<br/>
-• Floors (0)<br/>
-<br/>
-<em>Spawn: (17,2)</em>
-</td>
-</tr>
+#### MAP 31 (Northeast) - River North
+- Shallow water (a)
+- Deep water (w)
+- Rocks (R,r)
+- Graves (G)
+- _Spawn: (19,1)_
 
-<tr>
-<th>MAP 14<br/>(Sandman)</th>
-<th>MAP 24<br/>(START)</th>
-<th>MAP 34<br/>(River-South)</th>
-<th>MAP 44<br/>(Dynamite)</th>
-</tr>
-<tr>
-<td>
-<strong>Desert</strong><br/>
-• <strong>Sandman (h)</strong><br/>
-• <strong>DEAD WOOD (3,8)</strong><br/>
-• Sandy desert (2)<br/>
-• Small rocks (r)<br/>
-<br/>
-<em>Spawn: (11,4)</em>
-</td>
-<td>
-<strong>Starting Area</strong><br/>
-• <strong>Boatman (h)</strong><br/>
-• <strong>RUTTER (9,1)</strong><br/>
-• Healer (H)<br/>
-• Weapon Shop (W)<br/>
-• River on east<br/>
-<em>Spawn: (17,5)</em>
-</td>
-<td>
-<strong>River South</strong><br/>
-• Deep water<br/>
-• Shallow water<br/>
-• Sand & rocks<br/>
-• Floor areas (0)<br/>
-<br/>
-<em>Spawn: (2,1)</em>
-</td>
-<td>
-<strong>Rocky Fortress</strong><br/>
-• <strong>Old Man (h)</strong><br/>
-• <strong>DYNAMITE (14,6)</strong><br/>
-• Large rocks (R)<br/>
-• Floor passages<br/>
-<br/>
-<em>Spawn: (19,6)</em>
-</td>
-</tr>
-</table>
+#### MAP 41 (Necromancer) - Graveyard
+- **Necromancer (h)**
+- Many graves (G)
+- Rocky terrain
+- Water on west edge
+- _Spawn: (1,7)_
+
+---
+
+#### MAP 12 (West-Mid) - Mixed Forest
+- Forest & grass mix
+- Small trees (t)
+- Monster encounters
+- _Spawn: (0,0)_
+
+#### MAP 22 (Forest-Mid) - Wood Location
+- **WOOD (10,4)**
+- Dense forest
+- Grass clearings
+- Trees & small trees
+- _Spawn: (0,0)_
+
+#### MAP 32 (River-Mid) - Castle Island
+- **Fountain (h)**
+- Castle (C) 4×4
+- River surrounds
+- Shallow water
+- _Spawn: (19,8)_
+
+#### MAP 42 (East-Mid) - Rocky Mountains
+- Two huts (h)
+- Large rocks (R)
+- Small rocks (r)
+- Graves (G)
+- _Spawn: (17,2)_
+
+---
+
+#### MAP 13 (Southwest) - Cloth Location
+- **CLOTH (7,6)**
+- Dense forest
+- Grass paths
+- Sandy areas south
+- _Spawn: (0,0)_
+
+#### MAP 23 (Forest-South) - Dense Forest
+- Heavy trees
+- High encounter rate
+- Grass paths
+- Sand transitions
+- _Spawn: (0,0)_
+
+#### MAP 33 (River-South) - River Crossing
+- Deep water (w)
+- Shallow water (a)
+- Sandy banks (2)
+- Rocky outcrops
+- _Spawn: (0,0)_
+
+#### MAP 43 (Mountain) - Mountain Jack
+- **Mountain Jack (h)**
+- Rocky mountains
+- Large boulders
+- Floors (0)
+- _Spawn: (17,2)_
+
+---
+
+#### MAP 14 (Sandman) - Desert
+- **Sandman (h)**
+- **DEAD WOOD (3,8)**
+- Sandy desert (2)
+- Small rocks (r)
+- _Spawn: (11,4)_
+
+#### MAP 24 (START) - Starting Area
+- **Boatman (h)**
+- **RUTTER (9,1)**
+- Healer (H)
+- Weapon Shop (W)
+- River on east
+- _Spawn: (17,5)_
+
+#### MAP 34 (River-South) - River South
+- Deep water
+- Shallow water
+- Sand & rocks
+- Floor areas (0)
+- _Spawn: (2,1)_
+
+#### MAP 44 (Dynamite) - Rocky Fortress
+- **Old Man (h)**
+- **DYNAMITE (14,6)**
+- Large rocks (R)
+- Floor passages
+- _Spawn: (19,6)_
 
 ### Quest Items Summary
 
