@@ -128,6 +128,93 @@ The game world consists of 16 maps (4×4 grid) forming an 80×40 tile landscape.
 
 ---
 
+## Complete World Map (All 16 Maps)
+
+Below is the entire game world showing all 16 maps stitched together (80 columns × 40 rows). This massive visualization shows the complete playable area.
+
+### Full World Visualization
+
+```
+         MAP 11              MAP 21              MAP 31              MAP 41
+      (Northwest)         (North-Mid)        (Northeast)        (Necromancer)
+TTTTTTTTTTTTTTTTT TTTTTTTTTTTTTTTTTTTTTTTTtttttttRrrrrrrrrrwwwrrrrrrrrrrrr
+T1T111TTT1TT111T T1T11111TTT1T1tT111T111TTTT11111tttttrrrrrrwrrrrrrrrrrrrrr
+T1T1T1111T1T11TT TTTTTTTTTTTTTTTTtttttttt1111111Trwwr0000000000000rrrrr
+T1T11TTT111T11TT T1T1tT11tT1tT1ttT111tttTTTTT111rGwwwrGGGGGGGGGGGrr
+T1T1111111T11TTT T1T11T11T1tT1Ttt1111TT11111TT1T1111tr0000000rrr
+T1TT1TT11TT1T1TT T1t1TTT1111T1tT1111111111T1111111111t11tG00000000
+TT1T1TTTTT1T1TTT 1T11111TT1tT1t11TT1111t111111111G00000000rrrr
+T1TTT1111T1TT1TT T111111TT111t1111TT11tt1111Gwwwwwr000000000rrrr
+T1T1hT1T1tT1TTTTT 1111TTtttt111tt1111t111TT1TTT11r1222222r2000000rr
+TTTTTTTTTtt1T11TtttTTTT111t22222r2222222www11112222222222222waawr2222Rrrrrrrrrrrr
+      MAP 12              MAP 22              MAP 32              MAP 42
+     (West-Mid)         (Forest-Mid)       (River-Mid)          (East-Mid)
+TTTTTTTTTTTTTTTTTTTTtttT111TT1T1T1ttt111112222222wwaa wrrrrrrGGGGGGGGGr
+T11111111TTT1T1T1TT111111111111111111tttt11112222222wwaar2rhrrrrr0000000Ghr
+T1T1tT11T1T1T1TttT111TTTT1tt111tt111t2www22222waarrRrrr2rr0000rrr000R
+T1T11111111111111T1tTtttT111ttTtT11tw22222www2CCC CrrrrrrRRRr00rrr000r
+T1t1T1111tT1tT1Ttt1tT1111rt1tTt1t2r112222waCCC C22rr000rRRRRrr00000Rr
+T1t1T11tTT1tT1TT11T111tt12222rw22Ct1122221waCC CCwrRr002000rRRR000RR
+T1t1TTtT111ttT111tttttr22222w CC C11r22RRRrrrRRRRRRrr0000R0R
+T1t11TttT1TT1tT1t12222wa wa w1tt222Rt22tt1r1rwwaawr0rRRRR000RR
+T111TTtt1tt00002waaaw2wh wtt112222222waaaaa w2RrrrrrrRRRR00RRR
+tTT1Tt1TTttttt22222wa awtrrrrrr22222222wwwaawaarrrr0000rrrrrrrRRRRRRRRR
+      MAP 13              MAP 23              MAP 33              MAP 43
+    (Southwest)        (Forest-South)     (River-South)         (Mountain)
+TTTtttttTTt11tttTttt1TT11tt11t11111ttt22tw222222t22wwaarrrr000000rRRRRRRRRRR
+T11111111111111111tt111111111t111tt211222222wwwwwwaa2rrrR0rrrR0rr0RRR000000R
+T1TTtttTtT1ttttttt1ttt111tt1t11t221212222rwaaaaw222rrrr0rrrrr0rrr0rrrrr0
+T11111111111111111111111111t1t11222r2222222waaaw2222rRrr0rrrr00000rrrr0Rr
+T1TTTtttTT1tttt11tT111ttt1112222222222222w22222rrr000000000000000RRrrrr0
+t1TTTt1t1ttttt1ttttt11t222222rrrr222222waaaaa2222222r000000rrr000000R00r
+t111111111111111t1TTTTt122222222222222w222rrrr000000000rrrr0000R0r
+t1TTTTtttttttt1tTTT111tt222222r2222rwaaawtt2222wwr000rr00rr0rR000rr0R
+t1111111111111111tt12222222r2222r22222222waaaaa11222222t2wwaaawRRRRRRRRRRR
+ttttttt222ttt222tt1t222222w222wwwrr000000000200aaaww12222222www000 R
+      MAP 14              MAP 24              MAP 34              MAP 44
+     (Sandman)           (START)          (River-South)        (Dynamite)
+rrrrrrrr222ttt222tt2ttt22222222r2rrr222waaawrr222222000r000R000rwwrR00000r0Dr
+r222222222222222ttt222222222ttt2r22www220r2222r22t220r000000r0r00000R0r00000R0R
+r22r22222222r222r222222rrrr22222rwwwwww22r222222222r0000r0r00rrr00rR00rrrrrr
+r2222222222222r222222r22r2222rrwaa aaa222222www20r0000000r000000rRrrrrrrrrrr
+r222222222r22222222222222222rwwwwaaaw0000000000r000rrrr000r000R000rr0R0rrrr0r0
+r22r22222222r222r222222rrr2222rwaaaa22t2w00r0rrr00r00rr000000R0R0000rrRrr0r0r
+r2222222222222r222222r22r222rrww22rrrr000rr00r0000000000R0R00rR0rr00Rr0000R000R
+rtt222222222r222r22222222r02200000wrrrwrrr0000000000rrrr000000RRRR0rrrr0Rrr00rrrr
+rrrrrrrrrrrrrrr22222r222000000wrrrwaaa22Rtt1222t2w00rrr000000R00rr00000R00R00r0h0R
+rrrrrrrrrrrrrrr1t2222wwwwwwww222222wwaa22tttt1222w0r000rr000000R000R000RRR
+```
+
+### Map Labels Key
+
+The full map above shows:
+- **Top Row (Y=1)**: Maps 11, 21, 31, 41 - Castle area, forests, river/graves, necromancer
+- **Row 2 (Y=2)**: Maps 12, 22, 32, 42 - Forests, **Wood** location, river/castle, rocky mountains
+- **Row 3 (Y=3)**: Maps 13, 23, 33, 43 - **Cloth** location, dense forest, river, Mountain Jack
+- **Bottom Row (Y=4)**: Maps 14, 24, 34, 44 - Sandman/deadwood, **START**/rutter/shops, river, **Dynamite**/Old Man
+
+### Key Item Markers in Full Map
+
+Looking at the combined map above, you can navigate to find:
+- **Map 11** (top-left quadrant): Castle with fountain `h`
+- **Map 13** (third row, left): Cloth at approximately column 7, row 25
+- **Map 14** (bottom-left): Dead Wood at approximately column 3, row 38 + Sandman hut `h`
+- **Map 22** (row 2, mid-left): Wood at approximately column 30, row 14
+- **Map 24** (bottom row, mid-left): Starting position - Boatman `h`, Healer `H`, Weapon Shop `W`
+- **Map 41** (top-right): Necromancer hut `h` in graveyard (`G` tiles)
+- **Map 43** (third row, right): Mountain Jack hut `h`
+- **Map 44** (bottom-right): Dynamite at decorated floor `D`, Old Man hut `h`
+
+### Navigation Notes
+
+- **River System**: Runs north-south through maps 31-34 (columns 40-59) marked by `w` (water) and `a` (shallow)
+- **Forest Zones**: Heavy tree coverage (`T`,`t`) in maps 11-13, 21-23
+- **Desert/Sand**: Concentrated in maps 14, 23, 24 (marked by `2`)
+- **Rocky Mountains**: Eastern maps 41-44 (marked by `R`, `r`)
+- **Graveyard**: Map 41 (top-right) marked with `G` graves
+
+---
+
 ## Detailed Map Sections
 
 Below are detailed ASCII maps for key locations with item spawn points.
