@@ -13,25 +13,6 @@ This codebase represents the efforts of a bunch of high-school kids back in
 software development too, but this project still lingers at the back of our
 heads as one of our first multi-developer projects.
 
-Pictures
-====================
-
-The land of GEF!
-
-![gef](pics/thelandofgef.png)
-
-Battle foes
-
-![foes](pics/battlefoes.png)
-
-Rest!
-
-![gef](pics/restandrecover.png)
-
-Don't die
-
-![gef](pics/trynottodie.png)
-
 GUIDES
 ======
 
