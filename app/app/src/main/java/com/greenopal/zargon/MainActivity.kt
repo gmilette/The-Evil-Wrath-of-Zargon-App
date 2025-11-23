@@ -91,6 +91,7 @@ class MainActivity : ComponentActivity() {
                 var screenState by remember { mutableStateOf(ScreenState.TITLE) }
                 var currentNpcType by remember { mutableStateOf<NpcType?>(null) }
                 var isExplorationMode by remember { mutableStateOf(false) }
+                var saveSlots by remember { mutableStateOf(saveRepository.getAllSaves()) }
 
                 LaunchedEffect(Unit) {
                     val sprites = spriteParser.parseAllSprites()
@@ -116,23 +117,24 @@ class MainActivity : ComponentActivity() {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     when (screenState) {
                         ScreenState.TITLE -> {
-                            val saveSlots = remember { saveRepository.getAllSaves() }
                             TitleScreen(
                                 saveSlots = saveSlots,
                                 onNewGame = { slot ->
-                                    // Reset to new game state and start exploration
                                     android.util.Log.d("MainActivity", "Starting new game in slot $slot")
                                     viewModel.newGame(slot)
                                     isExplorationMode = true
                                     screenState = ScreenState.MAP
                                 },
                                 onContinue = { slot ->
-                                    // Load saved game and start exploration
                                     saveRepository.loadGame(slot)?.let { savedState ->
                                         viewModel.updateGameState(savedState)
                                         isExplorationMode = true
                                         screenState = ScreenState.MAP
                                     }
+                                },
+                                onDeleteSave = { slot ->
+                                    saveRepository.deleteSave(slot)
+                                    saveSlots = saveRepository.getAllSaves()
                                 },
                                 modifier = Modifier
                                     .fillMaxSize()
