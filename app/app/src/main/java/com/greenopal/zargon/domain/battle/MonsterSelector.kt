@@ -44,9 +44,9 @@ class MonsterSelector @Inject constructor() {
         }
 
         // Special case: Boss Necro at specific location
-        // QBASIC: IF mapx = 4 AND mapy = 2 AND storystatus = 4 AND cx = 3 AND cy = 2
+        // QBASIC: IF mapx = 4 AND mapy = 2 AND storystatus >= 3 AND cx = 3 AND cy = 2
         if (gameState.worldX == 4 && gameState.worldY == 2 &&
-            gameState.storyStatus == 4.0f &&
+            gameState.storyStatus >= 3.0f &&
             gameState.characterX == 3 && gameState.characterY == 2) {
             return MonsterStats(
                 type = MonsterType.NECRO,

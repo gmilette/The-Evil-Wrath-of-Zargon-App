@@ -76,6 +76,13 @@ fun BattleScreen(
         } else if (battleState?.battleResult == BattleResult.Defeat) {
             android.util.Log.d("BattleScreen", "Player defeated - showing death dialog")
             showDefeatDialog = true
+        } else if (battleState?.battleResult == BattleResult.Fled) {
+            android.util.Log.d("BattleScreen", "Player fled - ending battle")
+            val state = battleState
+            if (state != null) {
+                val updatedGameState = viewModel.getUpdatedGameState() ?: gameState
+                onBattleEnd(state.battleResult, updatedGameState)
+            }
         }
     }
 
@@ -411,7 +418,7 @@ private fun ActionMenu(
                 enabled = isPlayerTurn,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text("1. Attack!")
+                Text("⚔️")
             }
 
             Button(
@@ -419,7 +426,7 @@ private fun ActionMenu(
                 enabled = isPlayerTurn,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text("2. Magick")
+                Text("✨")
             }
 
             Button(
@@ -427,7 +434,7 @@ private fun ActionMenu(
                 enabled = isPlayerTurn,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text("3. Run!")
+                Text("🏃")
             }
         }
     }

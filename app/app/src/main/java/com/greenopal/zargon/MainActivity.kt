@@ -293,10 +293,9 @@ class MainActivity : ComponentActivity() {
 
                         ScreenState.DIALOG -> {
                             currentNpcType?.let { npcType ->
-                                val dialog = dialogProvider.getDialog(npcType, gameState)
                                 DialogScreen(
                                     npcType = npcType,
-                                    dialog = dialog,
+                                    dialogProvider = dialogProvider,
                                     gameState = gameState,
                                     onDialogEnd = { updatedState, storyAction ->
                                         android.util.Log.d("MainActivity", "Dialog ended with story action: $storyAction")
@@ -355,6 +354,29 @@ class MainActivity : ComponentActivity() {
                                             is StoryAction.ResurrectBoatman -> {
                                                 updatedState.updateStory(5.0f)
                                             }
+                                            is StoryAction.IncreaseAttack -> {
+                                                if (updatedState.character.gold >= storyAction.cost) {
+                                                    val updatedCharacter = updatedState.character.copy(
+                                                        gold = updatedState.character.gold - storyAction.cost,
+                                                        baseAP = updatedState.character.baseAP + 1
+                                                    )
+                                                    updatedState.updateCharacter(updatedCharacter)
+                                                } else {
+                                                    updatedState
+                                                }
+                                            }
+                                            is StoryAction.IncreaseDefense -> {
+                                                if (updatedState.character.gold >= storyAction.cost) {
+                                                    val updatedCharacter = updatedState.character.copy(
+                                                        gold = updatedState.character.gold - storyAction.cost,
+                                                        baseDP = updatedState.character.baseDP + 1,
+                                                        currentDP = updatedState.character.currentDP + 1
+                                                    )
+                                                    updatedState.updateCharacter(updatedCharacter)
+                                                } else {
+                                                    updatedState
+                                                }
+                                            }
                                             is StoryAction.MultiAction -> {
                                                 // Process multiple actions in sequence
                                                 val finalMultiState = storyAction.actions.fold(updatedState) { currentState, action ->
@@ -392,6 +414,29 @@ class MainActivity : ComponentActivity() {
                                                             StoryProgressionChecker.checkAndAdvanceStory(withShip)
                                                         }
                                                         is StoryAction.ResurrectBoatman -> currentState.updateStory(5.0f)
+                                                        is StoryAction.IncreaseAttack -> {
+                                                            if (currentState.character.gold >= action.cost) {
+                                                                val updatedChar = currentState.character.copy(
+                                                                    gold = currentState.character.gold - action.cost,
+                                                                    baseAP = currentState.character.baseAP + 1
+                                                                )
+                                                                currentState.updateCharacter(updatedChar)
+                                                            } else {
+                                                                currentState
+                                                            }
+                                                        }
+                                                        is StoryAction.IncreaseDefense -> {
+                                                            if (currentState.character.gold >= action.cost) {
+                                                                val updatedChar = currentState.character.copy(
+                                                                    gold = currentState.character.gold - action.cost,
+                                                                    baseDP = currentState.character.baseDP + 1,
+                                                                    currentDP = currentState.character.currentDP + 1
+                                                                )
+                                                                currentState.updateCharacter(updatedChar)
+                                                            } else {
+                                                                currentState
+                                                            }
+                                                        }
                                                         else -> currentState
                                                     }
                                                 }
@@ -402,6 +447,8 @@ class MainActivity : ComponentActivity() {
                                         }
                                         android.util.Log.d("MainActivity", "Final story status after actions: ${finalState.storyStatus}")
                                         viewModel.updateGameState(finalState)
+
+                                        // Always return to map after dialog ends
                                         screenState = ScreenState.MAP
                                     },
                                     modifier = Modifier

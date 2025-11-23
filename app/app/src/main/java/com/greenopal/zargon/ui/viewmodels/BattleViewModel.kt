@@ -330,7 +330,8 @@ class BattleViewModel @Inject constructor(
         val itemDropped = rewardSystem.getSpecialDrop(
             monster.type,
             gameState.worldX,
-            gameState.worldY
+            gameState.worldY,
+            gameState.storyStatus
         )
 
         // Update character with XP and gold

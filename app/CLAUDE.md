@@ -4,12 +4,16 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-**Blank** is an Android application built with modern Android development practices using Jetpack Compose, Hilt for dependency injection, and Kotlin 2.1.0.
+**Blank** is an Android application built with modern Android development practices using Jetpack Compose, Hilt for dependency injection, and Kotlin 2.1.0. This app is a port of "The Evil Wrath of Zargon", a legacy QBASIC game from 1998-1999.
 
 - **Package**: `com.greenopal.blank`
 - **Application ID**: `com.greenopal.blank`
 - **Min SDK**: 24
 - **Target SDK**: 35
+
+### Zargon Game Port
+
+This Android app is a port of the original QBASIC game "The Evil Wrath of Zargon". The original QBASIC source code (ZARGON.BAS) is located in `/Users/greg/dev/zargon/app/zargon/ZARGON.BAS` but is **READ-ONLY** and should **NEVER BE EDITED**. It serves only as reference material for understanding the original game logic. All game logic modifications should be made to the Kotlin/Android implementation files.
 
 ## Build Commands
 

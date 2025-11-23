@@ -4,6 +4,8 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -56,7 +58,8 @@ fun QuestProgressScreen(
         QuestItem("wood", "Wood", "Ship hull material"),
         QuestItem("boat plans", "Boat Plans", "Ship blueprints"),
         QuestItem("trapped soul", "Trapped Soul", "Currency for necromancer"),
-        QuestItem("ship", "Ship", "River travel vehicle")
+        QuestItem("ship", "Ship", "River travel vehicle"),
+        QuestItem("Zargon", "Zargon Trophy", "Victory over evil overlord")
     )
 
     // Calculate progress based on discovered items (not current inventory)
@@ -75,7 +78,8 @@ fun QuestProgressScreen(
         Column(
             modifier = Modifier
                 .fillMaxWidth(0.9f)
-                .padding(16.dp),
+                .padding(16.dp)
+                .verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
