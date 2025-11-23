@@ -79,6 +79,7 @@ class MapViewModel @Inject constructor(
                     state.worldX == 2 && state.worldY == 4 -> TileInteraction.NpcDialog(NpcType.BOATMAN)  // Map 24
                     state.worldX == 1 && state.worldY == 4 -> TileInteraction.NpcDialog(NpcType.SANDMAN)  // Map 14
                     state.worldX == 4 && state.worldY == 1 -> TileInteraction.NpcDialog(NpcType.NECROMANCER)  // Map 41
+                    state.worldX == 4 && state.worldY == 2 -> TileInteraction.NpcDialog(NpcType.STAT_TRAINER)  // Map 42
                     state.worldX == 4 && state.worldY == 3 -> TileInteraction.NpcDialog(NpcType.MOUNTAIN_JACK)  // Map 43
                     state.worldX == 4 && state.worldY == 4 -> TileInteraction.NpcDialog(NpcType.OLD_MAN)  // Map 44
                     state.worldX == 1 && state.worldY == 1 -> TileInteraction.NpcDialog(NpcType.FOUNTAIN)  // Map 11

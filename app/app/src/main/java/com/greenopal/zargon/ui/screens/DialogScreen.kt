@@ -26,10 +26,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.runtime.LaunchedEffect
 import com.greenopal.zargon.data.models.Dialog
 import com.greenopal.zargon.data.models.GameState
 import com.greenopal.zargon.data.models.NpcType
 import com.greenopal.zargon.data.models.StoryAction
+import com.greenopal.zargon.domain.story.NpcDialogProvider
 
 /**
  * Dialog screen for NPC interactions
@@ -38,13 +40,20 @@ import com.greenopal.zargon.data.models.StoryAction
 @Composable
 fun DialogScreen(
     npcType: NpcType,
-    dialog: Dialog,
+    dialogProvider: NpcDialogProvider,
     gameState: GameState,
     onDialogEnd: (GameState, StoryAction?) -> Unit,
     modifier: Modifier = Modifier
 ) {
     var currentAnswer by remember { mutableStateOf<String?>(null) }
     var selectedAction by remember { mutableStateOf<StoryAction?>(null) }
+    var dialog by remember { mutableStateOf(dialogProvider.getDialog(npcType, gameState)) }
+
+    LaunchedEffect(gameState.storyStatus, gameState.inventory.size) {
+        dialog = dialogProvider.getDialog(npcType, gameState)
+        currentAnswer = null
+        selectedAction = null
+    }
 
     Box(
         modifier = modifier
@@ -76,6 +85,17 @@ fun DialogScreen(
                     textAlign = TextAlign.Center
                 )
 
+                // Description (if present)
+                dialog.description?.let { description ->
+                    Text(
+                        text = description,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.padding(vertical = 8.dp)
+                    )
+                }
+
                 Spacer(modifier = Modifier.height(8.dp))
 
                 // Answer display (if question was asked)
@@ -98,7 +118,9 @@ fun DialogScreen(
 
                     // Continue button
                     Button(
-                        onClick = { currentAnswer = null },
+                        onClick = {
+                            currentAnswer = null
+                        },
                         modifier = Modifier.fillMaxWidth(),
                         colors = ButtonDefaults.buttonColors(
                             containerColor = MaterialTheme.colorScheme.secondary,
@@ -119,6 +141,7 @@ fun DialogScreen(
                                 // Only update selectedAction if there's a new non-null action
                                 dialog.action1?.let { selectedAction = it }
                             },
+                            enabled = dialog.enabled1,
                             modifier = Modifier.fillMaxWidth(),
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = if (dialog.action1 != null) {
@@ -126,13 +149,14 @@ fun DialogScreen(
                                 } else {
                                     MaterialTheme.colorScheme.primary
                                 },
-                                contentColor = Color.White
+                                contentColor = Color.White,
+                                disabledContainerColor = Color(0xFF424242),
+                                disabledContentColor = Color(0xFF9E9E9E)
                             )
                         ) {
                             Text(
                                 text = "1. ${dialog.question1}",
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = Color.White
+                                style = MaterialTheme.typography.bodyMedium
                             )
                         }
                     }
@@ -144,6 +168,7 @@ fun DialogScreen(
                                 // Only update selectedAction if there's a new non-null action
                                 dialog.action2?.let { selectedAction = it }
                             },
+                            enabled = dialog.enabled2,
                             modifier = Modifier.fillMaxWidth(),
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = if (dialog.action2 != null) {
@@ -151,13 +176,14 @@ fun DialogScreen(
                                 } else {
                                     MaterialTheme.colorScheme.primary
                                 },
-                                contentColor = Color.White
+                                contentColor = Color.White,
+                                disabledContainerColor = Color(0xFF424242),
+                                disabledContentColor = Color(0xFF9E9E9E)
                             )
                         ) {
                             Text(
                                 text = "2. ${dialog.question2}",
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = Color.White
+                                style = MaterialTheme.typography.bodyMedium
                             )
                         }
                     }
@@ -169,6 +195,7 @@ fun DialogScreen(
                                 // Only update selectedAction if there's a new non-null action
                                 dialog.storyAction?.let { selectedAction = it }
                             },
+                            enabled = dialog.enabled3,
                             modifier = Modifier.fillMaxWidth(),
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = if (dialog.storyAction != null) {
@@ -176,13 +203,14 @@ fun DialogScreen(
                                 } else {
                                     MaterialTheme.colorScheme.primary
                                 },
-                                contentColor = Color.White
+                                contentColor = Color.White,
+                                disabledContainerColor = Color(0xFF424242),
+                                disabledContentColor = Color(0xFF9E9E9E)
                             )
                         ) {
                             Text(
                                 text = "3. ${dialog.question3}",
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = Color.White
+                                style = MaterialTheme.typography.bodyMedium
                             )
                         }
                     }

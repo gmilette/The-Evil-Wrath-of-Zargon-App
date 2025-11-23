@@ -97,7 +97,7 @@ sealed class WorldSpell(
     /**
      * Warp spell (ZARGON.BAS:805-812)
      * MP cost: 7
-     * Effect: Teleport to healer location (Map 2,4 at coordinates 15,8)
+     * Effect: Teleport to healer location (Map 2,4 at coordinates 10,8)
      */
     object Warp : WorldSpell(
         id = 3,
@@ -107,11 +107,11 @@ sealed class WorldSpell(
         description = "Teleport to the healer"
     ) {
         override fun cast(gameState: GameState): Pair<GameState, String> {
-            // QBASIC: mapx = 2: mapy = 4: cx = 15: cy = 8
+            // QBASIC: mapx = 2: mapy = 4: cx = 10: cy = 8
             val updatedState = gameState.copy(
                 worldX = 2,
                 worldY = 4,
-                characterX = 15,
+                characterX = 10,
                 characterY = 8,
                 character = gameState.character.copy(
                     currentMP = gameState.character.currentMP - mpCost

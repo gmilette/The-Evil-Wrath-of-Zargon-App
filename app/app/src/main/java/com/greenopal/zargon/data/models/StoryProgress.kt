@@ -59,7 +59,11 @@ data class Dialog(
     val answer3: String,
     val storyAction: StoryAction? = null,  // Action for question3 (legacy)
     val action1: StoryAction? = null,       // Action for question1
-    val action2: StoryAction? = null        // Action for question2
+    val action2: StoryAction? = null,       // Action for question2
+    val enabled1: Boolean = true,           // Whether option 1 is enabled
+    val enabled2: Boolean = true,           // Whether option 2 is enabled
+    val enabled3: Boolean = true,           // Whether option 3 is enabled
+    val description: String? = null         // Optional description text shown above options
 )
 
 sealed class StoryAction {
@@ -69,6 +73,8 @@ sealed class StoryAction {
     object BuildBoat : StoryAction()
     object ResurrectBoatman : StoryAction()
     object HealPlayer : StoryAction()
+    data class IncreaseAttack(val cost: Int) : StoryAction()
+    data class IncreaseDefense(val cost: Int) : StoryAction()
     data class MultiAction(val actions: List<StoryAction>) : StoryAction()
 }
 
@@ -79,6 +85,7 @@ enum class NpcType(val npcId: String, val displayName: String) {
     BOATMAN("11", "Boatman"),
     SANDMAN("14", "Sandman"),
     NECROMANCER("41", "Necromancer"),
+    STAT_TRAINER("42", "Trainer"),
     MOUNTAIN_JACK("43", "Mountain Jack"),
     OLD_MAN("44", "Old Man"),
     FOUNTAIN("F", "Fountain"),

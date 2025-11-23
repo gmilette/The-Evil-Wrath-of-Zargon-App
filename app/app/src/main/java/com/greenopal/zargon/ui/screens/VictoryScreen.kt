@@ -155,7 +155,7 @@ fun VictoryScreen(
                     // Return to GEF button
                     Button(
                         onClick = {
-                            // Warp to healer location (Map 2,4 at coordinates 15,8)
+                            // Warp to healer location (Map 2,4 at coordinates 10,8)
                             // Add "Zargon" trophy item to inventory
                             val zargonTrophy = Item(
                                 name = "Zargon",
@@ -167,7 +167,7 @@ fun VictoryScreen(
                                 .copy(
                                     worldX = 2,
                                     worldY = 4,
-                                    characterX = 15,
+                                    characterX = 10,
                                     characterY = 8
                                 )
                                 .addItem(zargonTrophy)

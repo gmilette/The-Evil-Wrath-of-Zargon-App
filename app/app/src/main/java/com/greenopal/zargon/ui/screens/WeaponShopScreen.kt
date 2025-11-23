@@ -13,6 +13,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Button
@@ -273,29 +275,41 @@ private fun WeaponList(
     onBack: () -> Unit
 ) {
     Column(
-        modifier = Modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
+        modifier = Modifier.fillMaxWidth()
     ) {
-        Text("Weapons for Sale:", style = MaterialTheme.typography.titleMedium)
+        Text(
+            "Weapons for Sale:",
+            style = MaterialTheme.typography.titleMedium,
+            modifier = Modifier.padding(bottom = 8.dp)
+        )
 
-        Weapon.values().forEach { weapon ->
-            val adjustedPrice = (weapon.basePrice * mood.priceMultiplier).toInt()
-            val isEquipped = weapon.ordinal == currentWeaponStatus
-            WeaponItem(
-                weapon = weapon,
-                price = adjustedPrice,
-                canAfford = currentGold >= adjustedPrice,
-                isEquipped = isEquipped
-            ) {
-                onPurchase(weapon)
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(1f),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            items(Weapon.values()) { weapon ->
+                val adjustedPrice = (weapon.basePrice * mood.priceMultiplier).toInt()
+                val isEquipped = weapon.ordinal == currentWeaponStatus
+                WeaponItem(
+                    weapon = weapon,
+                    price = adjustedPrice,
+                    canAfford = currentGold >= adjustedPrice,
+                    isEquipped = isEquipped
+                ) {
+                    onPurchase(weapon)
+                }
             }
         }
 
         Button(
             onClick = onBack,
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 8.dp),
             colors = ButtonDefaults.buttonColors(
-                containerColor = Color(0xFF666666), // Medium gray with white text
+                containerColor = Color(0xFF666666),
                 contentColor = Color.White
             )
         ) {
@@ -330,9 +344,8 @@ private fun WeaponItem(
             disabledContentColor = Color.White
         )
     ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween
+        Column(
+            modifier = Modifier.fillMaxWidth()
         ) {
             Text(
                 text = if (isEquipped) {
@@ -362,29 +375,41 @@ private fun ArmorList(
     onBack: () -> Unit
 ) {
     Column(
-        modifier = Modifier.fillMaxWidth(),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
+        modifier = Modifier.fillMaxWidth()
     ) {
-        Text("Armor for Sale:", style = MaterialTheme.typography.titleMedium)
+        Text(
+            "Armor for Sale:",
+            style = MaterialTheme.typography.titleMedium,
+            modifier = Modifier.padding(bottom = 8.dp)
+        )
 
-        Armor.values().forEach { armor ->
-            val adjustedPrice = (armor.basePrice * mood.priceMultiplier).toInt()
-            val isEquipped = armor.ordinal == currentArmorStatus
-            ArmorItem(
-                armor = armor,
-                price = adjustedPrice,
-                canAfford = currentGold >= adjustedPrice,
-                isEquipped = isEquipped
-            ) {
-                onPurchase(armor)
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(1f),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            items(Armor.values()) { armor ->
+                val adjustedPrice = (armor.basePrice * mood.priceMultiplier).toInt()
+                val isEquipped = armor.ordinal == currentArmorStatus
+                ArmorItem(
+                    armor = armor,
+                    price = adjustedPrice,
+                    canAfford = currentGold >= adjustedPrice,
+                    isEquipped = isEquipped
+                ) {
+                    onPurchase(armor)
+                }
             }
         }
 
         Button(
             onClick = onBack,
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 8.dp),
             colors = ButtonDefaults.buttonColors(
-                containerColor = Color(0xFF666666), // Medium gray with white text
+                containerColor = Color(0xFF666666),
                 contentColor = Color.White
             )
         ) {
@@ -419,9 +444,8 @@ private fun ArmorItem(
             disabledContentColor = Color.White
         )
     ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween
+        Column(
+            modifier = Modifier.fillMaxWidth()
         ) {
             Text(
                 text = if (isEquipped) {
@@ -460,7 +484,9 @@ enum class Weapon(val displayName: String, val basePrice: Int, val attackBonus: 
     BROAD_SWORD("broad sword", 103, 9),
     TWOHANDED_SWORD("twohanded sword", 250, 15),
     ATLANTEAN_SWORD("Atlantean Sword", 500, 25),
-    GERMANIC_WARCLEAVER("Germanic WarCleaver", 834, 40)
+    // too powerful
+//    GERMANIC_WARCLEAVER("Germanic WarCleaver", 834, 40),
+//    SIR_BEATDOWN("Sir Beatdown", 2500, 60)
 }
 
 enum class Armor(val displayName: String, val basePrice: Int, val defenseBonus: Int) {
@@ -470,8 +496,8 @@ enum class Armor(val displayName: String, val basePrice: Int, val defenseBonus: 
     SPIKED_LEATHER("spiked leather", 98, 20),
     CHAIN_MAIL("chain mail", 134, 28),
     PLATEMAIL("platemail", 279, 50),
-    SPLINT_MAIL("Splint mail", 578, 80),
-    RITE_OF_TOUGH_SKIN("Rite of tough skin", 1004, 120)
+//    SPLINT_MAIL("Splintmail", 578, 80),
+//    RITE_OF_TOUGH_SKIN("Rite of tough skin", 1004, 120)
 }
 
 /**

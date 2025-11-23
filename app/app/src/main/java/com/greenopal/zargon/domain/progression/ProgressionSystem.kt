@@ -69,10 +69,11 @@ class RewardSystem @Inject constructor() {
     fun getSpecialDrop(
         monsterType: MonsterType,
         worldX: Int,
-        worldY: Int
+        worldY: Int,
+        storyStatus: Float
     ): Item? {
-        // Necro at map(4,2) drops trapped soul
-        if (monsterType == MonsterType.NECRO && worldX == 4 && worldY == 2) {
+        // Necro at map(4,1) or map(4,2) drops trapped soul if boatman is dead (storyStatus >= 3)
+        if (monsterType == MonsterType.NECRO && worldX == 4 && (worldY == 1 || worldY == 2) && storyStatus >= 3.0f) {
             return Items.TRAPPED_SOUL
         }
         return null

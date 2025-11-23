@@ -22,6 +22,7 @@ class NpcDialogProvider @Inject constructor() {
             NpcType.BOATMAN -> getBoatmanDialog(gameState)
             NpcType.SANDMAN -> getSandmanDialog(gameState)
             NpcType.NECROMANCER -> getNecromancerDialog(gameState)
+            NpcType.STAT_TRAINER -> getStatTrainerDialog(gameState)
             NpcType.MOUNTAIN_JACK -> getMountainJackDialog(gameState)
             NpcType.OLD_MAN -> getOldManDialog(gameState)
             NpcType.FOUNTAIN -> getFountainDialog()
@@ -276,6 +277,7 @@ class NpcDialogProvider @Inject constructor() {
      */
     private fun getMountainJackDialog(gameState: GameState): Dialog {
         val status = gameState.storyStatus
+        val hasSoul = gameState.hasItem("trapped soul")
 
         return when {
             status < 4f -> {
@@ -283,20 +285,31 @@ class NpcDialogProvider @Inject constructor() {
                     question1 = "",
                     answer1 = "there is no one here",
                     question2 = "",
-                    answer2 = "",
+                    answer2 = "there is no one here",
                     question3 = "",
-                    answer3 = ""
+                    answer3 = "there is no one here"
                 )
             }
             status >= 4f -> {
-                Dialog(
-                    question1 = "hey old man",
-                    answer1 = "wha?... who you callin old man, get away from me",
-                    question2 = "please help me, i need a trapped soul",
-                    answer2 = "a trapped soul!?! you're crazy kid...ok fine, i do know where one is, if you just get away from me. travel to the north east, there is a graveyard, an evil graveyard. There you will find what you seek",
-                    question3 = "that's it?",
-                    answer3 = "yep."
-                )
+                if (hasSoul) {
+                    Dialog(
+                        question1 = "how can i escape from here?",
+                        answer1 = "well lemme see here, that there island wit da castle on it, well, i do declare, that if a fella like you could make it there, you might have some luck",
+                        question2 = "see i found the soul!",
+                        answer2 = "good for you tiger",
+                        question3 = "how long have you been living out here?",
+                        answer3 = "shoot, i reckon about 40 years or so. lost count after the first decade, hehe"
+                    )
+                } else {
+                    Dialog(
+                        question1 = "how can i escape from here?",
+                        answer1 = "well lemme see here, that there island wit da castle on it, well, i do declare, that if a fella like you could make it there, you might have some luck",
+                        question2 = "do you know where i can find a soul?",
+                        answer2 = "what in tarnation!. oh a soul..well i once knew a fella who was trapped behind a mountain. yea, hes long dead i reckon",
+                        question3 = "how long have you been living out here?",
+                        answer3 = "shoot, i reckon about 40 years or so. lost count after the first decade, hehe"
+                    )
+                }
             }
             else -> Dialog("", "No one is here", "", "", "", "")
         }
@@ -329,6 +342,37 @@ class NpcDialogProvider @Inject constructor() {
             action2 = StoryAction.HealPlayer,
             question3 = "leave",
             answer3 = "You walk away from the fountain feeling refreshed."
+        )
+    }
+
+    /**
+     * Stat Trainer dialog (Map 42 hut)
+     */
+    private fun getStatTrainerDialog(gameState: GameState): Dialog {
+        val gold = gameState.character.gold
+        val cost = 1000
+        val canAfford = gold >= cost
+
+        return Dialog(
+            description = "Heavy weights and things are lying about...",
+            question1 = "Increase your attack? (1000g) (+1 AP)",
+            answer1 = if (canAfford) {
+                "Your training is complete! You feel stronger! Attack increased by 1!"
+            } else {
+                "You don't have enough gold! Come back when you have 1000 gold."
+            },
+            action1 = if (canAfford) StoryAction.IncreaseAttack(cost) else null,
+            enabled1 = canAfford,
+            question2 = "Increase your defense? (1000g) (+1 DP)",
+            answer2 = if (canAfford) {
+                "Your training is complete! You feel more resilient! Defense increased by 1!"
+            } else {
+                "You don't have enough gold! Come back when you have 1000 gold."
+            },
+            action2 = if (canAfford) StoryAction.IncreaseDefense(cost) else null,
+            enabled2 = canAfford,
+            question3 = "",
+            answer3 = ""
         )
     }
 }
