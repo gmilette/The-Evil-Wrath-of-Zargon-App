@@ -247,10 +247,11 @@ class MainActivity : ComponentActivity() {
                                                     updatedGameState.characterX in 13..16 &&
                                                     updatedGameState.characterY in 4..6
 
-                                            screenState = when {
-                                                defeatedZargon -> ScreenState.VICTORY
-                                                isExplorationMode -> ScreenState.MAP
-                                                else -> ScreenState.MENU
+                                            // After battle victory, return to map (or victory screen if ZARGON defeated)
+                                            screenState = if (defeatedZargon) {
+                                                ScreenState.VICTORY
+                                            } else {
+                                                ScreenState.MAP
                                             }
                                         }
                                         is BattleResult.Defeat -> {
@@ -258,12 +259,8 @@ class MainActivity : ComponentActivity() {
                                             screenState = ScreenState.GAME_OVER
                                         }
                                         is BattleResult.Fled -> {
-                                            // Fled - return to map if exploring
-                                            screenState = if (isExplorationMode) {
-                                                ScreenState.MAP
-                                            } else {
-                                                ScreenState.MENU
-                                            }
+                                            // Fled - return to map
+                                            screenState = ScreenState.MAP
                                         }
                                         else -> {}
                                     }
