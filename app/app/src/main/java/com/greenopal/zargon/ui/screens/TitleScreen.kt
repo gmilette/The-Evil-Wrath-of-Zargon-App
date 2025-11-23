@@ -132,7 +132,7 @@ fun TitleScreen(
                                 Text(
                                     text = "Empty",
                                     style = MaterialTheme.typography.bodySmall,
-                                    color = Color.Gray
+                                    color = Color.Black
                                 )
                             }
                         }
