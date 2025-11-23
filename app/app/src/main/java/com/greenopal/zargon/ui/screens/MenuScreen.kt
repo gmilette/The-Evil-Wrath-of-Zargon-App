@@ -34,6 +34,7 @@ fun MenuScreen(
     onStartBattleTest: () -> Unit,
     onViewStats: () -> Unit,
     onViewQuestProgress: () -> Unit,
+    onViewHints: () -> Unit,
     onBack: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -100,6 +101,22 @@ fun MenuScreen(
                     Text(
                         text = "View Quest Progress",
                         style = MaterialTheme.typography.titleMedium
+                    )
+                }
+
+                // View Map Guide & Hints button
+                Button(
+                    onClick = onViewHints,
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFFFFD700)
+                    )
+                ) {
+                    Text(
+                        text = "Map Guide & Hints",
+                        style = MaterialTheme.typography.titleMedium,
+                        color = Color.Black,
+                        fontWeight = FontWeight.Bold
                     )
                 }
 

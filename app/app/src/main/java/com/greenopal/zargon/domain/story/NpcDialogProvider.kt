@@ -35,42 +35,75 @@ class NpcDialogProvider @Inject constructor() {
     private fun getBoatmanDialog(gameState: GameState): Dialog {
         val status = gameState.storyStatus
         val hasWood = gameState.hasItem("wood")
+        val hasDeadWood = gameState.hasItem("dead wood")
+        val hasCloth = gameState.hasItem("cloth")
+        val hasRutter = gameState.hasItem("rutter")
+        val hasDynamite = gameState.hasItem("dynamite")
+        val hasAllBoatMaterials = hasWood && hasDeadWood && hasCloth && hasRutter
+
+        android.util.Log.d("NpcDialogProvider", "Boatman dialog - Story status: $status, Has dynamite: $hasDynamite, Has all materials: $hasAllBoatMaterials, Inventory: ${gameState.inventory.map { it.name }}")
 
         return when {
             // Stage 1: Trapped boatman
             status < 2f -> {
-                val question2 = if (status == 1.5f) "use the dynamite" else "how can i help?"
-                Dialog(
-                    question1 = "what happened??",
-                    answer1 = "monsters attacked me, but their mage blasted down these rocks...now i am stuck, please help!!!",
-                    question2 = question2,
-                    answer2 = "blast me out of here!!.. use the dynamite, the sandman knows where it is, i think..",
-                    question3 = "why should i help you?",
-                    answer3 = "because i am a boat master.. i can build you a boat!!!! ooo ouch! help!",
-                    storyAction = if (status == 1.5f) StoryAction.AdvanceStory(2.0f) else null
-                )
+                if (status == 1.5f && hasDynamite) {
+                    // Player has dynamite - show option to rescue him
+                    android.util.Log.d("NpcDialogProvider", "Showing dynamite rescue option")
+                    Dialog(
+                        question1 = "what happened??",
+                        answer1 = "monsters attacked me, but their mage blasted down these rocks...now i am stuck, please help!!!",
+                        question2 = "how can i help?",
+                        answer2 = "blast me out of here!!.. use the dynamite, the sandman knows where it is, i think..",
+                        question3 = "(use the dynamite)",
+                        answer3 = "**BOOM!** The rocks explode! The boatman is free! 'Thank you!' he says. 'I can help you escape this land - I'm a boat master!'",
+                        storyAction = StoryAction.MultiAction(listOf(
+                            StoryAction.TakeItem("dynamite"),
+                            StoryAction.AdvanceStory(2.0f)
+                        ))
+                    )
+                } else {
+                    // Player doesn't have dynamite yet or hasn't talked to Sandman
+                    android.util.Log.d("NpcDialogProvider", "Showing basic boatman dialog (no dynamite option)")
+                    Dialog(
+                        question1 = "what happened??",
+                        answer1 = "monsters attacked me, but their mage blasted down these rocks...now i am stuck, please help!!!",
+                        question2 = "how can i help?",
+                        answer2 = "blast me out of here!!.. use the dynamite, the sandman knows where it is, i think..",
+                        question3 = "why should i help you?",
+                        answer3 = "because i am a boat master.. i can build you a boat!!!! ooo ouch! help!"
+                    )
+                }
             }
 
             // Stage 2: Freed boatman, needs materials
             status >= 2f && status < 3f -> {
-                if (status == 2.5f && hasWood) {
+                if (hasAllBoatMaterials) {
+                    // Player has all materials - give boat plans and advance story
                     Dialog(
                         question1 = "how can we get out of here?",
                         answer1 = "well there used to be a warper, in the old castle, but it is currently overrun by monsters, the island is the only way out",
                         question2 = "how can we get to this island?",
                         answer2 = "duh? i am a boatmaker, i guess i could make you a boat seeing that you saved my life and all.. i'll need some materials though..",
-                        question3 = "(give him the wood)",
-                        answer3 = "ahh yes thankyou, i will build you the boat soon enough, but i am tired, and i need to get some rest, so please excuse me, oh here is what i need (he gives you the boat plans)",
-                        storyAction = StoryAction.GiveItem("boat plans")
+                        question3 = "(give him the materials)",
+                        answer3 = "ahh yes thankyou! The wood, dead wood, cloth, and rutter - perfect! I will build you the boat soon enough, but i am tired, and i need to get some rest, so please excuse me, oh here are the plans (he gives you the boat plans)",
+                        storyAction = StoryAction.MultiAction(listOf(
+                            StoryAction.TakeItem("wood"),
+                            StoryAction.TakeItem("dead wood"),
+                            StoryAction.TakeItem("cloth"),
+                            StoryAction.TakeItem("rutter"),
+                            StoryAction.GiveItem("boat plans"),
+                            StoryAction.AdvanceStory(3.0f)
+                        ))
                     )
                 } else {
+                    // Still collecting materials
                     Dialog(
                         question1 = "how can we get out of here?",
                         answer1 = "well there used to be a warper, in the old castle, but it is currently overrun by monsters, the island is the only way out",
                         question2 = "how can we get to this island?",
                         answer2 = "duh? i am a boatmaker, i guess i could make you a boat seeing that you saved my life and all.. i'll need some materials though..",
                         question3 = "what do you need and where do i find it?",
-                        answer3 = "i'll need wood first, but not any old wood..it has to be nearly dead and dried. Almost as if the sand had blown its strength into it"
+                        answer3 = "I need 4 things: WOOD (strong wood for the hull), DEAD WOOD (dried by the sands), CLOTH (for the sail), and a RUTTER (for navigation). Bring me all of these!"
                     )
                 }
             }
@@ -121,22 +154,33 @@ class NpcDialogProvider @Inject constructor() {
     private fun getSandmanDialog(gameState: GameState): Dialog {
         val status = gameState.storyStatus
 
+        android.util.Log.d("NpcDialogProvider", "Sandman dialog - Story status: $status")
+
         return when {
             // Early game
             status < 3f -> {
-                Dialog(
-                    question1 = "how can i escape?",
-                    answer1 = "the only way i know of is through the river",
-                    question2 = if (status == 1f) "(ask him about the dynamite)" else "what's up with this place?",
-                    answer2 = if (status == 1f) {
-                        "the dynamite? hmm.. it lies on the east side of the TWO GREAT ROCKS OF THE UNIVERSE, but beware, monsters tend to spurt out, be careful, may the sands be with u"
-                    } else {
-                        "This is the land of Gef. The great river splits the forest of the land from the rocks and mountains. In the middle of the island is the castle where the elves used to live, i have no knowledge of what is going on there now"
-                    },
-                    question3 = "do you dig the sand?",
-                    answer3 = "yea it rules man.",
-                    storyAction = if (status == 1f) StoryAction.AdvanceStory(1.5f) else null
-                )
+                if (status == 1f) {
+                    // Beginning - player can ask about dynamite
+                    Dialog(
+                        question1 = "how can i escape?",
+                        answer1 = "the only way i know of is through the river",
+                        question2 = "what's up with this place?",
+                        answer2 = "This is the land of Gef. The great river splits the forest of the land from the rocks and mountains. In the middle of the island is the castle where the elves used to live, i have no knowledge of what is going on there now",
+                        question3 = "(ask him about the dynamite)",
+                        answer3 = "the dynamite? hmm.. it lies on the east side of the TWO GREAT ROCKS OF THE UNIVERSE, but beware, monsters tend to spurt out, be careful, may the sands be with u",
+                        storyAction = StoryAction.AdvanceStory(1.5f)
+                    )
+                } else {
+                    // After learning about dynamite
+                    Dialog(
+                        question1 = "how can i escape?",
+                        answer1 = "the only way i know of is through the river",
+                        question2 = "what's up with this place?",
+                        answer2 = "This is the land of Gef. The great river splits the forest of the land from the rocks and mountains. In the middle of the island is the castle where the elves used to live, i have no knowledge of what is going on there now",
+                        question3 = "do you dig the sand?",
+                        answer3 = "yea it rules man."
+                    )
+                }
             }
 
             // Mid game: collecting boat materials
@@ -181,7 +225,9 @@ class NpcDialogProvider @Inject constructor() {
      */
     private fun getNecromancerDialog(gameState: GameState): Dialog {
         val status = gameState.storyStatus
-        val hasSoul = gameState.hasItem("soul")
+        val hasSoul = gameState.hasItem("trapped soul")
+
+        android.util.Log.d("NpcDialogProvider", "Necromancer dialog - Story status: $status, Has trapped soul: $hasSoul")
 
         return when {
             status < 4f || status >= 5f -> {
@@ -196,7 +242,7 @@ class NpcDialogProvider @Inject constructor() {
             }
 
             status >= 4f && status < 5f -> {
-                if (status == 4.3f && hasSoul) {
+                if (hasSoul) {
                     Dialog(
                         question1 = "hello mr. necromancer, i have to ask you for something",
                         answer1 = "WHAT DO YOU WANT? YOU PATHETIC MORTALS?",
@@ -204,7 +250,10 @@ class NpcDialogProvider @Inject constructor() {
                         answer2 = "WHAT?.. you are asking quite a favor, you know how many pathetic creatures come to me and ask me that same question? Well i am a nice guy, so OCCASIONALLY i will do it, but ya see i aint gunna do it no more, it has made me too weak. NO.. the answer is NO!",
                         question3 = "(give him the soul)",
                         answer3 = "ahhhhh yes, fresh blood...there, i will restore your friend..hopefully he'll do the same for you when you die MAHAHAHAHAAA!!",
-                        storyAction = StoryAction.ResurrectBoatman
+                        storyAction = StoryAction.MultiAction(listOf(
+                            StoryAction.TakeItem("trapped soul"),
+                            StoryAction.AdvanceStory(5.0f)
+                        ))
                     )
                 } else {
                     Dialog(
@@ -273,11 +322,13 @@ class NpcDialogProvider @Inject constructor() {
     private fun getFountainDialog(): Dialog {
         return Dialog(
             question1 = "drink from fountain",
-            answer1 = "You drink the cool refreshing water. You feel revitalized! (HP and MP restored)",
+            answer1 = "You drink the cool refreshing water. You feel revitalized! HP and MP restored!",
+            action1 = StoryAction.HealPlayer,
             question2 = "bathe in fountain",
-            answer2 = "You bathe in the fountain. The water cleanses your wounds! (HP and MP restored)",
-            question3 = "save game",
-            answer3 = "You rest by the fountain and save your progress."
+            answer2 = "You bathe in the fountain. The water cleanses your wounds! HP and MP restored!",
+            action2 = StoryAction.HealPlayer,
+            question3 = "leave",
+            answer3 = "You walk away from the fountain feeling refreshed."
         )
     }
 }

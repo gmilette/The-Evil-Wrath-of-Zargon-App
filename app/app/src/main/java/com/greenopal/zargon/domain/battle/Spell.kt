@@ -21,7 +21,13 @@ data class Spell(
      */
     fun calculateEffect(playerLevel: Int): Int {
         // QBASIC formula: Gain = INT(RND * randomBonus) + 1 * lev
-        val gain = Random.nextInt(1, randomBonus + 1) + playerLevel
+        // Fix: Handle randomBonus == 0 to prevent Random.nextInt crash
+        val randomComponent = if (randomBonus > 0) {
+            Random.nextInt(1, randomBonus + 1)
+        } else {
+            0
+        }
+        val gain = randomComponent + playerLevel
         return baseDamage + gain
     }
 

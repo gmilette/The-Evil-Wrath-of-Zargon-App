@@ -6,10 +6,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
@@ -40,14 +38,14 @@ import androidx.compose.ui.unit.dp
 import com.greenopal.zargon.data.models.GameState
 
 /**
- * Healer screen for restoring HP/MP
- * Based on QBASIC healr procedure (ZARGON.BAS:1610-1665)
+ * Fountain screen for restoring HP/MP and saving
+ * Based on QBASIC fountain procedure (ZARGON.BAS:1487-1540)
  */
 @Composable
-fun HealerScreen(
+fun FountainScreen(
     gameState: GameState,
     onSaveGame: (GameState) -> Unit,
-    onHealerExit: (GameState) -> Unit,
+    onFountainExit: (GameState) -> Unit,
     modifier: Modifier = Modifier
 ) {
     var message by remember { mutableStateOf<String?>(null) }
@@ -56,7 +54,7 @@ fun HealerScreen(
 
     // Handle Android back button
     BackHandler {
-        onHealerExit(updatedGameState)
+        onFountainExit(updatedGameState)
     }
 
     Box(
@@ -77,14 +75,14 @@ fun HealerScreen(
             Box {
                 // Exit button in top-left corner
                 IconButton(
-                    onClick = { onHealerExit(updatedGameState) },
+                    onClick = { onFountainExit(updatedGameState) },
                     modifier = Modifier
                         .align(Alignment.TopStart)
                         .padding(8.dp)
                 ) {
                     Icon(
                         imageVector = Icons.Default.Close,
-                        contentDescription = "Exit healer",
+                        contentDescription = "Exit fountain",
                         tint = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.size(32.dp)
                     )
@@ -100,19 +98,17 @@ fun HealerScreen(
                 ) {
                 // Header
                 Text(
-                    text = "The Healer",
+                    text = "The Fountain",
                     style = MaterialTheme.typography.headlineSmall,
                     color = MaterialTheme.colorScheme.primary,
                     textAlign = TextAlign.Center
                 )
 
                 Text(
-                    text = "hi mr. healer!",
+                    text = "A beautiful crystal-clear fountain flows before you",
                     style = MaterialTheme.typography.bodyMedium,
                     textAlign = TextAlign.Center
                 )
-
-                Spacer(modifier = Modifier.height(8.dp))
 
                 // Stats display
                 Card(
@@ -138,75 +134,55 @@ fun HealerScreen(
                             text = "MP: ${updatedGameState.character.currentMP}/${updatedGameState.character.maxMP}",
                             color = Color.White
                         )
-                        Text(
-                            text = "Gold: ${updatedGameState.character.gold}",
-                            color = Color(0xFFFFD700),
-                            fontWeight = FontWeight.Bold
-                        )
                     }
                 }
 
-                Spacer(modifier = Modifier.height(8.dp))
-
-                Text(
-                    text = "what do you want?",
-                    style = MaterialTheme.typography.bodyMedium,
-                    fontWeight = FontWeight.Bold
-                )
-
-                // Service buttons
-                HealingOption(
-                    number = 1,
-                    service = "healing",
-                    cost = 3,
-                    enabled = updatedGameState.character.gold >= 3 &&
-                            updatedGameState.character.currentDP < updatedGameState.character.maxDP,
+                // Fountain action buttons
+                Button(
                     onClick = {
-                        val newChar = updatedGameState.character.copy(
+                        val healedCharacter = updatedGameState.character.copy(
                             currentDP = updatedGameState.character.maxDP,
-                            gold = updatedGameState.character.gold - 3
+                            currentMP = updatedGameState.character.maxMP
                         )
-                        updatedGameState = updatedGameState.updateCharacter(newChar)
-                        message = "sure my son"
+                        updatedGameState = updatedGameState.updateCharacter(healedCharacter)
+                        message = "You drink the cool refreshing water. You feel revitalized! HP and MP restored!"
                         showMessageDialog = true
-                    }
-                )
-
-                HealingOption(
-                    number = 2,
-                    service = "magic healing",
-                    cost = 3,
-                    enabled = updatedGameState.character.gold >= 3 &&
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    enabled = updatedGameState.character.currentDP < updatedGameState.character.maxDP ||
                             updatedGameState.character.currentMP < updatedGameState.character.maxMP,
-                    onClick = {
-                        val newChar = updatedGameState.character.copy(
-                            currentMP = updatedGameState.character.maxMP,
-                            gold = updatedGameState.character.gold - 3
-                        )
-                        updatedGameState = updatedGameState.updateCharacter(newChar)
-                        message = "sure my son"
-                        showMessageDialog = true
-                    }
-                )
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFF1976D2), // Blue
+                        contentColor = Color.White,
+                        disabledContainerColor = Color(0xFF424242),
+                        disabledContentColor = Color(0xFF888888)
+                    )
+                ) {
+                    Text("1. drink from fountain")
+                }
 
-                HealingOption(
-                    number = 3,
-                    service = "complete rest",
-                    cost = 5,
-                    enabled = updatedGameState.character.gold >= 5 &&
-                            (updatedGameState.character.currentDP < updatedGameState.character.maxDP ||
-                                    updatedGameState.character.currentMP < updatedGameState.character.maxMP),
+                Button(
                     onClick = {
-                        val newChar = updatedGameState.character.copy(
+                        val healedCharacter = updatedGameState.character.copy(
                             currentDP = updatedGameState.character.maxDP,
-                            currentMP = updatedGameState.character.maxMP,
-                            gold = updatedGameState.character.gold - 5
+                            currentMP = updatedGameState.character.maxMP
                         )
-                        updatedGameState = updatedGameState.updateCharacter(newChar)
-                        message = "sure my son"
+                        updatedGameState = updatedGameState.updateCharacter(healedCharacter)
+                        message = "You bathe in the fountain. The water cleanses your wounds! HP and MP restored!"
                         showMessageDialog = true
-                    }
-                )
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    enabled = updatedGameState.character.currentDP < updatedGameState.character.maxDP ||
+                            updatedGameState.character.currentMP < updatedGameState.character.maxMP,
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFF1976D2), // Blue
+                        contentColor = Color.White,
+                        disabledContainerColor = Color(0xFF424242),
+                        disabledContentColor = Color(0xFF888888)
+                    )
+                ) {
+                    Text("2. bathe in fountain")
+                }
 
                 Button(
                     onClick = {
@@ -220,18 +196,18 @@ fun HealerScreen(
                         contentColor = Color.White
                     )
                 ) {
-                    Text("4. shall i save your game?")
+                    Text("3. save your journey")
                 }
 
                 Button(
-                    onClick = { onHealerExit(updatedGameState) },
+                    onClick = { onFountainExit(updatedGameState) },
                     modifier = Modifier.fillMaxWidth(),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFF666666), // Medium gray with white text
+                        containerColor = Color(0xFF666666), // Medium gray
                         contentColor = Color.White
                     )
                 ) {
-                    Text("5. i've had enough of this guy")
+                    Text("0. leave")
                 }
             }
         }
@@ -243,7 +219,7 @@ fun HealerScreen(
                 onDismissRequest = { showMessageDialog = false },
                 title = {
                     Text(
-                        text = "Healer",
+                        text = "Fountain",
                         style = MaterialTheme.typography.titleLarge
                     )
                 },
@@ -261,31 +237,5 @@ fun HealerScreen(
                 containerColor = MaterialTheme.colorScheme.surface
             )
         }
-    }
-}
-
-@Composable
-private fun HealingOption(
-    number: Int,
-    service: String,
-    cost: Int,
-    enabled: Boolean,
-    onClick: () -> Unit
-) {
-    Button(
-        onClick = onClick,
-        modifier = Modifier.fillMaxWidth(),
-        enabled = enabled,
-        colors = ButtonDefaults.buttonColors(
-            containerColor = if (enabled) Color(0xFF1976D2) else Color(0xFF424242),
-            contentColor = Color.White,
-            disabledContainerColor = Color(0xFF424242),
-            disabledContentColor = Color(0xFF888888)
-        )
-    ) {
-        Text(
-            text = "$number) $service  ${cost}gp",
-            color = if (enabled) Color.White else Color(0xFF888888)
-        )
     }
 }

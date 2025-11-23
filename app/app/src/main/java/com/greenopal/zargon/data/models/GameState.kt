@@ -20,6 +20,9 @@ data class GameState(
     // Inventory (QBASIC: items() array, max 10)
     val inventory: List<Item> = emptyList(),
 
+    // Track all items ever discovered (persists even after items are given away/consumed)
+    val discoveredItems: Set<String> = emptySet(),
+
     // Story progression (QBASIC: storystatus, ranges 1.0 to 5.5)
     val storyStatus: Float = 1.0f,
 
@@ -35,12 +38,29 @@ data class GameState(
 ) {
     /**
      * Add item to inventory (max 10 items)
+     * Prevents duplicate items - only one of each item allowed
+     * Also tracks item in discoveredItems for quest progress
      */
     fun addItem(item: Item): GameState {
-        return if (inventory.size < 10) {
-            copy(inventory = inventory + item)
+        // Check if item already exists (case-insensitive)
+        val alreadyHasItem = inventory.any { it.name.equals(item.name, ignoreCase = true) }
+
+        // Track item as discovered (lowercase for consistency)
+        val updatedDiscovered = discoveredItems + item.name.lowercase()
+
+        return if (alreadyHasItem) {
+            // Already have this item, don't add duplicate
+            // But still track as discovered
+            copy(discoveredItems = updatedDiscovered)
+        } else if (inventory.size < 10) {
+            // Add item to inventory and track as discovered
+            copy(
+                inventory = inventory + item,
+                discoveredItems = updatedDiscovered
+            )
         } else {
-            this  // Inventory full
+            // Inventory full - still track as discovered
+            copy(discoveredItems = updatedDiscovered)
         }
     }
 
@@ -52,10 +72,18 @@ data class GameState(
     }
 
     /**
-     * Check if player has a specific item
+     * Check if player has a specific item in current inventory
      */
     fun hasItem(itemName: String): Boolean {
         return inventory.any { it.name.equals(itemName, ignoreCase = true) }
+    }
+
+    /**
+     * Check if player has ever discovered a specific item (for quest progress)
+     * Items remain discovered even after being given away or consumed
+     */
+    fun hasDiscovered(itemName: String): Boolean {
+        return discoveredItems.contains(itemName.lowercase())
     }
 
     /**

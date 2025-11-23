@@ -21,7 +21,7 @@ enum class TileType(
 
     // Water
     WATER("w", Color(0xFF0000AA), isWalkable = false),
-    SHALLOW_WATER("4", Color(0xFF5555FF), isWalkable = true, encounterRate = 0.05f),
+    SHALLOW_WATER("4", Color(0xFF5555FF), isWalkable = false),
 
     // Ground
     GRASS("1", Color(0xFF55FF55), isWalkable = true, encounterRate = 0.1f),
@@ -40,7 +40,14 @@ enum class TileType(
         fun fromCode(code: String): TileType {
             // Handle "a" to "4" conversion from QBASIC
             val normalizedCode = if (code == "a") "4" else code
-            return values().find { it.code == normalizedCode } ?: GRASS
+            val result = values().find { it.code == normalizedCode } ?: GRASS
+
+            // Debug log if we're defaulting to GRASS for unknown codes
+            if (result == GRASS && normalizedCode != "1") {
+                android.util.Log.w("TileType", "Unknown tile code '$normalizedCode' (original: '$code') - defaulting to GRASS")
+            }
+
+            return result
         }
     }
 }

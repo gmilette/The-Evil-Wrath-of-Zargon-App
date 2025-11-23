@@ -31,7 +31,7 @@ import com.greenopal.zargon.data.repository.SaveSlotInfo
 @Composable
 fun TitleScreen(
     saveSlots: List<SaveSlotInfo>,
-    onNewGame: () -> Unit,
+    onNewGame: (Int) -> Unit,  // Now takes slot number
     onContinue: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -66,65 +66,64 @@ fun TitleScreen(
                     textAlign = TextAlign.Center
                 )
 
-                Text(
-                    text = "A Classic QBASIC Adventure",
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.secondary,
-                    textAlign = TextAlign.Center
-                )
-
                 Spacer(modifier = Modifier.height(24.dp))
 
-                // New Game button
-                Button(
-                    onClick = onNewGame,
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.primary
-                    )
-                ) {
-                    Text(
-                        text = "New Game",
-                        style = MaterialTheme.typography.titleLarge,
-                        modifier = Modifier.padding(8.dp)
-                    )
-                }
+                Text(
+                    text = "Select Save Slot:",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.secondary
+                )
 
-                // Continue buttons (for each save slot)
-                saveSlots.filter { it.exists }.forEach { slot ->
+                // Show all save slots (1-4)
+                saveSlots.forEach { slot ->
                     Button(
-                        onClick = { onContinue(slot.slot) },
+                        onClick = {
+                            if (slot.exists) {
+                                // Load existing save
+                                onContinue(slot.slot)
+                            } else {
+                                // Start new game in this slot
+                                onNewGame(slot.slot)
+                            }
+                        },
                         modifier = Modifier.fillMaxWidth(),
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = MaterialTheme.colorScheme.secondary
+                            containerColor = if (slot.exists) {
+                                MaterialTheme.colorScheme.secondary
+                            } else {
+                                MaterialTheme.colorScheme.primary
+                            }
                         )
                     ) {
                         Column(
-                            modifier = Modifier.padding(8.dp)
+                            modifier = Modifier.padding(8.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally
                         ) {
-                            Text(
-                                text = "Continue - Slot ${slot.slot}",
-                                style = MaterialTheme.typography.titleMedium
-                            )
-                            slot.gameState?.let { state ->
+                            if (slot.exists) {
                                 Text(
-                                    text = "Level ${state.character.level} | ${state.character.gold} gold",
-                                    style = MaterialTheme.typography.bodySmall
+                                    text = "Slot ${slot.slot} - Continue",
+                                    style = MaterialTheme.typography.titleMedium
+                                )
+                                slot.gameState?.let { state ->
+                                    Text(
+                                        text = "Level ${state.character.level} | ${state.character.gold} gold | Map ${state.worldX}${state.worldY}",
+                                        style = MaterialTheme.typography.bodySmall
+                                    )
+                                }
+                            } else {
+                                Text(
+                                    text = "Slot ${slot.slot} - New Game",
+                                    style = MaterialTheme.typography.titleMedium
+                                )
+                                Text(
+                                    text = "Empty",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = Color.Gray
                                 )
                             }
                         }
                     }
                 }
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                // Credits
-                Text(
-                    text = "Original Game by Snappahed Software 98\nAndroid Port 2024",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = Color.Gray,
-                    textAlign = TextAlign.Center
-                )
             }
         }
     }

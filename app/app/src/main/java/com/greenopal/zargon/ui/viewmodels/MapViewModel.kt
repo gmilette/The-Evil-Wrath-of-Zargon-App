@@ -121,24 +121,37 @@ class MapViewModel @Inject constructor(
         // Check if tile is walkable
         val targetTile = map.getTile(newX, newY)
         val hasShip = state.hasItem("ship")
-        val hasDynamite = state.hasItem("dynomite")
 
-        // Allow water tiles if player has ship, allow rocks if player has dynamite
+        // Movement validation with explicit water handling
+        // Note: Dynamite is NOT used for general rock traversal - it's only used
+        // in a specific story event (rescuing the boatman in ZARGON.BAS:2026-2046)
         val canMove = when {
-            targetTile == TileType.WATER && hasShip -> true
-            (targetTile == TileType.ROCK || targetTile == TileType.ROCK2) && hasDynamite -> true
-            targetTile == null -> false
+            targetTile == null -> false  // Out of bounds
+            // Deep water is never walkable (too deep even for ship)
+            targetTile == TileType.WATER -> false
+            // Shallow water requires ship (not walkable without it)
+            targetTile == TileType.SHALLOW_WATER -> hasShip
+            // All other tiles (rocks, trees, graves, etc.) use standard walkability
             else -> targetTile.isWalkable
         }
 
+        // Debug logging for map24 (healer area) movement
+        if (state.worldX == 2 && state.worldY == 4) {
+            android.util.Log.d("MapViewModel", "Map24 Movement: from (${state.characterX}, ${state.characterY}) to ($newX, $newY), tile=${targetTile?.name}, walkable=${targetTile?.isWalkable}, canMove=$canMove")
+        }
+
         if (!canMove) {
-            // Hit obstacle - do nothing
+            // Hit obstacle - log and return
+            android.util.Log.d("MapViewModel", "Movement blocked - tile: $targetTile, hasShip: $hasShip")
             return
         }
 
-        // Move player (update inShip status if on water)
-        val onWater = targetTile == TileType.WATER
-        val newState = state.moveTo(newX, newY).copy(inShip = onWater && hasShip)
+        // Move player
+        // Update inShip status: true only when on shallow water with ship
+        val isOnShallowWater = targetTile == TileType.SHALLOW_WATER
+        val shouldBeInShip = (isOnShallowWater && hasShip)
+
+        val newState = state.moveTo(newX, newY).copy(inShip = shouldBeInShip)
         _gameState.value = newState
 
         android.util.Log.d("MapViewModel", "movePlayer($direction) - New position: World (${newState.worldX}, ${newState.worldY}), Char (${newState.characterX}, ${newState.characterY})")
@@ -203,6 +216,26 @@ class MapViewModel @Inject constructor(
             }
         }
 
+        // Check if target tile in new map is walkable before transitioning
+        val targetMap = mapParser.parseMap(newWorldPos.first, newWorldPos.second)
+        val targetTile = targetMap.getTile(newCharPos.first, newCharPos.second)
+        val hasShip = state.hasItem("ship")
+
+        // Check walkability using same logic as normal movement
+        val canTransition = when {
+            targetTile == null -> false
+            // Deep water is never walkable (too deep even for ship)
+            targetTile == TileType.WATER -> false
+            // Shallow water requires ship
+            targetTile == TileType.SHALLOW_WATER -> hasShip
+            else -> targetTile.isWalkable
+        }
+
+        if (!canTransition) {
+            android.util.Log.d("MapViewModel", "Map transition blocked - target tile: $targetTile at (${newCharPos.first}, ${newCharPos.second}) is not walkable")
+            return
+        }
+
         // Update game state with new map and position
         val newState = state.changeMap(
             worldX = newWorldPos.first,
@@ -233,6 +266,8 @@ class MapViewModel @Inject constructor(
     fun searchForItem(): Item? {
         val state = _gameState.value ?: return null
 
+        android.util.Log.d("MapViewModel", "Searching at Map${state.worldX}${state.worldY} position (${state.characterX}, ${state.characterY})")
+
         // Check if item exists at this location and not already in inventory
         val foundItem = MapItems.getItemAt(
             worldX = state.worldX,
@@ -241,13 +276,19 @@ class MapViewModel @Inject constructor(
             spotY = state.characterY
         )
 
+        android.util.Log.d("MapViewModel", "Found item: ${foundItem?.name ?: "nothing"}")
+
         // Only return item if player doesn't already have it
         return if (foundItem != null && !state.hasItem(foundItem.name)) {
             // Add item to game state
             val newState = state.addItem(foundItem)
             _gameState.value = newState
+            android.util.Log.d("MapViewModel", "Added ${foundItem.name} to inventory. Inventory size: ${newState.inventory.size}")
             foundItem
         } else {
+            if (foundItem != null && state.hasItem(foundItem.name)) {
+                android.util.Log.d("MapViewModel", "Player already has ${foundItem.name}")
+            }
             null
         }
     }

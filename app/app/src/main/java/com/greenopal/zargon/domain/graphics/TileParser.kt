@@ -131,46 +131,76 @@ class TileParser @Inject constructor(
     }
 
     private fun createGrassTile(width: Int, height: Int): List<List<Color>> {
-        val lightGreen = Color(0xFF55FF55)
+        val baseGreen = Color(0xFF55FF55)
         val darkGreen = Color(0xFF00AA00)
+        val lightGreen = Color(0xFF88FF88)
+        val yellowGreen = Color(0xFFAAFF55)
+
         return List(height) { y ->
             List(width) { x ->
-                // Add some variation
-                if ((x + y) % 3 == 0) darkGreen else lightGreen
+                // Create grass blade texture with random variation
+                val hash = (x * 73 + y * 193) % 100
+                when {
+                    hash < 15 -> darkGreen  // Darker patches
+                    hash < 30 -> lightGreen // Lighter highlights
+                    hash < 40 -> yellowGreen // Yellow-green variation
+                    else -> baseGreen
+                }
             }
         }
     }
 
     private fun createRockTile(width: Int, height: Int, variant: Boolean): List<List<Color>> {
-        val gray = Color(0xFF888888)
+        val baseGray = Color(0xFF888888)
         val darkGray = Color(0xFF555555)
         val lightGray = Color(0xFFAAAAAA)
+        val veryDarkGray = Color(0xFF333333)
+        val white = Color(0xFFEEEEEE)
 
         return List(height) { y ->
             List(width) { x ->
+                // Create craggy rock texture with highlights and shadows
+                val hash = (x * 97 + y * 211 + (if (variant) 50 else 0)) % 100
                 when {
-                    (x + y) % 4 == 0 -> lightGray
-                    (x * y) % 5 == 0 -> darkGray
-                    else -> gray
+                    hash < 8 -> white          // Bright highlights
+                    hash < 20 -> lightGray     // Light areas
+                    hash < 35 -> darkGray      // Dark areas
+                    hash < 45 -> veryDarkGray  // Deep shadows/crevices
+                    else -> baseGray           // Base rock color
                 }
             }
         }
     }
 
     private fun createSandTile(width: Int, height: Int): List<List<Color>> {
-        val sand = Color(0xFFFFFF55)
-        val darkSand = Color(0xFFEEEE44)
+        val baseSand = Color(0xFFFFFF55)
+        val darkSand = Color(0xFFEEDD44)
+        val lightSand = Color(0xFFFFFF88)
+        val brown = Color(0xFFAA8844)
+        val gray = Color(0xFFCCCCBB)  // Small rocks/pebbles
+
         return List(height) { y ->
             List(width) { x ->
-                if ((x + y) % 2 == 0) darkSand else sand
+                // Create sand grain texture with small rocks
+                val hash = (x * 131 + y * 173) % 100
+                when {
+                    hash < 5 -> gray        // Small pebbles
+                    hash < 15 -> brown      // Darker sand patches
+                    hash < 30 -> lightSand  // Bright sand
+                    hash < 50 -> darkSand   // Medium sand
+                    else -> baseSand        // Base sand color
+                }
             }
         }
     }
 
     private fun createTreeTile(width: Int, height: Int, variant: Boolean): List<List<Color>> {
-        val green = Color(0xFF00AA00)
+        val baseGreen = Color(0xFF00AA00)
         val darkGreen = Color(0xFF006600)
+        val lightGreen = Color(0xFF00CC00)
         val brown = Color(0xFF8B4513)
+        val darkBrown = Color(0xFF654321)
+        val black = Color(0xFF000000)
 
         val centerX = width / 2
         val centerY = height / 2
@@ -179,13 +209,26 @@ class TileParser @Inject constructor(
             List(width) { x ->
                 val dx = x - centerX
                 val dy = y - centerY
+                val hash = (x * 83 + y * 157 + (if (variant) 30 else 0)) % 100
 
                 when {
-                    // Trunk
-                    dy > centerY / 2 && Math.abs(dx) < 2 -> brown
-                    // Leaves (circular)
+                    // Trunk with bark texture
+                    dy > centerY / 2 && Math.abs(dx) < 2 -> {
+                        when {
+                            // Vertical bark lines
+                            y % 2 == 0 && dx == 0 -> black
+                            y % 3 == 0 && dx == 1 -> darkBrown
+                            hash < 30 -> darkBrown  // Random bark spots
+                            else -> brown
+                        }
+                    }
+                    // Leaves (circular) with texture
                     (dx * dx + dy * dy) < (width * width / 8) -> {
-                        if ((x + y) % 3 == 0) darkGreen else green
+                        when {
+                            hash < 20 -> darkGreen   // Dark leaf patches
+                            hash < 35 -> lightGreen  // Light highlights
+                            else -> baseGreen
+                        }
                     }
                     else -> Color.Transparent
                 }
@@ -194,11 +237,21 @@ class TileParser @Inject constructor(
     }
 
     private fun createWaterTile(width: Int, height: Int): List<List<Color>> {
-        val water = Color(0xFF0000AA)
+        val baseWater = Color(0xFF0000AA)
         val lightWater = Color(0xFF3333FF)
+        val darkWater = Color(0xFF000088)
+        val highlight = Color(0xFF6666FF)
+
         return List(height) { y ->
             List(width) { x ->
-                if ((x + y) % 3 == 0) lightWater else water
+                // Create water ripple texture
+                val hash = (x * 109 + y * 181) % 100
+                when {
+                    hash < 10 -> highlight    // Water sparkles
+                    hash < 30 -> lightWater   // Light ripples
+                    hash < 45 -> darkWater    // Dark areas
+                    else -> baseWater         // Base water color
+                }
             }
         }
     }

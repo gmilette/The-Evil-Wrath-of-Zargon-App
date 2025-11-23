@@ -55,6 +55,8 @@ import com.greenopal.zargon.domain.map.GameMap
 import com.greenopal.zargon.domain.map.TileType
 import com.greenopal.zargon.ui.viewmodels.MapViewModel
 import com.greenopal.zargon.ui.viewmodels.TileInteraction
+import com.greenopal.zargon.ui.components.WorldMagicMenu
+import com.greenopal.zargon.domain.world.WorldSpell
 import javax.inject.Inject
 
 /**
@@ -66,6 +68,7 @@ fun MapScreen(
     gameState: GameState,
     playerSprite: Sprite?,
     tileParser: TileParser?,
+    tileBitmapCache: com.greenopal.zargon.domain.graphics.TileBitmapCache?,
     onEnterBattle: (GameState) -> Unit,
     onInteract: (TileInteraction) -> Unit,
     onOpenMenu: () -> Unit,
@@ -75,14 +78,15 @@ fun MapScreen(
 ) {
     // State for found item dialog
     var foundItem by remember { mutableStateOf<Item?>(null) }
-    // Note: Tile sprites disabled for performance - pixel-by-pixel rendering was too slow
-    // TODO: Re-enable with optimized bitmap-based rendering
-    // var tileSprites by remember { mutableStateOf<Map<String, Sprite>>(emptyMap()) }
-    // LaunchedEffect(Unit) {
-    //     tileParser?.let {
-    //         tileSprites = it.parseAllTiles()
-    //     }
-    // }
+
+    // State for spell casting
+    var showSpellMenu by remember { mutableStateOf(false) }
+    var spellResultMessage by remember { mutableStateOf<String?>(null) }
+
+    // Preload tile bitmaps for better performance
+    LaunchedEffect(tileBitmapCache) {
+        tileBitmapCache?.preloadCommonTiles(32)
+    }
 
     // Initialize map
     LaunchedEffect(gameState.worldX, gameState.worldY) {
@@ -149,6 +153,7 @@ fun MapScreen(
                     playerX = currentGameState!!.characterX,
                     playerY = currentGameState!!.characterY,
                     playerSprite = playerSprite,
+                    tileBitmapCache = tileBitmapCache,
                     modifier = Modifier
                         .fillMaxWidth()
                         .weight(1f)
@@ -195,6 +200,9 @@ fun MapScreen(
                             foundItem = Item("", "Nothing found here", type = com.greenopal.zargon.data.models.ItemType.MISC)
                         }
                     },
+                    onCast = {
+                        showSpellMenu = true
+                    },
                     modifier = Modifier.fillMaxWidth()
                 )
             }
@@ -217,6 +225,52 @@ fun MapScreen(
             ItemFoundDialog(
                 item = foundItem!!,
                 onDismiss = { foundItem = null }
+            )
+        }
+
+        // Spell casting menu
+        if (showSpellMenu && currentGameState != null) {
+            WorldMagicMenu(
+                spellLevel = currentGameState!!.character.level,
+                currentMP = currentGameState!!.character.currentMP,
+                onSpellSelected = { spell ->
+                    val (updatedState, message) = spell.cast(currentGameState!!)
+                    viewModel.setGameState(updatedState)
+                    onPositionChanged(updatedState)
+                    showSpellMenu = false
+                    spellResultMessage = message
+                },
+                onCancel = { showSpellMenu = false }
+            )
+        }
+
+        // Spell result dialog
+        if (spellResultMessage != null) {
+            AlertDialog(
+                onDismissRequest = { spellResultMessage = null },
+                title = {
+                    Text(
+                        text = "Spell Cast",
+                        style = MaterialTheme.typography.titleLarge,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                },
+                text = {
+                    Text(
+                        text = spellResultMessage!!,
+                        style = MaterialTheme.typography.bodyLarge,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                },
+                confirmButton = {
+                    TextButton(onClick = { spellResultMessage = null }) {
+                        Text("OK")
+                    }
+                },
+                containerColor = MaterialTheme.colorScheme.surface,
+                tonalElevation = 6.dp
             )
         }
     }
@@ -287,7 +341,7 @@ private fun MapView(
     playerX: Int,
     playerY: Int,
     playerSprite: Sprite?,
-    tileSprites: Map<String, Sprite> = emptyMap(),
+    tileBitmapCache: com.greenopal.zargon.domain.graphics.TileBitmapCache? = null,
     modifier: Modifier = Modifier
 ) {
     Card(
@@ -321,16 +375,32 @@ private fun MapView(
                     for (x in 0 until map.width) {
                         val tile = map.getTile(x, y)
                         if (tile != null) {
-                            // Use colored rectangles for tiles (pixel-by-pixel sprite rendering is too slow)
-                            // TODO: Optimize sprite rendering using Android Bitmap caching
-                            drawRect(
-                                color = tile.displayColor,
-                                topLeft = Offset(
-                                    offsetX + x * tileSize,
-                                    offsetY + y * tileSize
-                                ),
-                                size = Size(tileSize, tileSize)
-                            )
+                            // Try to use textured bitmap from cache, fall back to colored rectangle
+                            val tileBitmap = tileBitmapCache?.getBitmap(tile.name, tileSize.toInt())
+
+                            if (tileBitmap != null) {
+                                // Draw textured bitmap tile
+                                drawIntoCanvas { canvas ->
+                                    val left = offsetX + x * tileSize
+                                    val top = offsetY + y * tileSize
+                                    canvas.nativeCanvas.drawBitmap(
+                                        tileBitmap,
+                                        left,
+                                        top,
+                                        null
+                                    )
+                                }
+                            } else {
+                                // Fallback to colored rectangle if bitmap not available
+                                drawRect(
+                                    color = tile.displayColor,
+                                    topLeft = Offset(
+                                        offsetX + x * tileSize,
+                                        offsetY + y * tileSize
+                                    ),
+                                    size = Size(tileSize, tileSize)
+                                )
+                            }
 
                             // Draw labels for special tiles
                             val label = when (tile) {
@@ -499,6 +569,7 @@ private fun DrawScope.drawGrid(
 private fun MovementControls(
     onMove: (Direction) -> Unit,
     onSearch: () -> Unit,
+    onCast: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Card(
@@ -548,15 +619,30 @@ private fun MovementControls(
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            // Search button
-            Button(
-                onClick = onSearch,
-                modifier = Modifier.fillMaxWidth(0.7f),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.tertiary
-                )
+            // Search and Cast buttons
+            Row(
+                modifier = Modifier.fillMaxWidth(0.9f),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                Text("SEARCH (S)")
+                Button(
+                    onClick = onSearch,
+                    modifier = Modifier.weight(1f),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.tertiary
+                    )
+                ) {
+                    Text("SEARCH")
+                }
+
+                Button(
+                    onClick = onCast,
+                    modifier = Modifier.weight(1f),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFF6A1B9A) // Purple for magic
+                    )
+                ) {
+                    Text("CAST")
+                }
             }
         }
     }

@@ -32,6 +32,14 @@ Don't die
 
 ![gef](pics/trynottodie.png)
 
+GUIDES
+======
+
+For the Android port, see detailed game guides:
+
+- **[MAP_GUIDE.md](MAP_GUIDE.md)** - Complete world map with all 16 maps, item locations, NPC positions, and detailed ASCII visualizations
+- **[STORY_PROGRESSION.md](STORY_PROGRESSION.md)** - Story progression walkthrough, quest flow, and how to advance through each story level
+
 DISCLAIMER
 ==========
 

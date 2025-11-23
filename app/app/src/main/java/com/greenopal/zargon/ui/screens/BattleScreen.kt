@@ -65,6 +65,7 @@ fun BattleScreen(
     val battleRewards by viewModel.battleRewards.collectAsState()
 
     var showRewardsDialog by remember { mutableStateOf(false) }
+    var showDefeatDialog by remember { mutableStateOf(false) }
 
     // Show rewards dialog when battle is won and rewards are available
     LaunchedEffect(battleState?.battleResult, battleRewards) {
@@ -72,6 +73,9 @@ fun BattleScreen(
         if (battleState?.battleResult == BattleResult.Victory && battleRewards != null) {
             android.util.Log.d("BattleScreen", "Showing rewards dialog NOW!")
             showRewardsDialog = true
+        } else if (battleState?.battleResult == BattleResult.Defeat) {
+            android.util.Log.d("BattleScreen", "Player defeated - showing death dialog")
+            showDefeatDialog = true
         }
     }
 
@@ -206,6 +210,66 @@ fun BattleScreen(
                 }
             )
         }
+
+        // Defeat dialog
+        if (showDefeatDialog) {
+            DefeatDialog(
+                onDismiss = {
+                    showDefeatDialog = false
+                    handleBattleEnd()
+                }
+            )
+        }
+    }
+}
+
+@Composable
+private fun DefeatDialog(
+    onDismiss: () -> Unit
+) {
+    androidx.compose.ui.window.Dialog(onDismissRequest = onDismiss) {
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            colors = CardDefaults.cardColors(
+                containerColor = Color(0xFF2A0000) // Dark red background
+            ),
+            border = BorderStroke(3.dp, Color(0xFFFF0000)) // Red border
+        ) {
+            Column(
+                modifier = Modifier.padding(24.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                Text(
+                    text = "YOU DIED",
+                    style = MaterialTheme.typography.headlineLarge,
+                    color = Color(0xFFFF0000),
+                    textAlign = TextAlign.Center
+                )
+
+                Text(
+                    text = "Your quest has ended...",
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = Color.White,
+                    textAlign = TextAlign.Center
+                )
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                Button(
+                    onClick = onDismiss,
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = androidx.compose.material3.ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFFCC0000),
+                        contentColor = Color.White
+                    )
+                ) {
+                    Text("Continue", color = Color.White)
+                }
+            }
+        }
     }
 }
 
@@ -301,7 +365,8 @@ private fun MessageBox(
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
         ) {
-            messages.forEach { message ->
+            // Display messages in reverse order (latest at top)
+            messages.asReversed().forEach { message ->
                 Text(
                     text = message,
                     style = MaterialTheme.typography.bodySmall,

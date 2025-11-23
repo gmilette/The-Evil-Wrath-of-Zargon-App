@@ -20,8 +20,8 @@ class GameViewModel @Inject constructor() : ViewModel() {
     /**
      * Initialize new game
      */
-    fun newGame() {
-        _gameState.value = GameState()
+    fun newGame(saveSlot: Int = 1) {
+        _gameState.value = GameState(saveSlot = saveSlot)
     }
 
     /**

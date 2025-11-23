@@ -33,12 +33,15 @@ import com.greenopal.zargon.domain.graphics.Sprite
 import com.greenopal.zargon.domain.graphics.SpriteParser
 import com.greenopal.zargon.domain.graphics.TileParser
 import com.greenopal.zargon.domain.story.NpcDialogProvider
+import com.greenopal.zargon.domain.story.StoryProgressionChecker
 import com.greenopal.zargon.ui.components.SpriteView
 import com.greenopal.zargon.ui.components.StatsCard
 import com.greenopal.zargon.ui.screens.BattleScreen
 import com.greenopal.zargon.ui.screens.DialogScreen
+import com.greenopal.zargon.ui.screens.FountainScreen
 import com.greenopal.zargon.ui.screens.GameOverScreen
 import com.greenopal.zargon.ui.screens.HealerScreen
+import com.greenopal.zargon.ui.screens.HintsScreen
 import com.greenopal.zargon.ui.screens.MapScreen
 import com.greenopal.zargon.ui.screens.MenuScreen
 import com.greenopal.zargon.ui.screens.QuestProgressScreen
@@ -53,7 +56,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
 enum class ScreenState {
-    TITLE, MENU, MAP, BATTLE, STATS, QUEST_PROGRESS, DIALOG, WEAPON_SHOP, HEALER, GAME_OVER, VICTORY
+    TITLE, MENU, MAP, BATTLE, STATS, QUEST_PROGRESS, DIALOG, WEAPON_SHOP, HEALER, FOUNTAIN, GAME_OVER, VICTORY, HINTS
 }
 
 @AndroidEntryPoint
@@ -69,6 +72,9 @@ class MainActivity : ComponentActivity() {
 
     @Inject
     lateinit var saveRepository: SaveGameRepository
+
+    @Inject
+    lateinit var tileBitmapCache: com.greenopal.zargon.domain.graphics.TileBitmapCache
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -113,9 +119,10 @@ class MainActivity : ComponentActivity() {
                             val saveSlots = remember { saveRepository.getAllSaves() }
                             TitleScreen(
                                 saveSlots = saveSlots,
-                                onNewGame = {
+                                onNewGame = { slot ->
                                     // Reset to new game state and start exploration
-                                    viewModel.newGame()
+                                    android.util.Log.d("MainActivity", "Starting new game in slot $slot")
+                                    viewModel.newGame(slot)
                                     isExplorationMode = true
                                     screenState = ScreenState.MAP
                                 },
@@ -149,6 +156,9 @@ class MainActivity : ComponentActivity() {
                                 onViewQuestProgress = {
                                     screenState = ScreenState.QUEST_PROGRESS
                                 },
+                                onViewHints = {
+                                    screenState = ScreenState.HINTS
+                                },
                                 onBack = {
                                     // Return to map when closing menu
                                     screenState = ScreenState.MAP
@@ -164,6 +174,7 @@ class MainActivity : ComponentActivity() {
                                 gameState = gameState,
                                 playerSprite = playerSprite,
                                 tileParser = tileParser,
+                                tileBitmapCache = tileBitmapCache,
                                 onEnterBattle = { encounterState ->
                                     // Update game state with encounter
                                     viewModel.updateGameState(encounterState)
@@ -172,8 +183,14 @@ class MainActivity : ComponentActivity() {
                                 onInteract = { interaction ->
                                     when (interaction) {
                                         is TileInteraction.NpcDialog -> {
-                                            currentNpcType = interaction.npcType
-                                            screenState = ScreenState.DIALOG
+                                            // Check if it's a fountain - use fountain screen instead
+                                            if (interaction.npcType == NpcType.FOUNTAIN) {
+                                                android.util.Log.d("MainActivity", "Entering fountain - Position: World (${gameState.worldX}, ${gameState.worldY}), Char (${gameState.characterX}, ${gameState.characterY})")
+                                                screenState = ScreenState.FOUNTAIN
+                                            } else {
+                                                currentNpcType = interaction.npcType
+                                                screenState = ScreenState.DIALOG
+                                            }
                                         }
                                         is TileInteraction.WeaponShop -> {
                                             android.util.Log.d("MainActivity", "Entering shop - Position: World (${gameState.worldX}, ${gameState.worldY}), Char (${gameState.characterX}, ${gameState.characterY})")
@@ -285,22 +302,48 @@ class MainActivity : ComponentActivity() {
                                     dialog = dialog,
                                     gameState = gameState,
                                     onDialogEnd = { updatedState, storyAction ->
+                                        android.util.Log.d("MainActivity", "Dialog ended with story action: $storyAction")
+                                        android.util.Log.d("MainActivity", "Current story status: ${updatedState.storyStatus}")
+
                                         // Handle story actions
                                         val finalState = when (storyAction) {
                                             is StoryAction.AdvanceStory -> {
+                                                android.util.Log.d("MainActivity", "Advancing story from ${updatedState.storyStatus} to ${storyAction.newStatus}")
                                                 updatedState.updateStory(storyAction.newStatus)
                                             }
                                             is StoryAction.GiveItem -> {
-                                                updatedState.addItem(
+                                                val stateWithItem = updatedState.addItem(
                                                     com.greenopal.zargon.data.models.Item(
                                                         name = storyAction.itemName,
                                                         description = "Story item",
                                                         type = com.greenopal.zargon.data.models.ItemType.KEY_ITEM
                                                     )
                                                 )
+                                                // Check if story should auto-advance
+                                                StoryProgressionChecker.checkAndAdvanceStory(stateWithItem)
+                                            }
+                                            is StoryAction.TakeItem -> {
+                                                // Remove item from inventory
+                                                val itemToRemove = updatedState.inventory.find {
+                                                    it.name.equals(storyAction.itemName, ignoreCase = true)
+                                                }
+                                                if (itemToRemove != null) {
+                                                    updatedState.removeItem(itemToRemove)
+                                                } else {
+                                                    updatedState
+                                                }
+                                            }
+                                            is StoryAction.HealPlayer -> {
+                                                // Fully restore HP and MP
+                                                val healedCharacter = updatedState.character.copy(
+                                                    currentDP = updatedState.character.maxDP,
+                                                    currentMP = updatedState.character.maxMP
+                                                )
+                                                android.util.Log.d("MainActivity", "Fountain healing - HP: ${healedCharacter.currentDP}/${healedCharacter.maxDP}, MP: ${healedCharacter.currentMP}/${healedCharacter.maxMP}")
+                                                updatedState.updateCharacter(healedCharacter)
                                             }
                                             is StoryAction.BuildBoat -> {
-                                                updatedState
+                                                val stateWithShip = updatedState
                                                     .updateStory(5.5f)
                                                     .addItem(
                                                         com.greenopal.zargon.data.models.Item(
@@ -309,12 +352,58 @@ class MainActivity : ComponentActivity() {
                                                             type = com.greenopal.zargon.data.models.ItemType.KEY_ITEM
                                                         )
                                                     )
+                                                // Check if story should auto-advance
+                                                StoryProgressionChecker.checkAndAdvanceStory(stateWithShip)
                                             }
                                             is StoryAction.ResurrectBoatman -> {
                                                 updatedState.updateStory(5.0f)
                                             }
+                                            is StoryAction.MultiAction -> {
+                                                // Process multiple actions in sequence
+                                                val finalMultiState = storyAction.actions.fold(updatedState) { currentState, action ->
+                                                    when (action) {
+                                                        is StoryAction.AdvanceStory -> currentState.updateStory(action.newStatus)
+                                                        is StoryAction.GiveItem -> {
+                                                            val withItem = currentState.addItem(
+                                                                com.greenopal.zargon.data.models.Item(
+                                                                    name = action.itemName,
+                                                                    description = "Story item",
+                                                                    type = com.greenopal.zargon.data.models.ItemType.KEY_ITEM
+                                                                )
+                                                            )
+                                                            // Check story progression after giving item
+                                                            StoryProgressionChecker.checkAndAdvanceStory(withItem)
+                                                        }
+                                                        is StoryAction.TakeItem -> {
+                                                            val itemToRemove = currentState.inventory.find {
+                                                                it.name.equals(action.itemName, ignoreCase = true)
+                                                            }
+                                                            if (itemToRemove != null) currentState.removeItem(itemToRemove) else currentState
+                                                        }
+                                                        is StoryAction.HealPlayer -> {
+                                                            val healedChar = currentState.character.copy(
+                                                                currentDP = currentState.character.maxDP,
+                                                                currentMP = currentState.character.maxMP
+                                                            )
+                                                            currentState.updateCharacter(healedChar)
+                                                        }
+                                                        is StoryAction.BuildBoat -> {
+                                                            val withShip = currentState.updateStory(5.5f).addItem(
+                                                                com.greenopal.zargon.data.models.Item(name = "ship", description = "Allows travel on the river", type = com.greenopal.zargon.data.models.ItemType.KEY_ITEM)
+                                                            )
+                                                            // Check story progression after building boat
+                                                            StoryProgressionChecker.checkAndAdvanceStory(withShip)
+                                                        }
+                                                        is StoryAction.ResurrectBoatman -> currentState.updateStory(5.0f)
+                                                        else -> currentState
+                                                    }
+                                                }
+                                                // Final story progression check after all multi-actions
+                                                StoryProgressionChecker.checkAndAdvanceStory(finalMultiState)
+                                            }
                                             else -> updatedState
                                         }
+                                        android.util.Log.d("MainActivity", "Final story status after actions: ${finalState.storyStatus}")
                                         viewModel.updateGameState(finalState)
                                         screenState = ScreenState.MAP
                                     },
@@ -347,8 +436,10 @@ class MainActivity : ComponentActivity() {
                         ScreenState.HEALER -> {
                             HealerScreen(
                                 gameState = gameState,
-                                onSaveGame = {
-                                    saveRepository.saveGame(gameState, 1)
+                                onSaveGame = { stateToSave ->
+                                    // Save the current state from healer (including updated HP/MP)
+                                    android.util.Log.d("MainActivity", "Saving game to slot ${stateToSave.saveSlot} - HP: ${stateToSave.character.currentDP}/${stateToSave.character.maxDP}, MP: ${stateToSave.character.currentMP}/${stateToSave.character.maxMP}")
+                                    saveRepository.saveGame(stateToSave, stateToSave.saveSlot)
                                 },
                                 onHealerExit = { updatedState ->
                                     // Return player to where they were before entering
@@ -356,6 +447,28 @@ class MainActivity : ComponentActivity() {
                                     android.util.Log.d("MainActivity", "Exiting healer - HP: ${updatedState.character.currentDP}/${updatedState.character.maxDP}")
                                     viewModel.updateGameState(updatedState)
                                     android.util.Log.d("MainActivity", "After healer exit - Position: World (${viewModel.gameState.value.worldX}, ${viewModel.gameState.value.worldY}), Char (${viewModel.gameState.value.characterX}, ${viewModel.gameState.value.characterY})")
+                                    screenState = ScreenState.MAP
+                                },
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .padding(innerPadding)
+                            )
+                        }
+
+                        ScreenState.FOUNTAIN -> {
+                            FountainScreen(
+                                gameState = gameState,
+                                onSaveGame = { stateToSave ->
+                                    // Save the current state from fountain (including updated HP/MP)
+                                    android.util.Log.d("MainActivity", "Saving game to slot ${stateToSave.saveSlot} at fountain - Position: World (${stateToSave.worldX}, ${stateToSave.worldY}), Char (${stateToSave.characterX}, ${stateToSave.characterY})")
+                                    android.util.Log.d("MainActivity", "Saving game - HP: ${stateToSave.character.currentDP}/${stateToSave.character.maxDP}, MP: ${stateToSave.character.currentMP}/${stateToSave.character.maxMP}")
+                                    saveRepository.saveGame(stateToSave, stateToSave.saveSlot)
+                                },
+                                onFountainExit = { updatedState ->
+                                    // Return player to where they were before entering
+                                    android.util.Log.d("MainActivity", "Exiting fountain - Position: World (${updatedState.worldX}, ${updatedState.worldY}), Char (${updatedState.characterX}, ${updatedState.characterY})")
+                                    android.util.Log.d("MainActivity", "Exiting fountain - HP: ${updatedState.character.currentDP}/${updatedState.character.maxDP}")
+                                    viewModel.updateGameState(updatedState)
                                     screenState = ScreenState.MAP
                                 },
                                 modifier = Modifier
@@ -383,6 +496,23 @@ class MainActivity : ComponentActivity() {
                                 onReturnToTitle = {
                                     viewModel.newGame()
                                     screenState = ScreenState.TITLE
+                                },
+                                onReturnToGEF = { updatedGameState ->
+                                    // Update game state with new position and Zargon trophy
+                                    viewModel.updateGameState(updatedGameState)
+                                    // Return to map screen
+                                    screenState = ScreenState.MAP
+                                },
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .padding(innerPadding)
+                            )
+                        }
+
+                        ScreenState.HINTS -> {
+                            HintsScreen(
+                                onBack = {
+                                    screenState = ScreenState.MENU
                                 },
                                 modifier = Modifier
                                     .fillMaxSize()

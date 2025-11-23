@@ -49,7 +49,7 @@ fun QuestProgressScreen(
     }
     // Define all quest items
     val questItems = listOf(
-        QuestItem("dynomite", "Dynamite", "Blast through rocks"),
+        QuestItem("dynamite", "Dynamite", "Blast through rocks"),
         QuestItem("dead wood", "Dead Wood", "Material for ship"),
         QuestItem("rutter", "Rutter", "Navigation tool"),
         QuestItem("cloth", "Cloth", "Sail material"),
@@ -59,9 +59,9 @@ fun QuestProgressScreen(
         QuestItem("ship", "Ship", "River travel vehicle")
     )
 
-    // Calculate progress
+    // Calculate progress based on discovered items (not current inventory)
     val foundItems = questItems.count { item ->
-        gameState.hasItem(item.itemName)
+        gameState.hasDiscovered(item.itemName)
     }
     val totalItems = questItems.size
     val completionPercent = (foundItems.toFloat() / totalItems * 100).toInt()
@@ -153,7 +153,7 @@ fun QuestProgressScreen(
                     Spacer(modifier = Modifier.height(8.dp))
 
                     questItems.forEach { item ->
-                        val found = gameState.hasItem(item.itemName)
+                        val found = gameState.hasDiscovered(item.itemName)
                         QuestItemRow(
                             item = item,
                             found = found

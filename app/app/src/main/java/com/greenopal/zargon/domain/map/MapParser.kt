@@ -68,6 +68,18 @@ class MapParser @Inject constructor(
                 spawnPosition = Pair(spawnX, spawnY)
             )
 
+            // Debug logging for map24 (healer map) to verify tile parsing
+            if (worldX == 2 && worldY == 4) {
+                android.util.Log.d("MapParser", "=== Map 24 (Healer Area) Debug ===")
+                android.util.Log.d("MapParser", "Healer should be at (10, 7)")
+                for (y in 6..8) {
+                    for (x in 9..11) {
+                        val tile = tiles[y][x]
+                        android.util.Log.d("MapParser", "Tile at ($x, $y): ${tile.name}, code=${tile.code}, walkable=${tile.isWalkable}")
+                    }
+                }
+            }
+
             // Cache the map
             mapCache[cacheKey] = map
 

@@ -73,16 +73,20 @@ data class CharacterStats(
 
     /**
      * Add experience and return updated stats
+     * Prevents integer overflow
      */
     fun gainExperience(amount: Int): CharacterStats {
-        return copy(experience = experience + amount)
+        val newXP = (experience.toLong() + amount.toLong()).coerceAtMost(Int.MAX_VALUE.toLong()).toInt()
+        return copy(experience = maxOf(0, newXP))
     }
 
     /**
      * Add gold and return updated stats
+     * Prevents integer overflow
      */
     fun gainGold(amount: Int): CharacterStats {
-        return copy(gold = gold + amount)
+        val newGold = (gold.toLong() + amount.toLong()).coerceAtMost(Int.MAX_VALUE.toLong()).toInt()
+        return copy(gold = maxOf(0, newGold))
     }
 
     /**
@@ -90,7 +94,7 @@ data class CharacterStats(
      */
     fun spendGold(amount: Int): CharacterStats {
         return if (gold >= amount) {
-            copy(gold = gold - amount)
+            copy(gold = maxOf(0, gold - amount))
         } else {
             this
         }

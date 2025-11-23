@@ -9,9 +9,15 @@ data class MonsterStats(
     val attackPower: Int,       // mAP in QBASIC
     val currentHP: Int,         // mDP in QBASIC
     val maxHP: Int,             // Original mDP
-    val scalingFactor: Int = 1, // howmuchbigger in QBASIC
+    val scalingFactor: Int = 1, // howmuchbigger in QBASIC (must be >= 1)
     val displayName: String? = null, // Custom display name (e.g., "Great Bat")
 ) {
+    init {
+        // Validate scalingFactor to prevent division by zero or negative values
+        require(scalingFactor >= 1) { "scalingFactor must be at least 1, got $scalingFactor" }
+        require(maxHP > 0) { "maxHP must be positive, got $maxHP" }
+    }
+
     val name: String get() = displayName ?: type.displayName
     val isAlive: Boolean get() = currentHP > 0
     val hpPercentage: Float get() = currentHP.toFloat() / maxHP.toFloat()

@@ -20,13 +20,14 @@ object MapItems {
     private val allItems = listOf(
         // Item 1: Dynamite - Map 44 (World 4, Quadrant 4)
         // QBASIC Line 1463-1465
+        // Location: map44.lvl line 135 = tile 134 = position (14, 6)
         MapItem(
             worldX = 4,
             worldY = 4,
-            spotX = 15,
+            spotX = 14,
             spotY = 6,
             item = Item(
-                name = "dynomite",
+                name = "dynamite",
                 description = "Used to blast through rocks",
                 type = ItemType.KEY_ITEM
             )
@@ -62,11 +63,12 @@ object MapItems {
 
         // Item 5: Cloth - Map 13 (World 1, Quadrant 3)
         // QBASIC Line 1472-1474, coordinates from map13.lvl
+        // Updated to (7, 6) - moved down one to walkable grass tile
         MapItem(
             worldX = 1,
             worldY = 3,
             spotX = 7,
-            spotY = 5,
+            spotY = 6,
             item = Item(
                 name = "cloth",
                 description = "Sail material for ship",
