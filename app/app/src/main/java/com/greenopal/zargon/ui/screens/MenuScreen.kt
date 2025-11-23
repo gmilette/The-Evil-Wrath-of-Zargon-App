@@ -132,7 +132,8 @@ fun MenuScreen(
                 ) {
                     Text(
                         text = "Close",
-                        style = MaterialTheme.typography.titleMedium
+                        style = MaterialTheme.typography.titleMedium,
+                        color = Color.White
                     )
                 }
             }

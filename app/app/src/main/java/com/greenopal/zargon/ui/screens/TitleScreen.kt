@@ -104,11 +104,7 @@ fun TitleScreen(
                                 }
                             ),
                         colors = CardDefaults.cardColors(
-                            containerColor = if (slot.exists) {
-                                MaterialTheme.colorScheme.secondary
-                            } else {
-                                MaterialTheme.colorScheme.primary
-                            }
+                            containerColor = MaterialTheme.colorScheme.primary
                         )
                     ) {
                         Column(

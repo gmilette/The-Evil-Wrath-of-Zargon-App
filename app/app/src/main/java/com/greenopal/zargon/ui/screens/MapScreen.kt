@@ -638,7 +638,7 @@ private fun MovementControls(
                     onClick = onCast,
                     modifier = Modifier.weight(1f),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFF6A1B9A) // Purple for magic
+                        containerColor = MaterialTheme.colorScheme.tertiary
                     )
                 ) {
                     Text("CAST")
