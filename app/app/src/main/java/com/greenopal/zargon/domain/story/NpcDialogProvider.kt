@@ -47,7 +47,7 @@ class NpcDialogProvider @Inject constructor() {
         return when {
             // Stage 1: Trapped boatman
             status < 2f -> {
-                if (status == 1.5f && hasDynamite) {
+                if (hasDynamite) {
                     // Player has dynamite - show option to rescue him
                     android.util.Log.d("NpcDialogProvider", "Showing dynamite rescue option")
                     Dialog(
@@ -63,7 +63,7 @@ class NpcDialogProvider @Inject constructor() {
                         ))
                     )
                 } else {
-                    // Player doesn't have dynamite yet or hasn't talked to Sandman
+                    // Player doesn't have dynamite yet
                     android.util.Log.d("NpcDialogProvider", "Showing basic boatman dialog (no dynamite option)")
                     Dialog(
                         question1 = "what happened??",
@@ -117,7 +117,7 @@ class NpcDialogProvider @Inject constructor() {
                     question2 = "(poke at him/wake him up)",
                     answer2 = "you poke him, but he doesnt move, you push him over and a drop of blood escapes from his mouth, he's dead",
                     question3 = if (status >= 4f) "kick dirt in the deadman's face" else "search him",
-                    answer3 = if (status >= 4f) "nope, he still does not move" else "in his left hand, you find the plans for the ship...you pick them up and decide to read them later (hit I then choose them)"
+                    answer3 = if (status >= 4f) "nope, he still does not move" else "in his left hand, you find the plans for the ship...you pick them up and decide to read them later"
                 )
             }
 

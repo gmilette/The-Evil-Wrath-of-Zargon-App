@@ -27,7 +27,8 @@ object StoryProgressionChecker {
         val hasRutter = gameState.hasItem("rutter")
         val hasCloth = gameState.hasItem("cloth")
         val hasWood = gameState.hasItem("wood")
-        val hasAllBoatMaterials = hasRutter && hasCloth && hasWood
+        val hasDeadWood = gameState.hasItem("dead wood")
+        val hasAllBoatMaterials = hasRutter && hasCloth && hasWood && hasDeadWood
         val hasTrappedSoul = gameState.hasItem("trapped soul")
         val hasShip = gameState.hasItem("ship")
 
