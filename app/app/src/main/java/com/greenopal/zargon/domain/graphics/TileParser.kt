@@ -107,180 +107,127 @@ class TileParser @Inject constructor(
         val height = buffer.short.toInt()
         val dataLength = buffer.short.toInt()
 
-        // QBASIC GET array format stores packed bitmap data
-        // For now, create a simple colored sprite based on tile type
-        val pixels = createPixelsForTile(tileId, width, height)
+        // Read the QBASIC GET array format bitmap data
+        val bitmapData = ByteArray(dataLength)
+        buffer.get(bitmapData)
+
+        // Decode the EGA planar bitmap
+        val pixels = decodeEGABitmap(bitmapData, width, height)
 
         return Sprite(tileId, width, height, pixels)
     }
 
     /**
-     * Create pixel data for tiles
-     * Since parsing QBASIC GET format is complex, use procedural generation
+     * EGA 64-color palette mapping from ZARGON.BAS displayTile procedure (lines 1134-1137)
+     * PALETTE 0, 0: PALETTE 1, 4: PALETTE 2, 48: PALETTE 3, 2
+     * PALETTE 4, 6: PALETTE 5, 54: PALETTE 6, 10: PALETTE 7, 38
+     * PALETTE 8, 46: PALETTE 9, 5: PALETTE 10, 25: PALETTE 11, 7
+     * PALETTE 12, 57: PALETTE 13, 63: PALETTE 14, 9: PALETTE 15, 59
      */
-    private fun createPixelsForTile(tileId: String, width: Int, height: Int): List<List<Color>> {
-        return when (tileId) {
-            "Grass" -> createGrassTile(width, height)
-            "Rock-1", "Rock-2" -> createRockTile(width, height, tileId == "Rock-2")
-            "Sand" -> createSandTile(width, height)
-            "Trees1", "Trees2" -> createTreeTile(width, height, tileId == "Trees2")
-            "Water" -> createWaterTile(width, height)
-            "Gravestone" -> createGravestoneTile(width, height)
-            else -> createDefaultTile(width, height)
-        }
+    private val egaPaletteMap = intArrayOf(0, 4, 48, 2, 6, 54, 10, 38, 46, 5, 25, 7, 57, 63, 9, 59)
+
+    /**
+     * Convert EGA 64-color value to RGB
+     * EGA 64-color format uses 6-bit color: bits 543210 = RGBRGB (2 bits per channel)
+     */
+    private fun ega64ToRgb(egaColor: Int): Color {
+        // Extract RGB components (2 bits each, scaled to 0-3)
+        val r = ((egaColor shr 4) and 2) or ((egaColor shr 0) and 1)
+        val g = ((egaColor shr 3) and 2) or ((egaColor shr 1) and 1)
+        val b = ((egaColor shr 2) and 2) or ((egaColor shr 2) and 1)
+
+        // Scale from 0-3 to 0-255
+        return Color(r * 85, g * 85, b * 85)
     }
 
-    private fun createGrassTile(width: Int, height: Int): List<List<Color>> {
-        val baseGreen = Color(0xFF55FF55)
-        val darkGreen = Color(0xFF00AA00)
-        val lightGreen = Color(0xFF88FF88)
-        val yellowGreen = Color(0xFFAAFF55)
-
-        return List(height) { y ->
-            List(width) { x ->
-                // Create grass blade texture with random variation
-                val hash = (x * 73 + y * 193) % 100
-                when {
-                    hash < 15 -> darkGreen  // Darker patches
-                    hash < 30 -> lightGreen // Lighter highlights
-                    hash < 40 -> yellowGreen // Yellow-green variation
-                    else -> baseGreen
-                }
-            }
+    /**
+     * Get color from palette index
+     */
+    private fun getPaletteColor(index: Int): Color {
+        if (index < 0 || index >= egaPaletteMap.size) {
+            return Color.Black
         }
+        return ega64ToRgb(egaPaletteMap[index])
     }
 
-    private fun createRockTile(width: Int, height: Int, variant: Boolean): List<List<Color>> {
-        val baseGray = Color(0xFF888888)
-        val darkGray = Color(0xFF555555)
-        val lightGray = Color(0xFFAAAAAA)
-        val veryDarkGray = Color(0xFF333333)
-        val white = Color(0xFFEEEEEE)
-
-        return List(height) { y ->
-            List(width) { x ->
-                // Create craggy rock texture with highlights and shadows
-                val hash = (x * 97 + y * 211 + (if (variant) 50 else 0)) % 100
-                when {
-                    hash < 8 -> white          // Bright highlights
-                    hash < 20 -> lightGray     // Light areas
-                    hash < 35 -> darkGray      // Dark areas
-                    hash < 45 -> veryDarkGray  // Deep shadows/crevices
-                    else -> baseGray           // Base rock color
-                }
-            }
+    /**
+     * Decode QBASIC GET array format bitmap for EGA Screen 9
+     *
+     * Format:
+     * - First 2 integers (4 bytes): width, height (redundant, already known)
+     * - Remaining data: 4-plane EGA bitmap data
+     *
+     * The bitmap is stored in planar format with 4 bit planes (16 colors).
+     * Each scan line has all 4 planes stored sequentially.
+     */
+    private fun decodeEGABitmap(data: ByteArray, width: Int, height: Int): List<List<Color>> {
+        // Parse as 16-bit little-endian integers
+        val intArray = mutableListOf<Int>()
+        var i = 0
+        while (i < data.size - 1) {
+            val low = data[i].toInt() and 0xFF
+            val high = data[i + 1].toInt() and 0xFF
+            intArray.add(low or (high shl 8))
+            i += 2
         }
-    }
 
-    private fun createSandTile(width: Int, height: Int): List<List<Color>> {
-        val baseSand = Color(0xFFFFFF55)
-        val darkSand = Color(0xFFEEDD44)
-        val lightSand = Color(0xFFFFFF88)
-        val brown = Color(0xFFAA8844)
-        val gray = Color(0xFFCCCCBB)  // Small rocks/pebbles
+        // Skip header (first 2 integers are width and height)
+        val bytesPerRow = (width + 7) / 8  // Round up to nearest byte
 
-        return List(height) { y ->
-            List(width) { x ->
-                // Create sand grain texture with small rocks
-                val hash = (x * 131 + y * 173) % 100
-                when {
-                    hash < 5 -> gray        // Small pebbles
-                    hash < 15 -> brown      // Darker sand patches
-                    hash < 30 -> lightSand  // Bright sand
-                    hash < 50 -> darkSand   // Medium sand
-                    else -> baseSand        // Base sand color
-                }
-            }
-        }
-    }
+        // Create pixel array
+        val pixels = List(height) { MutableList(width) { Color.Black } }
 
-    private fun createTreeTile(width: Int, height: Int, variant: Boolean): List<List<Color>> {
-        val baseGreen = Color(0xFF00AA00)
-        val darkGreen = Color(0xFF006600)
-        val lightGreen = Color(0xFF00CC00)
-        val brown = Color(0xFF8B4513)
-        val darkBrown = Color(0xFF654321)
-        val black = Color(0xFF000000)
+        var dataIdx = 2  // Skip width/height header
 
-        val centerX = width / 2
-        val centerY = height / 2
+        // Decode each scan line
+        for (y in 0 until height) {
+            // Read 4 bit planes for this row
+            val planeData = Array(4) { ByteArray(bytesPerRow) }
 
-        return List(height) { y ->
-            List(width) { x ->
-                val dx = x - centerX
-                val dy = y - centerY
-                val hash = (x * 83 + y * 157 + (if (variant) 30 else 0)) % 100
+            for (plane in 0 until 4) {
+                // Read bytes for this plane's scan line
+                for (byteIdx in 0 until bytesPerRow) {
+                    if (dataIdx < intArray.size) {
+                        planeData[plane][byteIdx] = if (byteIdx % 2 == 0) {
+                            // Low byte of integer
+                            (intArray[dataIdx] and 0xFF).toByte()
+                        } else {
+                            // High byte of integer
+                            ((intArray[dataIdx] shr 8) and 0xFF).toByte()
+                        }
 
-                when {
-                    // Trunk with bark texture
-                    dy > centerY / 2 && Math.abs(dx) < 2 -> {
-                        when {
-                            // Vertical bark lines
-                            y % 2 == 0 && dx == 0 -> black
-                            y % 3 == 0 && dx == 1 -> darkBrown
-                            hash < 30 -> darkBrown  // Random bark spots
-                            else -> brown
+                        // Advance to next integer after reading high byte
+                        if (byteIdx % 2 == 1) {
+                            dataIdx++
                         }
                     }
-                    // Leaves (circular) with texture
-                    (dx * dx + dy * dy) < (width * width / 8) -> {
-                        when {
-                            hash < 20 -> darkGreen   // Dark leaf patches
-                            hash < 35 -> lightGreen  // Light highlights
-                            else -> baseGreen
-                        }
+                }
+
+                // If odd number of bytes, advance to next integer
+                if (bytesPerRow % 2 == 1) {
+                    dataIdx++
+                }
+            }
+
+            // Convert planar data to pixels
+            for (x in 0 until width) {
+                val byteIdx = x / 8
+                val bitIdx = 7 - (x % 8)
+
+                // Combine bits from all 4 planes to get color index
+                var colorIndex = 0
+                for (plane in 0 until 4) {
+                    if (byteIdx < planeData[plane].size) {
+                        val bit = (planeData[plane][byteIdx].toInt() shr bitIdx) and 1
+                        colorIndex = colorIndex or (bit shl plane)
                     }
-                    else -> Color.Transparent
                 }
+
+                pixels[y][x] = getPaletteColor(colorIndex)
             }
         }
-    }
 
-    private fun createWaterTile(width: Int, height: Int): List<List<Color>> {
-        val baseWater = Color(0xFF0000AA)
-        val lightWater = Color(0xFF3333FF)
-        val darkWater = Color(0xFF000088)
-        val highlight = Color(0xFF6666FF)
-
-        return List(height) { y ->
-            List(width) { x ->
-                // Create water ripple texture
-                val hash = (x * 109 + y * 181) % 100
-                when {
-                    hash < 10 -> highlight    // Water sparkles
-                    hash < 30 -> lightWater   // Light ripples
-                    hash < 45 -> darkWater    // Dark areas
-                    else -> baseWater         // Base water color
-                }
-            }
-        }
-    }
-
-    private fun createGravestoneTile(width: Int, height: Int): List<List<Color>> {
-        val gray = Color(0xFF666666)
-        val darkGray = Color(0xFF333333)
-
-        val centerX = width / 2
-
-        return List(height) { y ->
-            List(width) { x ->
-                when {
-                    // Gravestone shape
-                    y < height / 3 && Math.abs(x - centerX) < 3 -> gray
-                    y >= height / 3 && y < height * 2 / 3 && Math.abs(x - centerX) < 4 -> gray
-                    y >= height * 2 / 3 && Math.abs(x - centerX) < 2 -> darkGray
-                    else -> Color.Transparent
-                }
-            }
-        }
-    }
-
-    private fun createDefaultTile(width: Int, height: Int): List<List<Color>> {
-        return List(height) { y ->
-            List(width) { x ->
-                Color(0xFF00AA00)
-            }
-        }
+        return pixels
     }
 
     /**
