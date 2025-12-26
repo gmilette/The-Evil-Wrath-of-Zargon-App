@@ -60,7 +60,7 @@ fun FountainScreen(
     Box(
         modifier = modifier
             .fillMaxSize()
-            .background(Color.Black),
+            .background(MaterialTheme.colorScheme.background),
         contentAlignment = Alignment.Center
     ) {
         Card(
@@ -114,7 +114,7 @@ fun FountainScreen(
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     colors = CardDefaults.cardColors(
-                        containerColor = Color(0xFF2A2A2A)
+                        containerColor = MaterialTheme.colorScheme.surface
                     )
                 ) {
                     Column(
@@ -124,15 +124,15 @@ fun FountainScreen(
                         Text(
                             text = "Current Stats:",
                             fontWeight = FontWeight.Bold,
-                            color = Color.White
+                            color = MaterialTheme.colorScheme.secondary
                         )
                         Text(
                             text = "HP: ${updatedGameState.character.currentDP}/${updatedGameState.character.maxDP}",
-                            color = Color.White
+                            color = MaterialTheme.colorScheme.onSurface
                         )
                         Text(
                             text = "MP: ${updatedGameState.character.currentMP}/${updatedGameState.character.maxMP}",
-                            color = Color.White
+                            color = MaterialTheme.colorScheme.onSurface
                         )
                     }
                 }
@@ -152,10 +152,10 @@ fun FountainScreen(
                     enabled = updatedGameState.character.currentDP < updatedGameState.character.maxDP ||
                             updatedGameState.character.currentMP < updatedGameState.character.maxMP,
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFF1976D2), // Blue
-                        contentColor = Color.White,
-                        disabledContainerColor = Color(0xFF424242),
-                        disabledContentColor = Color(0xFF888888)
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        contentColor = MaterialTheme.colorScheme.onPrimary,
+                        disabledContainerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f),
+                        disabledContentColor = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.5f)
                     )
                 ) {
                     Text("1. drink from fountain")
@@ -175,10 +175,10 @@ fun FountainScreen(
                     enabled = updatedGameState.character.currentDP < updatedGameState.character.maxDP ||
                             updatedGameState.character.currentMP < updatedGameState.character.maxMP,
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFF1976D2), // Blue
-                        contentColor = Color.White,
-                        disabledContainerColor = Color(0xFF424242),
-                        disabledContentColor = Color(0xFF888888)
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        contentColor = MaterialTheme.colorScheme.onPrimary,
+                        disabledContainerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f),
+                        disabledContentColor = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.5f)
                     )
                 ) {
                     Text("2. bathe in fountain")
@@ -192,8 +192,8 @@ fun FountainScreen(
                     },
                     modifier = Modifier.fillMaxWidth(),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFF4CAF50), // Bright green
-                        contentColor = Color.White
+                        containerColor = MaterialTheme.colorScheme.secondary,
+                        contentColor = MaterialTheme.colorScheme.onSecondary
                     )
                 ) {
                     Text("3. save your journey")
@@ -203,8 +203,8 @@ fun FountainScreen(
                     onClick = { onFountainExit(updatedGameState) },
                     modifier = Modifier.fillMaxWidth(),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFF666666), // Medium gray
-                        contentColor = Color.White
+                        containerColor = MaterialTheme.colorScheme.tertiary,
+                        contentColor = MaterialTheme.colorScheme.onTertiary
                     )
                 ) {
                     Text("0. leave")

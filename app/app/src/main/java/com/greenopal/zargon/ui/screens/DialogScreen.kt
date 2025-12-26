@@ -10,10 +10,15 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -58,7 +63,7 @@ fun DialogScreen(
     Box(
         modifier = modifier
             .fillMaxSize()
-            .background(Color.Black),
+            .background(MaterialTheme.colorScheme.background),
         contentAlignment = Alignment.Center
     ) {
         Card(
@@ -70,13 +75,14 @@ fun DialogScreen(
             ),
             border = BorderStroke(3.dp, MaterialTheme.colorScheme.primary)
         ) {
-            Column(
-                modifier = Modifier
-                    .padding(24.dp)
-                    .fillMaxWidth(),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
+            Box {
+                Column(
+                    modifier = Modifier
+                        .padding(24.dp)
+                        .fillMaxWidth(),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
                 // NPC name
                 Text(
                     text = npcType.displayName,
@@ -124,13 +130,10 @@ fun DialogScreen(
                         modifier = Modifier.fillMaxWidth(),
                         colors = ButtonDefaults.buttonColors(
                             containerColor = MaterialTheme.colorScheme.secondary,
-                            contentColor = Color.White
+                            contentColor = MaterialTheme.colorScheme.onSecondary
                         )
                     ) {
-                        Text(
-                            text = "Continue...",
-                            color = Color.White
-                        )
+                        Text("Continue...")
                     }
                 } else {
                     // Question buttons
@@ -144,14 +147,10 @@ fun DialogScreen(
                             enabled = dialog.enabled1,
                             modifier = Modifier.fillMaxWidth(),
                             colors = ButtonDefaults.buttonColors(
-                                containerColor = if (dialog.action1 != null) {
-                                    Color(0xFF1565C0) // Dark blue for action buttons
-                                } else {
-                                    MaterialTheme.colorScheme.primary
-                                },
-                                contentColor = Color.White,
-                                disabledContainerColor = Color(0xFF424242),
-                                disabledContentColor = Color(0xFF9E9E9E)
+                                containerColor = MaterialTheme.colorScheme.primary,
+                                contentColor = MaterialTheme.colorScheme.onPrimary,
+                                disabledContainerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f),
+                                disabledContentColor = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.5f)
                             )
                         ) {
                             Text(
@@ -171,14 +170,10 @@ fun DialogScreen(
                             enabled = dialog.enabled2,
                             modifier = Modifier.fillMaxWidth(),
                             colors = ButtonDefaults.buttonColors(
-                                containerColor = if (dialog.action2 != null) {
-                                    Color(0xFF1565C0) // Dark blue for action buttons
-                                } else {
-                                    MaterialTheme.colorScheme.primary
-                                },
-                                contentColor = Color.White,
-                                disabledContainerColor = Color(0xFF424242),
-                                disabledContentColor = Color(0xFF9E9E9E)
+                                containerColor = MaterialTheme.colorScheme.primary,
+                                contentColor = MaterialTheme.colorScheme.onPrimary,
+                                disabledContainerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f),
+                                disabledContentColor = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.5f)
                             )
                         ) {
                             Text(
@@ -198,14 +193,10 @@ fun DialogScreen(
                             enabled = dialog.enabled3,
                             modifier = Modifier.fillMaxWidth(),
                             colors = ButtonDefaults.buttonColors(
-                                containerColor = if (dialog.storyAction != null) {
-                                    Color(0xFF1565C0) // Dark blue for action buttons
-                                } else {
-                                    MaterialTheme.colorScheme.primary
-                                },
-                                contentColor = Color.White,
-                                disabledContainerColor = Color(0xFF424242),
-                                disabledContentColor = Color(0xFF9E9E9E)
+                                containerColor = MaterialTheme.colorScheme.primary,
+                                contentColor = MaterialTheme.colorScheme.onPrimary,
+                                disabledContainerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f),
+                                disabledContentColor = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.5f)
                             )
                         ) {
                             Text(
@@ -224,16 +215,29 @@ fun DialogScreen(
                         },
                         modifier = Modifier.fillMaxWidth(),
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = Color.DarkGray,
-                            contentColor = Color.White
+                            containerColor = MaterialTheme.colorScheme.tertiary,
+                            contentColor = MaterialTheme.colorScheme.onTertiary
                         )
                     ) {
-                        Text(
-                            text = "0. Leave",
-                            color = Color.White
-                        )
+                        Text("0. Leave")
                     }
                 }
+            }
+
+            // Exit button in top-left corner
+            IconButton(
+                onClick = { onDialogEnd(gameState, selectedAction) },
+                modifier = Modifier
+                    .align(Alignment.TopStart)
+                    .padding(8.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Close,
+                    contentDescription = "Exit dialog",
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(32.dp)
+                )
+            }
             }
         }
     }

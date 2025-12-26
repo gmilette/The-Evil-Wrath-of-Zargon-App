@@ -65,6 +65,18 @@ class BattleViewModel @Inject constructor(
     fun onAction(action: BattleAction) {
         val state = _battleState.value ?: return
 
+        // Prevent actions if battle is already over
+        if (state.battleResult != BattleResult.InProgress) {
+            android.util.Log.w("BattleViewModel", "Ignoring action - battle already ended with ${state.battleResult}")
+            return
+        }
+
+        // Prevent actions if character is dead
+        if (!state.character.isAlive) {
+            android.util.Log.w("BattleViewModel", "Ignoring action - character is dead")
+            return
+        }
+
         // Prevent concurrent actions (except showing magic menu)
         if (action !is BattleAction.Magic && isProcessingAction) {
             android.util.Log.w("BattleViewModel", "Ignoring action - already processing")
@@ -304,9 +316,18 @@ class BattleViewModel @Inject constructor(
 
     /**
      * Calculate victory rewards (WinBattle from ZARGON.BAS:3658)
+     * IMPORTANT: Only called when monster is defeated AND character is still alive.
+     * This ensures Joe cannot gain rewards if he's dead.
      */
     private fun calculateVictoryRewards(state: BattleState) {
         val gameState = currentGameState ?: return
+
+        // Safety check: Do not give rewards if character is dead
+        if (!state.character.isAlive) {
+            android.util.Log.w("BattleViewModel", "calculateVictoryRewards called with dead character - skipping rewards")
+            return
+        }
+
         val monster = state.monster
 
         // Calculate XP and gold
@@ -372,20 +393,32 @@ class BattleViewModel @Inject constructor(
 
     /**
      * Get updated game state with battle results
+     * IMPORTANT: Only apply rewards if the battle was a Victory.
+     * If Joe died (Defeat), no rewards should be applied.
      */
     fun getUpdatedGameState(): GameState? {
         val gameState = currentGameState ?: return null
-        val character = _battleState.value?.character ?: return null
+        val battleState = _battleState.value ?: return null
+        val character = battleState.character
         val rewards = _battleRewards.value
+        val isVictory = battleState.battleResult == BattleResult.Victory
 
+        android.util.Log.d("BattleViewModel", "getUpdatedGameState - Battle result: ${battleState.battleResult}, isVictory: $isVictory")
         android.util.Log.d("BattleViewModel", "getUpdatedGameState - Character gold: ${character.gold}, XP: ${character.experience}")
         android.util.Log.d("BattleViewModel", "getUpdatedGameState - Original position - World: (${gameState.worldX}, ${gameState.worldY}), Char: (${gameState.characterX}, ${gameState.characterY})")
+
+        // If Joe died, return original game state (no rewards applied)
+        // The character's HP will be updated by the game death handling logic
+        if (!isVictory) {
+            android.util.Log.d("BattleViewModel", "getUpdatedGameState - Not a victory, returning original game state without rewards")
+            return gameState
+        }
 
         var updatedState = gameState.updateCharacter(character)
 
         android.util.Log.d("BattleViewModel", "getUpdatedGameState - Updated state character gold: ${updatedState.character.gold}")
 
-        // Add item to inventory if dropped
+        // Add item to inventory if dropped (only on Victory)
         rewards?.itemDropped?.let { item ->
             updatedState = updatedState.addItem(item)
             android.util.Log.d("BattleViewModel", "Item added: ${item.name} - Checking story progression")
@@ -394,7 +427,7 @@ class BattleViewModel @Inject constructor(
             updatedState = StoryProgressionChecker.checkAndAdvanceStory(updatedState)
         }
 
-        // Update next level XP if leveled up
+        // Update next level XP if leveled up (only on Victory)
         if (rewards?.leveledUp == true) {
             val newNextLevelXP = rewardSystem.calculateXPForNextLevel(
                 character.level,

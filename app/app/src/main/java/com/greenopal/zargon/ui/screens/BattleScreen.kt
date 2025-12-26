@@ -1,6 +1,7 @@
 package com.greenopal.zargon.ui.screens
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -20,6 +21,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.ui.res.painterResource
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -33,6 +35,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.greenopal.zargon.R
 import com.greenopal.zargon.data.models.GameState
 import com.greenopal.zargon.domain.battle.BattleAction
 import com.greenopal.zargon.domain.battle.BattleResult
@@ -101,7 +104,7 @@ fun BattleScreen(
     Box(
         modifier = modifier
             .fillMaxSize()
-            .background(Color.Black)
+            .background(MaterialTheme.colorScheme.background)
     ) {
         if (battleState != null) {
             Column(
@@ -202,7 +205,7 @@ fun BattleScreen(
                 Text(
                     text = "Entering Battle...",
                     style = MaterialTheme.typography.titleLarge,
-                    color = Color.White
+                    color = MaterialTheme.colorScheme.onBackground
                 )
             }
         }
@@ -234,15 +237,17 @@ fun BattleScreen(
 private fun DefeatDialog(
     onDismiss: () -> Unit
 ) {
-    androidx.compose.ui.window.Dialog(onDismissRequest = onDismiss) {
+    androidx.compose.ui.window.Dialog(
+        onDismissRequest = { /* Prevent dismissing by tapping outside */ }
+    ) {
         Card(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(16.dp),
             colors = CardDefaults.cardColors(
-                containerColor = Color(0xFF2A0000) // Dark red background
+                containerColor = MaterialTheme.colorScheme.errorContainer
             ),
-            border = BorderStroke(3.dp, Color(0xFFFF0000)) // Red border
+            border = BorderStroke(3.dp, MaterialTheme.colorScheme.error)
         ) {
             Column(
                 modifier = Modifier.padding(24.dp),
@@ -252,14 +257,14 @@ private fun DefeatDialog(
                 Text(
                     text = "YOU DIED",
                     style = MaterialTheme.typography.headlineLarge,
-                    color = Color(0xFFFF0000),
+                    color = MaterialTheme.colorScheme.error,
                     textAlign = TextAlign.Center
                 )
 
                 Text(
                     text = "Your quest has ended...",
                     style = MaterialTheme.typography.bodyLarge,
-                    color = Color.White,
+                    color = MaterialTheme.colorScheme.onErrorContainer,
                     textAlign = TextAlign.Center
                 )
 
@@ -269,11 +274,11 @@ private fun DefeatDialog(
                     onClick = onDismiss,
                     modifier = Modifier.fillMaxWidth(),
                     colors = androidx.compose.material3.ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFFCC0000),
-                        contentColor = Color.White
+                        containerColor = MaterialTheme.colorScheme.error,
+                        contentColor = MaterialTheme.colorScheme.onError
                     )
                 ) {
-                    Text("Continue", color = Color.White)
+                    Text("Return to Title")
                 }
             }
         }
@@ -289,7 +294,7 @@ private fun EnemyDisplayBox(
     Card(
         modifier = modifier,
         colors = CardDefaults.cardColors(
-            containerColor = Color(0xFF1A1A1A)
+            containerColor = MaterialTheme.colorScheme.surface
         ),
         border = BorderStroke(2.dp, MaterialTheme.colorScheme.primary)
     ) {
@@ -418,7 +423,11 @@ private fun ActionMenu(
                 enabled = isPlayerTurn,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text("⚔️")
+                Image(
+                    painter = painterResource(R.drawable.attack_icon),
+                    contentDescription = "Attack",
+                    modifier = Modifier.size(24.dp)
+                )
             }
 
             Button(

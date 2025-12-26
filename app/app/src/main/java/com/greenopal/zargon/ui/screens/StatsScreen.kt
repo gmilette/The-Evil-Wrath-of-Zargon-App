@@ -48,7 +48,7 @@ fun StatsScreen(
     Box(
         modifier = modifier
             .fillMaxSize()
-            .background(Color.Black),
+            .background(MaterialTheme.colorScheme.background),
         contentAlignment = Alignment.Center
     ) {
         LazyColumn(
@@ -95,7 +95,7 @@ fun StatsScreen(
                         StatRow("Magic Points", "${gameState.character.currentMP} / ${gameState.character.maxMP}")
                         StatRow("Attack Power", "${gameState.character.totalAP}")
                         StatRow("Defense Power", "${gameState.character.totalDefense}")
-                        StatRow("Gold", "${gameState.character.gold}g", Color(0xFFFFD700))
+                        StatRow("Gold", "${gameState.character.gold}g", MaterialTheme.colorScheme.primary)
                         StatRow("Experience", "${gameState.character.experience} / ${gameState.nextLevelXP}")
 
                         HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
@@ -138,7 +138,7 @@ fun StatsScreen(
                             Text(
                                 text = "No items",
                                 style = MaterialTheme.typography.bodyMedium,
-                                color = Color.Gray,
+                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
                                 modifier = Modifier.fillMaxWidth(),
                                 textAlign = TextAlign.Center
                             )
@@ -182,7 +182,7 @@ private fun StatRow(
         Text(
             text = label,
             style = MaterialTheme.typography.bodyLarge,
-            color = Color.LightGray
+            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
         )
         Text(
             text = value,
@@ -210,8 +210,8 @@ private fun ItemRow(item: Item) {
                 fontWeight = FontWeight.Bold,
                 color = when (item.type) {
                     com.greenopal.zargon.data.models.ItemType.KEY_ITEM -> MaterialTheme.colorScheme.tertiary
-                    com.greenopal.zargon.data.models.ItemType.WEAPON -> Color(0xFFFF6B6B)
-                    com.greenopal.zargon.data.models.ItemType.ARMOR -> Color(0xFF4ECDC4)
+                    com.greenopal.zargon.data.models.ItemType.WEAPON -> MaterialTheme.colorScheme.error
+                    com.greenopal.zargon.data.models.ItemType.ARMOR -> MaterialTheme.colorScheme.secondary
                     else -> MaterialTheme.colorScheme.onSurface
                 }
             )
@@ -219,7 +219,7 @@ private fun ItemRow(item: Item) {
                 Text(
                     text = item.description,
                     style = MaterialTheme.typography.bodySmall,
-                    color = Color.Gray
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                 )
             }
         }
