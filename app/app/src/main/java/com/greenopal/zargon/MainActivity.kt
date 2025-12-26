@@ -31,7 +31,6 @@ import com.greenopal.zargon.data.repository.SaveGameRepository
 import com.greenopal.zargon.domain.battle.BattleResult
 import com.greenopal.zargon.domain.graphics.Sprite
 import com.greenopal.zargon.domain.graphics.SpriteParser
-import com.greenopal.zargon.domain.graphics.TileParser
 import com.greenopal.zargon.domain.story.NpcDialogProvider
 import com.greenopal.zargon.domain.story.StoryProgressionChecker
 import com.greenopal.zargon.ui.components.SpriteView
@@ -65,9 +64,6 @@ class MainActivity : ComponentActivity() {
     lateinit var spriteParser: SpriteParser
 
     @Inject
-    lateinit var tileParser: TileParser
-
-    @Inject
     lateinit var dialogProvider: NpcDialogProvider
 
     @Inject
@@ -86,6 +82,7 @@ class MainActivity : ComponentActivity() {
 
                 // Load sprites
                 var playerSprite by remember { mutableStateOf<Sprite?>(null) }
+                var playerSprites by remember { mutableStateOf<Map<String, Sprite?>>(emptyMap()) }
                 var monsterSprites by remember { mutableStateOf<Map<String, Sprite?>>(emptyMap()) }
                 var spriteCount by remember { mutableStateOf(0) }
                 var screenState by remember { mutableStateOf(ScreenState.TITLE) }
@@ -97,8 +94,16 @@ class MainActivity : ComponentActivity() {
                     val sprites = spriteParser.parseAllSprites()
                     spriteCount = sprites.size
 
-                    // Load player sprite (use oldman or placeholder)
-                    playerSprite = sprites["oldman"] ?: spriteParser.createPlaceholderSprite("player")
+                    // Load all directional player sprites from drawable resources
+                    playerSprites = mapOf(
+                        "front" to tileBitmapCache.createSpriteFromDrawable("dude_front1"),
+                        "back" to tileBitmapCache.createSpriteFromDrawable("dude_back1"),
+                        "left" to tileBitmapCache.createSpriteFromDrawable("dude_sidel"),
+                        "right" to tileBitmapCache.createSpriteFromDrawable("dude_sider")
+                    )
+
+                    // Default player sprite (front-facing)
+                    playerSprite = playerSprites["front"] ?: spriteParser.createPlaceholderSprite("player")
 
                     // Load monster sprites
                     monsterSprites = mapOf(
@@ -174,8 +179,7 @@ class MainActivity : ComponentActivity() {
                         ScreenState.MAP -> {
                             MapScreen(
                                 gameState = gameState,
-                                playerSprite = playerSprite,
-                                tileParser = tileParser,
+                                playerSprites = playerSprites,
                                 tileBitmapCache = tileBitmapCache,
                                 onEnterBattle = { encounterState ->
                                     // Update game state with encounter

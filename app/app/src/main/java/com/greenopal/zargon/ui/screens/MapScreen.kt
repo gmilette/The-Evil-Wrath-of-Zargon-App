@@ -51,7 +51,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.greenopal.zargon.data.models.GameState
 import com.greenopal.zargon.data.models.Item
 import com.greenopal.zargon.domain.graphics.Sprite
-import com.greenopal.zargon.domain.graphics.TileParser
 import com.greenopal.zargon.domain.map.GameMap
 import com.greenopal.zargon.domain.map.TileType
 import com.greenopal.zargon.ui.viewmodels.MapViewModel
@@ -67,8 +66,7 @@ import javax.inject.Inject
 @Composable
 fun MapScreen(
     gameState: GameState,
-    playerSprite: Sprite?,
-    tileParser: TileParser?,
+    playerSprites: Map<String, Sprite?>,
     tileBitmapCache: com.greenopal.zargon.domain.graphics.TileBitmapCache?,
     onEnterBattle: (GameState) -> Unit,
     onInteract: (TileInteraction) -> Unit,
@@ -83,6 +81,33 @@ fun MapScreen(
     var spellResultMessage by remember { mutableStateOf<String?>(null) }
 
     var lastShopClickTime by remember { mutableStateOf(0L) }
+
+    // Track last position to determine movement direction
+    var lastX by remember { mutableStateOf(gameState.characterX) }
+    var lastY by remember { mutableStateOf(gameState.characterY) }
+    var currentDirection by remember { mutableStateOf("front") }
+
+    // Select sprite based on direction
+    val playerSprite = playerSprites[currentDirection] ?: playerSprites["front"]
+
+    // Update direction when position changes
+    LaunchedEffect(gameState.characterX, gameState.characterY) {
+        val newX = gameState.characterX
+        val newY = gameState.characterY
+
+        // Determine direction based on movement
+        currentDirection = when {
+            newY < lastY -> "back"      // Moved up
+            newY > lastY -> "front"     // Moved down
+            newX < lastX -> "left"      // Moved left
+            newX > lastX -> "right"     // Moved right
+            else -> currentDirection    // No movement, keep current direction
+        }
+
+        // Update last position
+        lastX = newX
+        lastY = newY
+    }
 
     // Preload tile bitmaps for better performance
     LaunchedEffect(tileBitmapCache) {
