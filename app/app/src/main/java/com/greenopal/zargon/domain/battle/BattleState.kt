@@ -38,11 +38,14 @@ data class BattleState(
 
     /**
      * Check if battle is over
+     * IMPORTANT: Character death takes priority over monster death to prevent
+     * the bug where player can "win and die" simultaneously.
+     * If Joe dies, it's always a Defeat - no rewards should be given.
      */
     fun checkBattleEnd(): BattleState {
         return when {
-            !monster.isAlive -> copy(battleResult = BattleResult.Victory)
             !character.isAlive -> copy(battleResult = BattleResult.Defeat)
+            !monster.isAlive -> copy(battleResult = BattleResult.Victory)
             else -> this
         }
     }

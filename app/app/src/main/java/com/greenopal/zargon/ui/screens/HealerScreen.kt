@@ -62,7 +62,7 @@ fun HealerScreen(
     Box(
         modifier = modifier
             .fillMaxSize()
-            .background(Color.Black),
+            .background(MaterialTheme.colorScheme.background),
         contentAlignment = Alignment.Center
     ) {
         Card(
@@ -103,7 +103,7 @@ fun HealerScreen(
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     colors = CardDefaults.cardColors(
-                        containerColor = Color(0xFF2A2A2A)
+                        containerColor = MaterialTheme.colorScheme.surface
                     )
                 ) {
                     Column(
@@ -113,19 +113,19 @@ fun HealerScreen(
                         Text(
                             text = "Current Stats:",
                             fontWeight = FontWeight.Bold,
-                            color = Color.White
+                            color = MaterialTheme.colorScheme.secondary
                         )
                         Text(
                             text = "HP: ${updatedGameState.character.currentDP}/${updatedGameState.character.maxDP}",
-                            color = Color.White
+                            color = MaterialTheme.colorScheme.onSurface
                         )
                         Text(
                             text = "MP: ${updatedGameState.character.currentMP}/${updatedGameState.character.maxMP}",
-                            color = Color.White
+                            color = MaterialTheme.colorScheme.onSurface
                         )
                         Text(
                             text = "Gold: ${updatedGameState.character.gold}",
-                            color = Color(0xFFFFD700),
+                            color = MaterialTheme.colorScheme.primary,
                             fontWeight = FontWeight.Bold
                         )
                     }
@@ -201,8 +201,8 @@ fun HealerScreen(
                     },
                     modifier = Modifier.fillMaxWidth(),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFF4CAF50), // Bright green
-                        contentColor = Color.White
+                        containerColor = MaterialTheme.colorScheme.secondary,
+                        contentColor = MaterialTheme.colorScheme.onSecondary
                     )
                 ) {
                     Text("4. shall i save your game?")
@@ -212,8 +212,8 @@ fun HealerScreen(
                     onClick = { onHealerExit(updatedGameState) },
                     modifier = Modifier.fillMaxWidth(),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFF666666), // Medium gray with white text
-                        contentColor = Color.White
+                        containerColor = MaterialTheme.colorScheme.tertiary,
+                        contentColor = MaterialTheme.colorScheme.onTertiary
                     )
                 ) {
                     Text("5. i've had enough of this guy")
@@ -276,15 +276,15 @@ private fun HealingOption(
         modifier = Modifier.fillMaxWidth(),
         enabled = enabled,
         colors = ButtonDefaults.buttonColors(
-            containerColor = if (enabled) Color(0xFF1976D2) else Color(0xFF424242),
-            contentColor = Color.White,
-            disabledContainerColor = Color(0xFF424242),
-            disabledContentColor = Color(0xFF888888)
-        )
+            containerColor = MaterialTheme.colorScheme.primary,
+            contentColor = MaterialTheme.colorScheme.onPrimary,
+            disabledContainerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f),
+            disabledContentColor = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.5f)
+        ),
+        border = if (!enabled) BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)) else null
     ) {
         Text(
-            text = "$number) $service  ${cost}gp",
-            color = if (enabled) Color.White else Color(0xFF888888)
+            text = "$number) $service  ${cost}gp"
         )
     }
 }

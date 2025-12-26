@@ -75,7 +75,7 @@ fun WeaponShopScreen(
     Box(
         modifier = modifier
             .fillMaxSize()
-            .background(Color.Black),
+            .background(MaterialTheme.colorScheme.background),
         contentAlignment = Alignment.Center
     ) {
         Card(
@@ -127,20 +127,20 @@ fun WeaponShopScreen(
                 Text(
                     text = "Gothox appears to be in a(n) ${mood.displayName} mood",
                     style = MaterialTheme.typography.bodyMedium,
-                    color = mood.color,
+                    color = mood.getColor(),
                     fontWeight = FontWeight.Bold
                 )
 
                 // Gold display
                 Card(
                     colors = CardDefaults.cardColors(
-                        containerColor = Color(0xFF1A1A1A)
+                        containerColor = MaterialTheme.colorScheme.surface
                     )
                 ) {
                     Text(
                         text = "You have ${updatedGameState.character.gold} gold",
                         style = MaterialTheme.typography.titleMedium,
-                        color = Color(0xFFFFD700),
+                        color = MaterialTheme.colorScheme.primary,
                         fontWeight = FontWeight.Bold,
                         modifier = Modifier.padding(8.dp)
                     )
@@ -236,8 +236,8 @@ private fun MainMenu(
         onClick = onBuyWeapon,
         modifier = Modifier.fillMaxWidth(),
         colors = ButtonDefaults.buttonColors(
-            containerColor = Color(0xFF1976D2), // Blue
-            contentColor = Color.White
+            containerColor = MaterialTheme.colorScheme.primary,
+            contentColor = MaterialTheme.colorScheme.onPrimary
         )
     ) {
         Text("1. Buy a Weapon")
@@ -247,8 +247,8 @@ private fun MainMenu(
         onClick = onBuyArmor,
         modifier = Modifier.fillMaxWidth(),
         colors = ButtonDefaults.buttonColors(
-            containerColor = Color(0xFF1976D2), // Blue
-            contentColor = Color.White
+            containerColor = MaterialTheme.colorScheme.primary,
+            contentColor = MaterialTheme.colorScheme.onPrimary
         )
     ) {
         Text("2. Buy Armor")
@@ -258,8 +258,8 @@ private fun MainMenu(
         onClick = onLeave,
         modifier = Modifier.fillMaxWidth(),
         colors = ButtonDefaults.buttonColors(
-            containerColor = Color(0xFF666666), // Medium gray with white text
-            contentColor = Color.White
+            containerColor = MaterialTheme.colorScheme.tertiary,
+            contentColor = MaterialTheme.colorScheme.onTertiary
         )
     ) {
         Text("0. Leave the store")
@@ -309,8 +309,8 @@ private fun WeaponList(
                 .fillMaxWidth()
                 .padding(top = 8.dp),
             colors = ButtonDefaults.buttonColors(
-                containerColor = Color(0xFF666666),
-                contentColor = Color.White
+                containerColor = MaterialTheme.colorScheme.tertiary,
+                contentColor = MaterialTheme.colorScheme.onTertiary
             )
         ) {
             Text("Back")
@@ -332,17 +332,25 @@ private fun WeaponItem(
         enabled = canAfford && !isEquipped,
         colors = ButtonDefaults.buttonColors(
             containerColor = when {
-                isEquipped -> Color(0xFF4CAF50) // Green for equipped
-                canAfford -> Color(0xFF1976D2)   // Blue for affordable
-                else -> Color(0xFF424242)        // Dark gray for too expensive
+                isEquipped -> MaterialTheme.colorScheme.secondary
+                canAfford -> MaterialTheme.colorScheme.primary
+                else -> MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)
             },
-            contentColor = Color.White,
+            contentColor = when {
+                isEquipped -> MaterialTheme.colorScheme.onSecondary
+                canAfford -> MaterialTheme.colorScheme.onPrimary
+                else -> MaterialTheme.colorScheme.onSurface
+            },
             disabledContainerColor = when {
-                isEquipped -> Color(0xFF4CAF50) // Keep green when equipped
-                else -> Color(0xFF424242)
+                isEquipped -> MaterialTheme.colorScheme.secondary
+                else -> MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)
             },
-            disabledContentColor = Color.White
-        )
+            disabledContentColor = when {
+                isEquipped -> MaterialTheme.colorScheme.onSecondary
+                else -> MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+            }
+        ),
+        border = if (!canAfford && !isEquipped) BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)) else null
     ) {
         Column(
             modifier = Modifier.fillMaxWidth()
@@ -352,13 +360,12 @@ private fun WeaponItem(
                     "${weapon.displayName} (+${weapon.attackBonus} AP) [EQUIPPED]"
                 } else {
                     "${weapon.displayName} (+${weapon.attackBonus} AP)"
-                },
-                color = Color.White
+                }
             )
             if (!isEquipped) {
                 Text(
                     text = "${price}g",
-                    color = Color(0xFFFFD700),
+                    color = MaterialTheme.colorScheme.primary,
                     fontWeight = FontWeight.Bold
                 )
             }
@@ -409,8 +416,8 @@ private fun ArmorList(
                 .fillMaxWidth()
                 .padding(top = 8.dp),
             colors = ButtonDefaults.buttonColors(
-                containerColor = Color(0xFF666666),
-                contentColor = Color.White
+                containerColor = MaterialTheme.colorScheme.tertiary,
+                contentColor = MaterialTheme.colorScheme.onTertiary
             )
         ) {
             Text("Back")
@@ -432,17 +439,25 @@ private fun ArmorItem(
         enabled = canAfford && !isEquipped,
         colors = ButtonDefaults.buttonColors(
             containerColor = when {
-                isEquipped -> Color(0xFF4CAF50) // Green for equipped
-                canAfford -> Color(0xFF1976D2)   // Blue for affordable
-                else -> Color(0xFF424242)        // Dark gray for too expensive
+                isEquipped -> MaterialTheme.colorScheme.secondary
+                canAfford -> MaterialTheme.colorScheme.primary
+                else -> MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)
             },
-            contentColor = Color.White,
+            contentColor = when {
+                isEquipped -> MaterialTheme.colorScheme.onSecondary
+                canAfford -> MaterialTheme.colorScheme.onPrimary
+                else -> MaterialTheme.colorScheme.onSurface
+            },
             disabledContainerColor = when {
-                isEquipped -> Color(0xFF4CAF50) // Keep green when equipped
-                else -> Color(0xFF424242)
+                isEquipped -> MaterialTheme.colorScheme.secondary
+                else -> MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)
             },
-            disabledContentColor = Color.White
-        )
+            disabledContentColor = when {
+                isEquipped -> MaterialTheme.colorScheme.onSecondary
+                else -> MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+            }
+        ),
+        border = if (!canAfford && !isEquipped) BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)) else null
     ) {
         Column(
             modifier = Modifier.fillMaxWidth()
@@ -452,13 +467,12 @@ private fun ArmorItem(
                     "${armor.displayName} (+${armor.defenseBonus} DP) [EQUIPPED]"
                 } else {
                     "${armor.displayName} (+${armor.defenseBonus} DP)"
-                },
-                color = Color.White
+                }
             )
             if (!isEquipped) {
                 Text(
                     text = "${price}g",
-                    color = Color(0xFFFFD700),
+                    color = MaterialTheme.colorScheme.primary,
                     fontWeight = FontWeight.Bold
                 )
             }
@@ -470,10 +484,19 @@ enum class ShopScreen {
     MAIN, WEAPONS, ARMOR
 }
 
-enum class ShopMood(val displayName: String, val priceMultiplier: Float, val color: Color) {
-    GOOD("good", 0.88f, Color.Green),
-    NORMAL("normal", 1.0f, Color.Yellow),
-    ANGRY("angry", 1.22f, Color.Red)
+enum class ShopMood(val displayName: String, val priceMultiplier: Float) {
+    GOOD("good", 0.88f),
+    NORMAL("normal", 1.0f),
+    ANGRY("angry", 1.22f)
+}
+
+@Composable
+fun ShopMood.getColor(): Color {
+    return when (this) {
+        ShopMood.GOOD -> MaterialTheme.colorScheme.secondary
+        ShopMood.NORMAL -> MaterialTheme.colorScheme.primary
+        ShopMood.ANGRY -> MaterialTheme.colorScheme.tertiary
+    }
 }
 
 enum class Weapon(val displayName: String, val basePrice: Int, val attackBonus: Int) {

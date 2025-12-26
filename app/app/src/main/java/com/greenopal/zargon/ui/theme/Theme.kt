@@ -7,40 +7,38 @@ import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 
-// EGA-inspired retro color palette
-private val RetroGreen = Color(0xFF00AA00)
-private val RetroBlue = Color(0xFF0000AA)
-private val RetroCyan = Color(0xFF00AAAA)
-private val RetroYellow = Color(0xFFFFFF55)
-private val RetroRed = Color(0xFFAA0000)
-private val RetroBrown = Color(0xFFAA5500)
-private val RetroGray = Color(0xFFAAAAAA)
-private val RetroDarkGray = Color(0xFF555555)
+private val Gold = Color(0xFFD4AF37)
+private val DarkStone = Color(0xFF3A3A3A)
+private val MidStone = Color(0xFF5B5B5B)
+private val Parchment = Color(0xFFD8C8A0)
+private val EmberOrange = Color(0xFFFF9A3C)
 
 private val DarkColorScheme = darkColorScheme(
-    primary = RetroGreen,
-    secondary = RetroCyan,
-    tertiary = RetroYellow,
-    background = Color.Black,
-    surface = RetroDarkGray,
-    onPrimary = Color.Black,
-    onSecondary = Color.Black,
-    onTertiary = Color.Black,
-    onBackground = RetroGray,
-    onSurface = Color.White,
+    primary = Gold,
+    secondary = Parchment,
+    tertiary = EmberOrange,
+    background = DarkStone,
+    surface = MidStone,
+    error = EmberOrange,
+    onPrimary = DarkStone,
+    onSecondary = DarkStone,
+    onTertiary = DarkStone,
+    onBackground = Parchment,
+    onSurface = Gold,
 )
 
 private val LightColorScheme = lightColorScheme(
-    primary = RetroBlue,
-    secondary = RetroCyan,
-    tertiary = RetroBrown,
-    background = RetroGray,
+    primary = Gold,
+    secondary = Parchment,
+    tertiary = EmberOrange,
+    background = Parchment,
     surface = Color.White,
-    onPrimary = Color.White,
-    onSecondary = Color.Black,
-    onTertiary = Color.White,
-    onBackground = Color.Black,
-    onSurface = Color.Black,
+    error = EmberOrange,
+    onPrimary = DarkStone,
+    onSecondary = DarkStone,
+    onTertiary = DarkStone,
+    onBackground = DarkStone,
+    onSurface = DarkStone,
 )
 
 @Composable
@@ -48,7 +46,7 @@ fun ZargonTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     content: @Composable () -> Unit
 ) {
-    val colorScheme = if (darkTheme) DarkColorScheme else LightColorScheme
+    val colorScheme = DarkColorScheme
 
     MaterialTheme(
         colorScheme = colorScheme,

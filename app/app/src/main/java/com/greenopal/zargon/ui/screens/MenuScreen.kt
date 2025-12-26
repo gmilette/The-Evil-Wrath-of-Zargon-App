@@ -46,7 +46,7 @@ fun MenuScreen(
     Box(
         modifier = modifier
             .fillMaxSize()
-            .background(Color.Black),
+            .background(MaterialTheme.colorScheme.background),
         contentAlignment = Alignment.Center
     ) {
         Card(
@@ -109,13 +109,13 @@ fun MenuScreen(
                     onClick = onViewHints,
                     modifier = Modifier.fillMaxWidth(),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = Color(0xFFFFD700)
+                        containerColor = MaterialTheme.colorScheme.tertiary,
+                        contentColor = MaterialTheme.colorScheme.onTertiary
                     )
                 ) {
                     Text(
                         text = "Map Guide & Hints",
                         style = MaterialTheme.typography.titleMedium,
-                        color = Color.Black,
                         fontWeight = FontWeight.Bold
                     )
                 }
@@ -127,13 +127,13 @@ fun MenuScreen(
                     onClick = onBack,
                     modifier = Modifier.fillMaxWidth(),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = Color.DarkGray
+                        containerColor = MaterialTheme.colorScheme.surface,
+                        contentColor = MaterialTheme.colorScheme.onSurface
                     )
                 ) {
                     Text(
                         text = "Close",
-                        style = MaterialTheme.typography.titleMedium,
-                        color = Color.White
+                        style = MaterialTheme.typography.titleMedium
                     )
                 }
             }
