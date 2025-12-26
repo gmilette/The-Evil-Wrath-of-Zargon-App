@@ -128,34 +128,23 @@ class BattleViewModel @Inject constructor(
         }
     }
 
-    /**
-     * Monster attacks player (Hitback from ZARGON.BAS:1685)
-     */
-    private fun monsterCounterattack(state: BattleState) {
-        viewModelScope.launch {
-            // Calculate damage: mAP - defense + random(monster level equivalent)
-            // In QBASIC: mloss = INT(RND * whatlev)
-            // Fix: Handle scalingFactor == 0 to prevent crash
-            val randomFactor = if (state.monster.scalingFactor > 0) {
-                Random.nextInt(0, state.monster.scalingFactor + 1)
-            } else {
-                0
-            }
-            val rawDamage = state.monster.attackPower - state.character.totalDefense + randomFactor
-            val damage = maxOf(1, rawDamage) // Minimum 1 damage
-
-            // Apply damage to character
-            val newCharacter = state.character.takeDamage(damage)
-
-            // Add message
-            var newState = state
-                .updateCharacter(newCharacter)
-                .addMessage("${state.monster.name} hits you for $damage damage!")
-
-            // Check if player is defeated
-            newState = newState.checkBattleEnd()
-            _battleState.value = newState
+    private suspend fun monsterCounterattack(state: BattleState) {
+        val randomFactor = if (state.monster.scalingFactor > 0) {
+            Random.nextInt(0, state.monster.scalingFactor + 1)
+        } else {
+            0
         }
+        val rawDamage = state.monster.attackPower - state.character.totalDefense + randomFactor
+        val damage = maxOf(1, rawDamage)
+
+        val newCharacter = state.character.takeDamage(damage)
+
+        var newState = state
+            .updateCharacter(newCharacter)
+            .addMessage("${state.monster.name} hits you for $damage damage!")
+
+        newState = newState.checkBattleEnd()
+        _battleState.value = newState
     }
 
     /**

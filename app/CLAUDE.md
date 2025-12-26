@@ -115,3 +115,8 @@ Use Kotest assertions for more expressive test assertions when writing new tests
 
 ## Coding conventions
 Do not add comments 
+Do not change any code in any .BAS files.
+
+
+## Claude execution notes
+Do not run any commandline commands

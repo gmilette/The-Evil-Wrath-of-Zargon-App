@@ -75,21 +75,6 @@ fun HealerScreen(
             border = BorderStroke(3.dp, MaterialTheme.colorScheme.primary)
         ) {
             Box {
-                // Exit button in top-left corner
-                IconButton(
-                    onClick = { onHealerExit(updatedGameState) },
-                    modifier = Modifier
-                        .align(Alignment.TopStart)
-                        .padding(8.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Close,
-                        contentDescription = "Exit healer",
-                        tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.size(32.dp)
-                    )
-                }
-
                 Column(
                     modifier = Modifier
                         .padding(24.dp)
@@ -234,6 +219,20 @@ fun HealerScreen(
                     Text("5. i've had enough of this guy")
                 }
             }
+
+                IconButton(
+                    onClick = { onHealerExit(updatedGameState) },
+                    modifier = Modifier
+                        .align(Alignment.TopStart)
+                        .padding(8.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Close,
+                        contentDescription = "Exit healer",
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(32.dp)
+                    )
+                }
         }
         }
 

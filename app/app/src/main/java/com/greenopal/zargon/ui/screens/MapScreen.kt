@@ -3,6 +3,7 @@ package com.greenopal.zargon.ui.screens
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -76,12 +77,12 @@ fun MapScreen(
     modifier: Modifier = Modifier,
     viewModel: MapViewModel = hiltViewModel()
 ) {
-    // State for found item dialog
     var foundItem by remember { mutableStateOf<Item?>(null) }
 
-    // State for spell casting
     var showSpellMenu by remember { mutableStateOf(false) }
     var spellResultMessage by remember { mutableStateOf<String?>(null) }
+
+    var lastShopClickTime by remember { mutableStateOf(0L) }
 
     // Preload tile bitmaps for better performance
     LaunchedEffect(tileBitmapCache) {
@@ -140,7 +141,20 @@ fun MapScreen(
                         modifier = Modifier.padding(8.dp),
                         horizontalArrangement = Arrangement.SpaceEvenly
                     ) {
-                        LegendItem("W", "Shop", Color(0xFF8B4513))
+                        LegendItem(
+                            symbol = "W",
+                            label = "Shop",
+                            color = Color(0xFF8B4513),
+                            onClick = {
+                                val currentTime = System.currentTimeMillis()
+                                if (currentTime - lastShopClickTime <= 500) {
+                                    currentGameState?.let { state ->
+                                        onEnterBattle(state)
+                                    }
+                                }
+                                lastShopClickTime = currentTime
+                            }
+                        )
                         LegendItem("H", "Healer", Color(0xFFFF69B4))
                         LegendItem("h", "NPC", Color(0xFFAA5500))
                         LegendItem("C", "Castle", Color(0xFF4B0082))
@@ -725,12 +739,19 @@ private fun LegendItem(
     symbol: String,
     label: String,
     color: Color,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onClick: (() -> Unit)? = null
 ) {
     Row(
         horizontalArrangement = Arrangement.spacedBy(4.dp),
         verticalAlignment = Alignment.CenterVertically,
-        modifier = modifier
+        modifier = modifier.then(
+            if (onClick != null) {
+                Modifier.clickable { onClick() }
+            } else {
+                Modifier
+            }
+        )
     ) {
         Box(
             modifier = Modifier
