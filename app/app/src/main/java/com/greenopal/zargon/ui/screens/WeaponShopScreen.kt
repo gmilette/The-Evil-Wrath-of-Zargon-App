@@ -49,16 +49,8 @@ fun WeaponShopScreen(
     onShopExit: (GameState) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    // Gothox's mood affects prices
-    val mood by remember {
-        mutableStateOf(
-            when (Random.nextInt(100)) {
-                in 0..24 -> ShopMood.GOOD
-                in 25..74 -> ShopMood.NORMAL
-                else -> ShopMood.ANGRY
-            }
-        )
-    }
+    // Fixed mood for consistent pricing
+    val mood = ShopMood.NORMAL
 
     var currentScreen by remember { mutableStateOf(ShopScreen.MAIN) }
     var message by remember { mutableStateOf<String?>(null) }
@@ -105,7 +97,7 @@ fun WeaponShopScreen(
 
                 Column(
                     modifier = Modifier
-                        .padding(24.dp)
+                        .padding(start = 24.dp, end = 24.dp, bottom = 24.dp, top = 56.dp)
                         .fillMaxWidth(),
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.spacedBy(12.dp)
@@ -122,13 +114,6 @@ fun WeaponShopScreen(
                     text = "A large, dirt-covered blacksmith stands behind the counter",
                     style = MaterialTheme.typography.bodySmall,
                     textAlign = TextAlign.Center
-                )
-
-                Text(
-                    text = "Gothox appears to be in a(n) ${mood.displayName} mood",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = mood.getColor(),
-                    fontWeight = FontWeight.Bold
                 )
 
                 // Gold display
@@ -365,7 +350,7 @@ private fun WeaponItem(
             if (!isEquipped) {
                 Text(
                     text = "${price}g",
-                    color = MaterialTheme.colorScheme.primary,
+                    color = if (canAfford) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
                     fontWeight = FontWeight.Bold
                 )
             }
@@ -472,7 +457,7 @@ private fun ArmorItem(
             if (!isEquipped) {
                 Text(
                     text = "${price}g",
-                    color = MaterialTheme.colorScheme.primary,
+                    color = if (canAfford) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
                     fontWeight = FontWeight.Bold
                 )
             }

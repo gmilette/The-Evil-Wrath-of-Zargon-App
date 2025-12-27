@@ -120,3 +120,63 @@ Do not change any code in any .BAS files.
 
 ## Claude execution notes
 Do not run any commandline commands
+
+## Project-Specific Patterns & Best Practices
+
+### Directory Structure
+- The project has an extra `app` directory level: `/app/app/app/src/main/...`
+- Drawable resources: `/app/app/app/src/main/res/drawable/`
+- When searching for files, account for this nested structure
+
+### Medieval Theme Colors
+The app uses a consistent medieval color palette defined in `ui/theme/Theme.kt`:
+- **Gold** (`0xFFD4AF37`) - Primary color for highlights, gold amounts, main action buttons
+- **DarkStone** (`0xFF3A3A3A`) - Background color
+- **MidStone** (`0xFF5B5B5B`) - Surface color for cards, disabled buttons
+- **Parchment** (`0xFFD8C8A0`) - Secondary color for success states, subtitles
+- **EmberOrange** (`0xFFFF9A3C`) - Tertiary color for warnings, exit/leave buttons
+
+**Color Usage Guidelines:**
+- Use `MaterialTheme.colorScheme.primary` for main action buttons and highlights
+- Use `MaterialTheme.colorScheme.tertiary` for exit/leave/back buttons (ensures visibility)
+- Use `MaterialTheme.colorScheme.secondary` for save/success buttons
+- **Never use** `MaterialTheme.colorScheme.surface` for button backgrounds (blends with DarkStone background)
+- For disabled buttons: use `primary.copy(alpha = 0.3f)` not surface color
+- Always provide proper on-colors (onPrimary, onSecondary, onTertiary, onSurface)
+
+### UI Screen Patterns
+All location screens (Healer, Shop, Fountain, Dialog) follow this pattern:
+```kotlin
+Box(background = MaterialTheme.colorScheme.background) {
+    Card(
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        border = BorderStroke(3.dp, MaterialTheme.colorScheme.primary)
+    ) {
+        Box {
+            Column { /* main content */ }
+
+            // Exit button in top-left corner
+            IconButton(
+                modifier = Modifier.align(Alignment.TopStart)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Close,
+                    tint = MaterialTheme.colorScheme.primary
+                )
+            }
+        }
+    }
+}
+```
+
+### Battle System Critical Rules
+**Battle Flow (from QBASIC original):**
+1. Player attacks first → if enemy dies, battle ends with Victory
+2. Enemy attacks second (only if alive) → if player dies, battle ends with Defeat
+
+**Critical Implementation Details:**
+- In `BattleState.checkBattleEnd()`: ALWAYS check `!character.isAlive` BEFORE `!monster.isAlive`
+- If player dies, battle result MUST be Defeat (never Victory)
+- No rewards (XP, gold, items) should be given if player dies
+- No level-up should occur if player dies
+- Death dialogs must be non-dismissible (set `onDismissRequest = {}`)

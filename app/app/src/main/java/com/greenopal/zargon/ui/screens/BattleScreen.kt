@@ -3,6 +3,7 @@ package com.greenopal.zargon.ui.screens
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -418,33 +419,29 @@ private fun ActionMenu(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            Button(
-                onClick = { onAction(BattleAction.Attack) },
-                enabled = isPlayerTurn,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Image(
-                    painter = painterResource(R.drawable.attack_icon),
-                    contentDescription = "Attack",
-                    modifier = Modifier.size(24.dp)
-                )
-            }
+            Image(
+                painter = painterResource(R.drawable.attack_icon),
+                contentDescription = "Attack",
+                modifier = Modifier
+                    .size(72.dp)
+                    .clickable(enabled = isPlayerTurn) { onAction(BattleAction.Attack) }
+            )
 
-            Button(
-                onClick = { onAction(BattleAction.Magic) },
-                enabled = isPlayerTurn,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text("✨")
-            }
+            Image(
+                painter = painterResource(R.drawable.spell),
+                contentDescription = "Magic",
+                modifier = Modifier
+                    .size(72.dp)
+                    .clickable(enabled = isPlayerTurn) { onAction(BattleAction.Magic) }
+            )
 
-            Button(
-                onClick = { onAction(BattleAction.Run) },
-                enabled = isPlayerTurn,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text("🏃")
-            }
+            Image(
+                painter = painterResource(R.drawable.run_icon),
+                contentDescription = "Run",
+                modifier = Modifier
+                    .size(72.dp)
+                    .clickable(enabled = isPlayerTurn) { onAction(BattleAction.Run) }
+            )
         }
     }
 }

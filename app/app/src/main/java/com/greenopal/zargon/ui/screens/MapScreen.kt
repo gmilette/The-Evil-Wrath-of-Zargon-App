@@ -51,7 +51,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.greenopal.zargon.data.models.GameState
 import com.greenopal.zargon.data.models.Item
 import com.greenopal.zargon.domain.graphics.Sprite
-import com.greenopal.zargon.domain.graphics.TileParser
 import com.greenopal.zargon.domain.map.GameMap
 import com.greenopal.zargon.domain.map.TileType
 import com.greenopal.zargon.ui.viewmodels.MapViewModel
@@ -67,8 +66,7 @@ import javax.inject.Inject
 @Composable
 fun MapScreen(
     gameState: GameState,
-    playerSprite: Sprite?,
-    tileParser: TileParser?,
+    playerSprites: Map<String, Sprite?>,
     tileBitmapCache: com.greenopal.zargon.domain.graphics.TileBitmapCache?,
     onEnterBattle: (GameState) -> Unit,
     onInteract: (TileInteraction) -> Unit,
@@ -83,6 +81,33 @@ fun MapScreen(
     var spellResultMessage by remember { mutableStateOf<String?>(null) }
 
     var lastShopClickTime by remember { mutableStateOf(0L) }
+
+    // Track last position to determine movement direction
+    var lastX by remember { mutableStateOf(gameState.characterX) }
+    var lastY by remember { mutableStateOf(gameState.characterY) }
+    var currentDirection by remember { mutableStateOf("front") }
+
+    // Select sprite based on direction
+    val playerSprite = playerSprites[currentDirection] ?: playerSprites["front"]
+
+    // Update direction when position changes
+    LaunchedEffect(gameState.characterX, gameState.characterY) {
+        val newX = gameState.characterX
+        val newY = gameState.characterY
+
+        // Determine direction based on movement
+        currentDirection = when {
+            newY < lastY -> "back"      // Moved up
+            newY > lastY -> "front"     // Moved down
+            newX < lastX -> "left"      // Moved left
+            newX > lastX -> "right"     // Moved right
+            else -> currentDirection    // No movement, keep current direction
+        }
+
+        // Update last position
+        lastX = newX
+        lastY = newY
+    }
 
     // Preload tile bitmaps for better performance
     LaunchedEffect(tileBitmapCache) {
@@ -130,36 +155,6 @@ fun MapScreen(
                     modifier = Modifier.fillMaxWidth()
                 )
 
-                // Map legend
-                Card(
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.surfaceVariant
-                    ),
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Row(
-                        modifier = Modifier.padding(8.dp),
-                        horizontalArrangement = Arrangement.SpaceEvenly
-                    ) {
-                        LegendItem(
-                            symbol = "W",
-                            label = "Shop",
-                            color = Color(0xFF8B4513),
-                            onClick = {
-                                val currentTime = System.currentTimeMillis()
-                                if (currentTime - lastShopClickTime <= 500) {
-                                    currentGameState?.let { state ->
-                                        onEnterBattle(state)
-                                    }
-                                }
-                                lastShopClickTime = currentTime
-                            }
-                        )
-                        LegendItem("H", "Healer", Color(0xFFFF69B4))
-                        LegendItem("h", "NPC", Color(0xFFAA5500))
-                        LegendItem("C", "Castle", Color(0xFF4B0082))
-                    }
-                }
 
                 // Map display
                 MapView(
@@ -385,22 +380,35 @@ private fun MapView(
                 val offsetY = (size.height - mapHeight) / 2
 
                 // Draw tiles
+                var loggedTiles = mutableSetOf<String>()
                 for (y in 0 until map.height) {
                     for (x in 0 until map.width) {
                         val tile = map.getTile(x, y)
                         if (tile != null) {
+                            // Log unique tile names being requested (only once per type)
+                            if (!loggedTiles.contains(tile.name)) {
+                                android.util.Log.d("MapScreen", "Requesting tile: '${tile.name}' for TileType: ${tile}")
+                                loggedTiles.add(tile.name)
+                            }
+
                             // Try to use textured bitmap from cache, fall back to colored rectangle
                             val tileBitmap = tileBitmapCache?.getBitmap(tile.name, tileSize.toInt())
 
                             if (tileBitmap != null) {
-                                // Draw textured bitmap tile
+                                // Draw textured bitmap tile, stretching to fill exact tile size
                                 drawIntoCanvas { canvas ->
                                     val left = offsetX + x * tileSize
                                     val top = offsetY + y * tileSize
-                                    canvas.nativeCanvas.drawBitmap(
-                                        tileBitmap,
+                                    val destRect = android.graphics.RectF(
                                         left,
                                         top,
+                                        left + tileSize,
+                                        top + tileSize
+                                    )
+                                    canvas.nativeCanvas.drawBitmap(
+                                        tileBitmap,
+                                        null,
+                                        destRect,
                                         null
                                     )
                                 }
@@ -414,32 +422,6 @@ private fun MapView(
                                     ),
                                     size = Size(tileSize, tileSize)
                                 )
-                            }
-
-                            // Draw labels for special tiles
-                            val label = when (tile) {
-                                TileType.WEAPON_SHOP -> "W"
-                                TileType.HEALER -> "H"
-                                TileType.HUT -> "h"
-                                TileType.CASTLE -> "C"
-                                else -> null
-                            }
-
-                            if (label != null && tileSize > 20f) {
-                                drawIntoCanvas { canvas ->
-                                    val paint = android.graphics.Paint().apply {
-                                        color = Color.White.toArgb()
-                                        textSize = (tileSize * 0.7f).coerceAtMost(24f)
-                                        textAlign = android.graphics.Paint.Align.CENTER
-                                        isFakeBoldText = true
-                                    }
-                                    canvas.nativeCanvas.drawText(
-                                        label,
-                                        offsetX + x * tileSize + tileSize / 2,
-                                        offsetY + y * tileSize + tileSize / 2 + paint.textSize / 3,
-                                        paint
-                                    )
-                                }
                             }
                         }
                     }
@@ -457,14 +439,14 @@ private fun MapView(
                     )
                 }
 
-                // Draw grid lines (optional, for clarity)
-                drawGrid(
-                    width = map.width,
-                    height = map.height,
-                    tileSize = tileSize,
-                    offsetX = offsetX,
-                    offsetY = offsetY
-                )
+                // Grid lines disabled - tiles now fill entire grid cells
+                // drawGrid(
+                //     width = map.width,
+                //     height = map.height,
+                //     tileSize = tileSize,
+                //     offsetX = offsetX,
+                //     offsetY = offsetY
+                // )
             }
         }
     }
