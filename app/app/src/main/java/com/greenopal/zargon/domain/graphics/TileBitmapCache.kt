@@ -38,10 +38,17 @@ class TileBitmapCache @Inject constructor(
         // Building/location sprites from bomb.sht
         "huts" to R.drawable.huts,
         "Huts" to R.drawable.huts,
+        "HUT" to R.drawable.huts,
+        "WEAPON_SHOP" to R.drawable.huts,
+        "HEALER" to R.drawable.huts,
         "cast" to R.drawable.cast,
         "Cast" to R.drawable.cast,
+        "CASTLE" to R.drawable.cast,
         "flor" to R.drawable.flor,
         "Flor" to R.drawable.flor,
+        "FLOOR" to R.drawable.flor,
+        "FLOOR_DECORATED" to R.drawable.florwd,
+        "florwd" to R.drawable.florwd,
 
         // Common aliases for backward compatibility
         "GRASS" to R.drawable.grass,
@@ -53,7 +60,9 @@ class TileBitmapCache @Inject constructor(
         "Trees" to R.drawable.trees1,
         "TREE2" to R.drawable.trees2,
         "WATER" to R.drawable.water,
+        "SHALLOW_WATER" to R.drawable.water,
         "GRAVE" to R.drawable.gravestone,
+        "Gravestone" to R.drawable.gravestone,
 
         // Character sprites
         "dude_back1" to R.drawable.dude_back1,
@@ -81,12 +90,21 @@ class TileBitmapCache @Inject constructor(
         }
 
         // Get drawable resource ID for this tile
-        val resourceId = tileResourceMap[tileId] ?: return null
+        val resourceId = tileResourceMap[tileId]
+        if (resourceId == null) {
+            android.util.Log.w("TileBitmapCache", "No resource mapping found for tileId: '$tileId'")
+            return null
+        }
+
+        android.util.Log.d("TileBitmapCache", "Loading tile '$tileId' from resource $resourceId")
 
         // Load bitmap from drawable resources
         val bitmap = loadBitmapFromResource(resourceId, size)
         if (bitmap != null) {
             bitmapCache[cacheKey] = bitmap
+            android.util.Log.d("TileBitmapCache", "Successfully loaded tile '$tileId' (${bitmap.width}x${bitmap.height})")
+        } else {
+            android.util.Log.e("TileBitmapCache", "Failed to load bitmap for tile '$tileId'")
         }
 
         return bitmap
