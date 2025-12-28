@@ -47,6 +47,8 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.greenopal.zargon.data.models.GameState
 import com.greenopal.zargon.data.models.Item
@@ -164,6 +166,7 @@ fun MapScreen(
                 HeaderBar(
                     gameState = currentGameState!!,
                     onOpenMenu = onOpenMenu,
+                    onEnterBattle = onEnterBattle,
                     modifier = Modifier.fillMaxWidth()
                 )
 
@@ -273,6 +276,7 @@ fun MapScreen(
 private fun HeaderBar(
     gameState: GameState,
     onOpenMenu: () -> Unit,
+    onEnterBattle: (GameState) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Row(
@@ -295,7 +299,15 @@ private fun HeaderBar(
                     text = "JOE Lv${gameState.character.level}",
                     style = MaterialTheme.typography.bodyMedium,
                     fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.primary
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.pointerInput(Unit) {
+                        detectTapGestures(
+                            onDoubleTap = {
+                                android.util.Log.d("MapScreen", "Double-clicked on JOE - triggering battle")
+                                onEnterBattle(gameState)
+                            }
+                        )
+                    }
                 )
                 Text(
                     text = "HP:${gameState.character.currentDP}/${gameState.character.maxDP}",
