@@ -86,6 +86,7 @@ fun MapScreen(
     var lastX by remember { mutableStateOf(gameState.characterX) }
     var lastY by remember { mutableStateOf(gameState.characterY) }
     var currentDirection by remember { mutableStateOf("front") }
+    var lastInteractedPosition by remember { mutableStateOf<Pair<Int, Int>?>(null) }
 
     // Select sprite based on direction
     val playerSprite = playerSprites[currentDirection] ?: playerSprites["front"]
@@ -133,6 +134,17 @@ fun MapScreen(
             viewModel.checkForEncounter(state)?.let { encounterState ->
                 onEnterBattle(encounterState)
             }
+
+            // Auto-interact with huts when player moves onto them
+            val currentPosition = Pair(state.characterX, state.characterY)
+            if (currentPosition != lastInteractedPosition) {
+                val interaction = viewModel.getCurrentInteraction()
+                if (interaction != null) {
+                    android.util.Log.d("MapScreen", "Auto-entering hut at position $currentPosition")
+                    lastInteractedPosition = currentPosition
+                    onInteract(interaction)
+                }
+            }
         }
     }
 
@@ -167,34 +179,6 @@ fun MapScreen(
                         .fillMaxWidth()
                         .weight(1f)
                 )
-
-                // Interact button (if on interactive tile)
-                val currentInteraction = viewModel.getCurrentInteraction()
-                if (currentInteraction != null) {
-                    Button(
-                        onClick = {
-                            // Sync the updated position back to MainActivity before interacting
-                            currentGameState?.let { updatedState ->
-                                android.util.Log.d("MapScreen", "Interact button clicked - MapViewModel position: World (${updatedState.worldX}, ${updatedState.worldY}), Char (${updatedState.characterX}, ${updatedState.characterY})")
-                            }
-                            onInteract(currentInteraction)
-                        },
-                        modifier = Modifier.fillMaxWidth(),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = MaterialTheme.colorScheme.tertiary
-                        )
-                    ) {
-                        Text(
-                            text = when (currentInteraction) {
-                                is TileInteraction.NpcDialog -> "Talk to ${currentInteraction.npcType.displayName}"
-                                is TileInteraction.WeaponShop -> "Enter Weapon Shop"
-                                is TileInteraction.Healer -> "Visit Healer"
-                                is TileInteraction.Castle -> "Enter Castle"
-                            },
-                            style = MaterialTheme.typography.titleMedium
-                        )
-                    }
-                }
 
                 // Movement controls
                 MovementControls(
