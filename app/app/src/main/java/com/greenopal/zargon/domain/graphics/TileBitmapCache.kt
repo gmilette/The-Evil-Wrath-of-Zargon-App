@@ -72,6 +72,18 @@ class TileBitmapCache @Inject constructor(
         "dude_sidel" to R.drawable.dude_sidel,
         "dude_sider" to R.drawable.dude_sider,
 
+        // Monster sprites
+        "bat" to R.drawable.bat,
+        "babble" to R.drawable.babble,
+        "spook" to R.drawable.spook,
+        "slime" to R.drawable.slime,
+        "demon" to R.drawable.demon,
+        "snake" to R.drawable.snake,
+        "necro" to R.drawable.necro,
+        "kraken" to R.drawable.kraken,
+        "zargon" to R.drawable.zargon,
+        "ZARGON" to R.drawable.zargon,
+
         // UI icons
         "spell" to R.drawable.spell,
         "attack_icon" to R.drawable.attack_icon,

@@ -72,6 +72,9 @@ class MainActivity : ComponentActivity() {
     @Inject
     lateinit var tileBitmapCache: com.greenopal.zargon.domain.graphics.TileBitmapCache
 
+    @Inject
+    lateinit var mapParser: com.greenopal.zargon.domain.map.MapParser
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -90,6 +93,52 @@ class MainActivity : ComponentActivity() {
                 var isExplorationMode by remember { mutableStateOf(false) }
                 var saveSlots by remember { mutableStateOf(saveRepository.getAllSaves()) }
 
+                fun isOnInteractiveTile(state: com.greenopal.zargon.data.models.GameState): Boolean {
+                    val currentMap = mapParser.parseMap(state.worldX, state.worldY)
+                    val tile = currentMap.getTile(state.characterX, state.characterY)
+                    return tile != null && (tile == com.greenopal.zargon.domain.map.TileType.HUT ||
+                            tile == com.greenopal.zargon.domain.map.TileType.WEAPON_SHOP ||
+                            tile == com.greenopal.zargon.domain.map.TileType.HEALER ||
+                            tile == com.greenopal.zargon.domain.map.TileType.CASTLE)
+                }
+
+                fun movePlayerOutsideInteraction(state: com.greenopal.zargon.data.models.GameState): com.greenopal.zargon.data.models.GameState {
+                    val currentMap = mapParser.parseMap(state.worldX, state.worldY)
+
+                    val directions = listOf(
+                        Pair(0, -1),
+                        Pair(0, 1),
+                        Pair(-1, 0),
+                        Pair(1, 0)
+                    )
+
+                    for ((dx, dy) in directions) {
+                        val newX = state.characterX + dx
+                        val newY = state.characterY + dy
+
+                        if (newX in 0..19 && newY in 0..9) {
+                            val tile = currentMap.getTile(newX, newY)
+                            if (tile != null && tile.isWalkable) {
+                                return state.copy(
+                                    characterX = newX,
+                                    characterY = newY
+                                )
+                            }
+                        }
+                    }
+
+                    return state
+                }
+
+                fun ensurePlayerNotOnInteractiveTile(state: com.greenopal.zargon.data.models.GameState): com.greenopal.zargon.data.models.GameState {
+                    return if (isOnInteractiveTile(state)) {
+                        android.util.Log.d("MainActivity", "Player starting on interactive tile - moving outside")
+                        movePlayerOutsideInteraction(state)
+                    } else {
+                        state
+                    }
+                }
+
                 LaunchedEffect(Unit) {
                     val sprites = spriteParser.parseAllSprites()
                     spriteCount = sprites.size
@@ -105,17 +154,17 @@ class MainActivity : ComponentActivity() {
                     // Default player sprite (front-facing)
                     playerSprite = playerSprites["front"] ?: spriteParser.createPlaceholderSprite("player")
 
-                    // Load monster sprites
+                    // Load monster sprites from drawable resources
                     monsterSprites = mapOf(
-                        "bat" to spriteParser.createBatSprite(),
-                        "babble" to spriteParser.createBabbleSprite(),
-                        "spook" to spriteParser.createSpookSprite(),
-                        "slime" to spriteParser.createSlimeSprite(),
-                        "demon" to sprites["demon"],
-                        "snake" to sprites["snake"],
-                        "necro" to sprites["necro"],
-                        "kraken" to sprites["kraken"],
-                        "ZARGON" to sprites["ZARGON"]
+                        "bat" to tileBitmapCache.createSpriteFromDrawable("bat"),
+                        "babble" to tileBitmapCache.createSpriteFromDrawable("babble"),
+                        "spook" to tileBitmapCache.createSpriteFromDrawable("spook"),
+                        "slime" to tileBitmapCache.createSpriteFromDrawable("slime"),
+                        "demon" to tileBitmapCache.createSpriteFromDrawable("demon"),
+                        "snake" to tileBitmapCache.createSpriteFromDrawable("snake"),
+                        "necro" to tileBitmapCache.createSpriteFromDrawable("necro"),
+                        "kraken" to tileBitmapCache.createSpriteFromDrawable("kraken"),
+                        "ZARGON" to tileBitmapCache.createSpriteFromDrawable("zargon")
                     )
                 }
 
@@ -127,12 +176,18 @@ class MainActivity : ComponentActivity() {
                                 onNewGame = { slot ->
                                     android.util.Log.d("MainActivity", "Starting new game in slot $slot")
                                     viewModel.newGame(slot)
+                                    val initialState = viewModel.gameState.value
+                                    val correctedState = ensurePlayerNotOnInteractiveTile(initialState)
+                                    if (correctedState != initialState) {
+                                        viewModel.updateGameState(correctedState)
+                                    }
                                     isExplorationMode = true
                                     screenState = ScreenState.MAP
                                 },
                                 onContinue = { slot ->
                                     saveRepository.loadGame(slot)?.let { savedState ->
-                                        viewModel.updateGameState(savedState)
+                                        val correctedState = ensurePlayerNotOnInteractiveTile(savedState)
+                                        viewModel.updateGameState(correctedState)
                                         isExplorationMode = true
                                         screenState = ScreenState.MAP
                                     }
@@ -452,7 +507,9 @@ class MainActivity : ComponentActivity() {
                                             else -> updatedState
                                         }
                                         android.util.Log.d("MainActivity", "Final story status after actions: ${finalState.storyStatus}")
-                                        viewModel.updateGameState(finalState)
+                                        val stateWithMovedPlayer = movePlayerOutsideInteraction(finalState)
+                                        android.util.Log.d("MainActivity", "Exiting dialog - Moved player from (${finalState.characterX}, ${finalState.characterY}) to (${stateWithMovedPlayer.characterX}, ${stateWithMovedPlayer.characterY})")
+                                        viewModel.updateGameState(stateWithMovedPlayer)
 
                                         // Always return to map after dialog ends
                                         screenState = ScreenState.MAP
@@ -470,10 +527,10 @@ class MainActivity : ComponentActivity() {
                             WeaponShopScreen(
                                 gameState = gameState,
                                 onShopExit = { updatedState ->
-                                    // Return player to where they were before entering
-                                    android.util.Log.d("MainActivity", "Exiting shop - Position: World (${updatedState.worldX}, ${updatedState.worldY}), Char (${updatedState.characterX}, ${updatedState.characterY})")
-                                    android.util.Log.d("MainActivity", "Exiting shop - Gold: ${updatedState.character.gold}")
-                                    viewModel.updateGameState(updatedState)
+                                    val stateWithMovedPlayer = movePlayerOutsideInteraction(updatedState)
+                                    android.util.Log.d("MainActivity", "Exiting shop - Moved player from (${updatedState.characterX}, ${updatedState.characterY}) to (${stateWithMovedPlayer.characterX}, ${stateWithMovedPlayer.characterY})")
+                                    android.util.Log.d("MainActivity", "Exiting shop - Gold: ${stateWithMovedPlayer.character.gold}")
+                                    viewModel.updateGameState(stateWithMovedPlayer)
                                     android.util.Log.d("MainActivity", "After shop exit - Position: World (${viewModel.gameState.value.worldX}, ${viewModel.gameState.value.worldY}), Char (${viewModel.gameState.value.characterX}, ${viewModel.gameState.value.characterY})")
                                     screenState = ScreenState.MAP
                                 },
@@ -492,10 +549,10 @@ class MainActivity : ComponentActivity() {
                                     saveSlots = saveRepository.getAllSaves()
                                 },
                                 onHealerExit = { updatedState ->
-                                    // Return player to where they were before entering
-                                    android.util.Log.d("MainActivity", "Exiting healer - Position: World (${updatedState.worldX}, ${updatedState.worldY}), Char (${updatedState.characterX}, ${updatedState.characterY})")
-                                    android.util.Log.d("MainActivity", "Exiting healer - HP: ${updatedState.character.currentDP}/${updatedState.character.maxDP}")
-                                    viewModel.updateGameState(updatedState)
+                                    val stateWithMovedPlayer = movePlayerOutsideInteraction(updatedState)
+                                    android.util.Log.d("MainActivity", "Exiting healer - Moved player from (${updatedState.characterX}, ${updatedState.characterY}) to (${stateWithMovedPlayer.characterX}, ${stateWithMovedPlayer.characterY})")
+                                    android.util.Log.d("MainActivity", "Exiting healer - HP: ${stateWithMovedPlayer.character.currentDP}/${stateWithMovedPlayer.character.maxDP}")
+                                    viewModel.updateGameState(stateWithMovedPlayer)
                                     android.util.Log.d("MainActivity", "After healer exit - Position: World (${viewModel.gameState.value.worldX}, ${viewModel.gameState.value.worldY}), Char (${viewModel.gameState.value.characterX}, ${viewModel.gameState.value.characterY})")
                                     screenState = ScreenState.MAP
                                 },
@@ -515,10 +572,10 @@ class MainActivity : ComponentActivity() {
                                     saveSlots = saveRepository.getAllSaves()
                                 },
                                 onFountainExit = { updatedState ->
-                                    // Return player to where they were before entering
-                                    android.util.Log.d("MainActivity", "Exiting fountain - Position: World (${updatedState.worldX}, ${updatedState.worldY}), Char (${updatedState.characterX}, ${updatedState.characterY})")
-                                    android.util.Log.d("MainActivity", "Exiting fountain - HP: ${updatedState.character.currentDP}/${updatedState.character.maxDP}")
-                                    viewModel.updateGameState(updatedState)
+                                    val stateWithMovedPlayer = movePlayerOutsideInteraction(updatedState)
+                                    android.util.Log.d("MainActivity", "Exiting fountain - Moved player from (${updatedState.characterX}, ${updatedState.characterY}) to (${stateWithMovedPlayer.characterX}, ${stateWithMovedPlayer.characterY})")
+                                    android.util.Log.d("MainActivity", "Exiting fountain - HP: ${stateWithMovedPlayer.character.currentDP}/${stateWithMovedPlayer.character.maxDP}")
+                                    viewModel.updateGameState(stateWithMovedPlayer)
                                     screenState = ScreenState.MAP
                                 },
                                 modifier = Modifier

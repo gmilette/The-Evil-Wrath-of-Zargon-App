@@ -47,6 +47,8 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.greenopal.zargon.data.models.GameState
 import com.greenopal.zargon.data.models.Item
@@ -86,6 +88,7 @@ fun MapScreen(
     var lastX by remember { mutableStateOf(gameState.characterX) }
     var lastY by remember { mutableStateOf(gameState.characterY) }
     var currentDirection by remember { mutableStateOf("front") }
+    var lastInteractedPosition by remember { mutableStateOf<Pair<Int, Int>?>(null) }
 
     // Select sprite based on direction
     val playerSprite = playerSprites[currentDirection] ?: playerSprites["front"]
@@ -133,6 +136,17 @@ fun MapScreen(
             viewModel.checkForEncounter(state)?.let { encounterState ->
                 onEnterBattle(encounterState)
             }
+
+            // Auto-interact with huts when player moves onto them
+            val currentPosition = Pair(state.characterX, state.characterY)
+            if (currentPosition != lastInteractedPosition) {
+                val interaction = viewModel.getCurrentInteraction()
+                if (interaction != null) {
+                    android.util.Log.d("MapScreen", "Auto-entering hut at position $currentPosition")
+                    lastInteractedPosition = currentPosition
+                    onInteract(interaction)
+                }
+            }
         }
     }
 
@@ -152,6 +166,7 @@ fun MapScreen(
                 HeaderBar(
                     gameState = currentGameState!!,
                     onOpenMenu = onOpenMenu,
+                    onEnterBattle = onEnterBattle,
                     modifier = Modifier.fillMaxWidth()
                 )
 
@@ -167,34 +182,6 @@ fun MapScreen(
                         .fillMaxWidth()
                         .weight(1f)
                 )
-
-                // Interact button (if on interactive tile)
-                val currentInteraction = viewModel.getCurrentInteraction()
-                if (currentInteraction != null) {
-                    Button(
-                        onClick = {
-                            // Sync the updated position back to MainActivity before interacting
-                            currentGameState?.let { updatedState ->
-                                android.util.Log.d("MapScreen", "Interact button clicked - MapViewModel position: World (${updatedState.worldX}, ${updatedState.worldY}), Char (${updatedState.characterX}, ${updatedState.characterY})")
-                            }
-                            onInteract(currentInteraction)
-                        },
-                        modifier = Modifier.fillMaxWidth(),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = MaterialTheme.colorScheme.tertiary
-                        )
-                    ) {
-                        Text(
-                            text = when (currentInteraction) {
-                                is TileInteraction.NpcDialog -> "Talk to ${currentInteraction.npcType.displayName}"
-                                is TileInteraction.WeaponShop -> "Enter Weapon Shop"
-                                is TileInteraction.Healer -> "Visit Healer"
-                                is TileInteraction.Castle -> "Enter Castle"
-                            },
-                            style = MaterialTheme.typography.titleMedium
-                        )
-                    }
-                }
 
                 // Movement controls
                 MovementControls(
@@ -289,6 +276,7 @@ fun MapScreen(
 private fun HeaderBar(
     gameState: GameState,
     onOpenMenu: () -> Unit,
+    onEnterBattle: (GameState) -> Unit,
     modifier: Modifier = Modifier
 ) {
     Row(
@@ -311,7 +299,15 @@ private fun HeaderBar(
                     text = "JOE Lv${gameState.character.level}",
                     style = MaterialTheme.typography.bodyMedium,
                     fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.primary
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.pointerInput(Unit) {
+                        detectTapGestures(
+                            onDoubleTap = {
+                                android.util.Log.d("MapScreen", "Double-clicked on JOE - triggering battle")
+                                onEnterBattle(gameState)
+                            }
+                        )
+                    }
                 )
                 Text(
                     text = "HP:${gameState.character.currentDP}/${gameState.character.maxDP}",
