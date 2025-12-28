@@ -154,17 +154,17 @@ class MainActivity : ComponentActivity() {
                     // Default player sprite (front-facing)
                     playerSprite = playerSprites["front"] ?: spriteParser.createPlaceholderSprite("player")
 
-                    // Load monster sprites
+                    // Load monster sprites from drawable resources
                     monsterSprites = mapOf(
-                        "bat" to spriteParser.createBatSprite(),
-                        "babble" to spriteParser.createBabbleSprite(),
-                        "spook" to spriteParser.createSpookSprite(),
-                        "slime" to spriteParser.createSlimeSprite(),
-                        "demon" to sprites["demon"],
-                        "snake" to sprites["snake"],
-                        "necro" to sprites["necro"],
-                        "kraken" to sprites["kraken"],
-                        "ZARGON" to sprites["ZARGON"]
+                        "bat" to tileBitmapCache.createSpriteFromDrawable("bat"),
+                        "babble" to tileBitmapCache.createSpriteFromDrawable("babble"),
+                        "spook" to tileBitmapCache.createSpriteFromDrawable("spook"),
+                        "slime" to tileBitmapCache.createSpriteFromDrawable("slime"),
+                        "demon" to tileBitmapCache.createSpriteFromDrawable("demon"),
+                        "snake" to tileBitmapCache.createSpriteFromDrawable("snake"),
+                        "necro" to tileBitmapCache.createSpriteFromDrawable("necro"),
+                        "kraken" to tileBitmapCache.createSpriteFromDrawable("kraken"),
+                        "ZARGON" to tileBitmapCache.createSpriteFromDrawable("zargon")
                     )
                 }
 
