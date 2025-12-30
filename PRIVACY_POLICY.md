@@ -150,11 +150,11 @@ You have the right to:
 
 If you have any questions or concerns about this Privacy Policy or the App's data practices, please contact us:
 
-**Email:** [YOUR EMAIL HERE]
+**Email:** handyandroidapp@gmail.com
 
 **App Name:** Zargon
 **Package Name:** com.greenopal.zargon
-**Developer:** [YOUR DEVELOPER NAME]
+**Developer:** Gradison Technologies
 
 ---
 
