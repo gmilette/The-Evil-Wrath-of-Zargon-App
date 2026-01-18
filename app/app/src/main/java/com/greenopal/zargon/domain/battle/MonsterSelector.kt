@@ -1,8 +1,10 @@
 package com.greenopal.zargon.domain.battle
 
+import com.greenopal.zargon.data.models.DifficultyLevel
 import com.greenopal.zargon.data.models.GameState
 import com.greenopal.zargon.data.models.MonsterStats
 import com.greenopal.zargon.data.models.MonsterType
+import com.greenopal.zargon.domain.challenges.ChallengeModifiers
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.random.Random
@@ -12,7 +14,9 @@ import kotlin.random.Random
  * Based on SelectMonsta procedure (ZARGON.BAS:3083)
  */
 @Singleton
-class MonsterSelector @Inject constructor() {
+class MonsterSelector @Inject constructor(
+    private val challengeModifiers: ChallengeModifiers
+) {
 
     /**
      * Select a monster for battle
@@ -28,19 +32,21 @@ class MonsterSelector @Inject constructor() {
         if (gameState.worldX == 3 && gameState.worldY == 2) {
             // Castle occupies a 4x3 area, check if player is inside
             if (gameState.characterX in 13..16 && gameState.characterY in 4..6) {
-                return MonsterStats(
+                val baseZargon = MonsterStats(
                     type = MonsterType.ZARGON,
                     attackPower = 60,
                     currentHP = 300,
                     maxHP = 300,
                     scalingFactor = 1
                 )
+                return applyDifficultyAndLabel(baseZargon, gameState)
             }
         }
 
         // Special case: Kraken when in ship
         if (gameState.inShip) {
-            return createMonster(MonsterType.KRAKEN, playerLevel, scalingFactor = 1)
+            val baseKraken = createMonster(MonsterType.KRAKEN, playerLevel, scalingFactor = 1)
+            return applyDifficultyAndLabel(baseKraken, gameState)
         }
 
         // Special case: Boss Necro at specific location
@@ -48,13 +54,14 @@ class MonsterSelector @Inject constructor() {
         if (gameState.worldX == 4 && gameState.worldY == 2 &&
             gameState.storyStatus >= 3.0f &&
             gameState.characterX == 3 && gameState.characterY == 2) {
-            return MonsterStats(
+            val baseNecro = MonsterStats(
                 type = MonsterType.NECRO,
                 attackPower = 45,
                 currentHP = 30,
                 maxHP = 30,
                 scalingFactor = 1
             )
+            return applyDifficultyAndLabel(baseNecro, gameState)
         }
 
         // Regular monster selection with level gating
@@ -99,7 +106,28 @@ class MonsterSelector @Inject constructor() {
             }
         }
 
-        return createMonster(monsterType, playerLevel, scalingFactor, prefix)
+        val baseMonster = createMonster(monsterType, playerLevel, scalingFactor, prefix)
+        return applyDifficultyAndLabel(baseMonster, gameState)
+    }
+
+    private fun applyDifficultyAndLabel(monster: MonsterStats, gameState: GameState): MonsterStats {
+        val config = gameState.challengeConfig
+        return if (config != null) {
+            val modifiedMonster = challengeModifiers.applyDifficultyToMonster(
+                monster,
+                config.difficulty
+            )
+            val label = challengeModifiers.getDifficultyLabel(config.difficulty)
+            if (label != null && modifiedMonster.displayName == null) {
+                modifiedMonster.copy(displayName = "$label ${modifiedMonster.type.displayName}")
+            } else if (label != null) {
+                modifiedMonster.copy(displayName = "$label ${modifiedMonster.displayName}")
+            } else {
+                modifiedMonster
+            }
+        } else {
+            monster
+        }
     }
 
     /**

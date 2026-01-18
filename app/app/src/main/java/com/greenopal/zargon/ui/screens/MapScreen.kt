@@ -448,49 +448,6 @@ private fun MapView(
     }
 }
 
-private fun DrawScope.drawTileSprite(
-    sprite: Sprite,
-    x: Int,
-    y: Int,
-    tileSize: Float,
-    offsetX: Float,
-    offsetY: Float
-) {
-    val startX = offsetX + x * tileSize
-    val startY = offsetY + y * tileSize
-
-    val pixelWidth = tileSize / sprite.width
-    val pixelHeight = tileSize / sprite.height
-
-    for (py in 0 until sprite.height) {
-        for (px in 0 until sprite.width) {
-            val color = sprite.getPixel(px, py)
-            // Skip transparent pixels
-            if (color.alpha > 0f) {
-                drawRect(
-                    color = color,
-                    topLeft = Offset(
-                        startX + px * pixelWidth,
-                        startY + py * pixelHeight
-                    ),
-                    size = Size(pixelWidth, pixelHeight)
-                )
-            }
-        }
-    }
-}
-
-private fun getTileSpriteForType(tile: TileType, sprites: Map<String, Sprite>): Sprite? {
-    return when (tile) {
-        TileType.GRASS -> sprites["GRASS"] ?: sprites["Grass"]
-        TileType.SAND -> sprites["SAND"] ?: sprites["Sand"]
-        TileType.TREE, TileType.TREE2 -> sprites["TREE"] ?: sprites["Trees1"]
-        TileType.ROCK, TileType.ROCK2 -> sprites["ROCK"] ?: sprites["Rock-1"]
-        TileType.WATER -> sprites["WATER"] ?: sprites["Water"]
-        TileType.GRAVE -> sprites["GRAVE"] ?: sprites["Gravestone"]
-        else -> null
-    }
-}
 
 private fun DrawScope.drawPlayerSprite(
     sprite: Sprite,
@@ -527,36 +484,6 @@ private fun DrawScope.drawPlayerSprite(
     }
 }
 
-private fun DrawScope.drawGrid(
-    width: Int,
-    height: Int,
-    tileSize: Float,
-    offsetX: Float,
-    offsetY: Float
-) {
-    val gridColor = Color.Gray.copy(alpha = 0.3f)
-
-    // Vertical lines
-    for (x in 0..width) {
-        drawLine(
-            color = gridColor,
-            start = Offset(offsetX + x * tileSize, offsetY),
-            end = Offset(offsetX + x * tileSize, offsetY + height * tileSize),
-            strokeWidth = 1f
-        )
-    }
-
-    // Horizontal lines
-    for (y in 0..height) {
-        drawLine(
-            color = gridColor,
-            start = Offset(offsetX, offsetY + y * tileSize),
-            end = Offset(offsetX + width * tileSize, offsetY + y * tileSize),
-            strokeWidth = 1f
-        )
-    }
-}
-
 @Composable
 private fun MovementControls(
     onMove: (Direction) -> Unit,
@@ -579,7 +506,6 @@ private fun MovementControls(
         ) {
             // Up button
             DirectionButton(
-                direction = Direction.UP,
                 onClick = { onMove(Direction.UP) },
                 text = "↑"
             )
@@ -591,19 +517,16 @@ private fun MovementControls(
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 DirectionButton(
-                    direction = Direction.LEFT,
                     onClick = { onMove(Direction.LEFT) },
                     text = "←"
                 )
 
                 DirectionButton(
-                    direction = Direction.DOWN,
                     onClick = { onMove(Direction.DOWN) },
                     text = "↓"
                 )
 
                 DirectionButton(
-                    direction = Direction.RIGHT,
                     onClick = { onMove(Direction.RIGHT) },
                     text = "→"
                 )
@@ -642,7 +565,6 @@ private fun MovementControls(
 
 @Composable
 private fun DirectionButton(
-    direction: Direction,
     onClick: () -> Unit,
     text: String,
     modifier: Modifier = Modifier
@@ -710,46 +632,6 @@ private fun ItemFoundDialog(
         containerColor = MaterialTheme.colorScheme.surface,
         tonalElevation = 6.dp
     )
-}
-
-@Composable
-private fun LegendItem(
-    symbol: String,
-    label: String,
-    color: Color,
-    modifier: Modifier = Modifier,
-    onClick: (() -> Unit)? = null
-) {
-    Row(
-        horizontalArrangement = Arrangement.spacedBy(4.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = modifier.then(
-            if (onClick != null) {
-                Modifier.clickable { onClick() }
-            } else {
-                Modifier
-            }
-        )
-    ) {
-        Box(
-            modifier = Modifier
-                .size(16.dp)
-                .background(color),
-            contentAlignment = Alignment.Center
-        ) {
-            Text(
-                text = symbol,
-                style = MaterialTheme.typography.labelSmall,
-                color = Color.White,
-                fontWeight = FontWeight.Bold
-            )
-        }
-        Text(
-            text = label,
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-    }
 }
 
 enum class Direction {

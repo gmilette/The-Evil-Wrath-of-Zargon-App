@@ -21,6 +21,8 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -29,6 +31,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.greenopal.zargon.data.models.GameState
 import com.greenopal.zargon.data.models.Item
+import com.greenopal.zargon.data.repository.PrestigeRepository
 
 /**
  * Character stats and inventory screen
@@ -38,8 +41,12 @@ import com.greenopal.zargon.data.models.Item
 fun StatsScreen(
     gameState: GameState,
     onBack: () -> Unit,
+    prestigeRepository: PrestigeRepository,
     modifier: Modifier = Modifier
 ) {
+    // Load prestige data
+    val prestige by prestigeRepository.loadPrestigeFlow().collectAsState(initial = com.greenopal.zargon.data.models.PrestigeData())
+
     // Handle back button
     BackHandler {
         onBack()
@@ -93,8 +100,31 @@ fun StatsScreen(
                         // Stats
                         StatRow("Hit Points", "${gameState.character.currentDP} / ${gameState.character.maxDP}")
                         StatRow("Magic Points", "${gameState.character.currentMP} / ${gameState.character.maxMP}")
-                        StatRow("Attack Power", "${gameState.character.totalAP}")
-                        StatRow("Defense Power", "${gameState.character.totalDefense}")
+
+                        // Attack Power with prestige bonus
+                        val apWithPrestige = gameState.character.totalAP + prestige.permanentAPBonus
+                        val apDisplay = if (prestige.permanentAPBonus > 0) {
+                            "${gameState.character.baseAP} + ${gameState.character.weaponBonus} + ${prestige.permanentAPBonus} = $apWithPrestige"
+                        } else {
+                            apWithPrestige.toString()
+                        }
+                        StatRow("Attack Power", apDisplay, if (prestige.permanentAPBonus > 0) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.onSurface)
+
+                        // Defense Power with prestige bonus
+                        val defenseWithPrestige = gameState.character.totalDefense + prestige.permanentDPBonus
+                        val defenseDisplay = if (prestige.permanentDPBonus > 0) {
+                            "${gameState.character.baseDP} + ${gameState.character.armorBonus} + ${prestige.permanentDPBonus} = $defenseWithPrestige"
+                        } else {
+                            defenseWithPrestige.toString()
+                        }
+                        StatRow("Defense Power", defenseDisplay, if (prestige.permanentDPBonus > 0) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.onSurface)
+
+                        // XP Multiplier if prestige XP bonus exists
+                        if (prestige.xpMultiplierBonus > 0f) {
+                            val multiplier = String.format("%.0f%%", prestige.xpMultiplierBonus * 100)
+                            StatRow("XP Multiplier", "+$multiplier", MaterialTheme.colorScheme.tertiary)
+                        }
+
                         StatRow("Gold", "${gameState.character.gold}g", MaterialTheme.colorScheme.primary)
                         StatRow("Experience", "${gameState.character.experience} / ${gameState.nextLevelXP}")
 

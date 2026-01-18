@@ -34,7 +34,18 @@ data class GameState(
 
     // Game meta
     val saveSlot: Int = 1,
-    val playtime: Long = 0L  // milliseconds
+    val playtime: Long = 0L,  // milliseconds
+
+    // Challenge configuration (null for legacy/normal games)
+    val challengeConfig: ChallengeConfig? = null,
+
+    // Timer tracking (for timed challenges)
+    val challengeStartTime: Long? = null,  // System.currentTimeMillis() at game start
+    val totalPauseTime: Long = 0L,  // Accumulated pause time to subtract
+
+    // Statistics tracking for challenge completion
+    val monstersDefeated: Int = 0,
+    val deathCount: Int = 0
 ) {
     /**
      * Add item to inventory (max 10 items)

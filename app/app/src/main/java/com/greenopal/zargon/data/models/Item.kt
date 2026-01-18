@@ -30,28 +30,4 @@ object Items {
         description = "A soul trapped by the Necromancer",
         type = ItemType.KEY_ITEM
     )
-
-    val WOODEN_SWORD = Item(
-        name = "Wooden Sword",
-        description = "+2 Attack",
-        type = ItemType.WEAPON
-    )
-
-    val IRON_SWORD = Item(
-        name = "Iron Sword",
-        description = "+5 Attack",
-        type = ItemType.WEAPON
-    )
-
-    val LEATHER_ARMOR = Item(
-        name = "Leather Armor",
-        description = "+2 Defense",
-        type = ItemType.ARMOR
-    )
-
-    val CHAIN_MAIL = Item(
-        name = "Chain Mail",
-        description = "+5 Defense",
-        type = ItemType.ARMOR
-    )
 }

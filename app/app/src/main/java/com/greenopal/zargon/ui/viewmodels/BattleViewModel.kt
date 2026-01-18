@@ -29,7 +29,10 @@ import kotlin.random.Random
 class BattleViewModel @Inject constructor(
     private val monsterSelector: MonsterSelector,
     private val rewardSystem: RewardSystem,
-    private val levelingSystem: LevelingSystem
+    private val levelingSystem: LevelingSystem,
+    private val challengeModifiers: com.greenopal.zargon.domain.challenges.ChallengeModifiers,
+    private val prestigeRepository: com.greenopal.zargon.data.repository.PrestigeRepository,
+    private val prestigeSystem: com.greenopal.zargon.domain.challenges.PrestigeSystem
 ) : ViewModel() {
 
     private val _battleState = MutableStateFlow<BattleState?>(null)
@@ -98,8 +101,22 @@ class BattleViewModel @Inject constructor(
         viewModelScope.launch {
             isProcessingAction = true
             try {
-                // Calculate damage: cAP + wgain (weapon bonus)
-                val damage = state.character.totalAP
+                // Calculate damage: cAP + wgain (weapon bonus) + prestige
+                val gameState = currentGameState
+                val prestige = prestigeRepository.loadPrestige()
+
+                // Apply challenge equipment mode modifiers if in challenge mode
+                val effectiveWeaponBonus = if (gameState?.challengeConfig != null) {
+                    challengeModifiers.getEffectiveWeaponBonus(
+                        state.character.weaponBonus,
+                        gameState.challengeConfig.weaponMode
+                    )
+                } else {
+                    state.character.weaponBonus
+                }
+
+                // Always add permanent prestige AP bonus
+                val damage = state.character.baseAP + effectiveWeaponBonus + prestige.permanentAPBonus
 
                 // Apply damage to monster
                 val newMonster = state.monster.takeDamage(damage)
@@ -146,7 +163,23 @@ class BattleViewModel @Inject constructor(
         } else {
             0
         }
-        val rawDamage = state.monster.attackPower - state.character.totalDefense + randomFactor
+        // Apply challenge modifiers and prestige bonuses for armor mode
+        val gameState = currentGameState
+        val prestige = prestigeRepository.loadPrestige()
+
+        // Apply challenge equipment mode modifiers if in challenge mode
+        val effectiveArmorBonus = if (gameState?.challengeConfig != null) {
+            challengeModifiers.getEffectiveArmorBonus(
+                state.character.armorBonus,
+                gameState.challengeConfig.armorMode
+            )
+        } else {
+            state.character.armorBonus
+        }
+
+        // Always add permanent prestige DP bonus
+        val totalDefense = state.character.baseDP + effectiveArmorBonus + prestige.permanentDPBonus
+        val rawDamage = state.monster.attackPower - totalDefense + randomFactor
         val damage = maxOf(1, rawDamage)
 
         val newCharacter = state.character.takeDamage(damage)
@@ -331,8 +364,12 @@ class BattleViewModel @Inject constructor(
         val monster = state.monster
 
         // Calculate XP and gold
-        val xpGained = rewardSystem.calculateXP(monster.type, monster.scalingFactor)
+        val baseXP = rewardSystem.calculateXP(monster.type, monster.scalingFactor)
         val goldGained = rewardSystem.calculateGold(monster.type, monster.scalingFactor)
+
+        // Apply prestige XP multiplier (permanent progression)
+        val prestige = prestigeRepository.loadPrestige()
+        val xpGained = (baseXP * prestigeSystem.getXPMultiplier(prestige)).toInt()
 
         android.util.Log.d("BattleViewModel", "Rewards calculated - XP: $xpGained, Gold: $goldGained for ${monster.type}")
 

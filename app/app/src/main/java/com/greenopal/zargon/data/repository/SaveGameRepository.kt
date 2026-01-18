@@ -28,6 +28,11 @@ class SaveGameRepository @Inject constructor(
      * Save game to a slot (1-4)
      */
     fun saveGame(gameState: GameState, slot: Int = 1): Boolean {
+        if (gameState.challengeConfig?.permanentDeath == true) {
+            android.util.Log.d("SaveGameRepository", "Save blocked - Permanent Death mode active")
+            return false
+        }
+
         return try {
             android.util.Log.d("SaveGameRepository", "Saving game to slot $slot:")
             android.util.Log.d("SaveGameRepository", "  Story Status: ${gameState.storyStatus}")
