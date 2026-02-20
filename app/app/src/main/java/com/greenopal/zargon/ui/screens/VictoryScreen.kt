@@ -33,6 +33,9 @@ import androidx.compose.ui.unit.dp
 import com.greenopal.zargon.data.models.GameState
 import com.greenopal.zargon.data.models.Item
 import com.greenopal.zargon.data.models.ItemType
+import com.greenopal.zargon.ui.theme.DarkStone
+import com.greenopal.zargon.ui.theme.Gold
+import com.greenopal.zargon.ui.theme.Parchment
 import kotlinx.coroutines.delay
 
 /**
@@ -43,6 +46,7 @@ fun VictoryScreen(
     finalGameState: GameState,
     onReturnToTitle: () -> Unit,
     onReturnToGEF: (GameState) -> Unit,
+    onChallengeComplete: ((com.greenopal.zargon.data.models.ChallengeResult) -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
     var showText by remember { mutableStateOf(false) }
@@ -50,6 +54,25 @@ fun VictoryScreen(
     LaunchedEffect(Unit) {
         delay(500)
         showText = true
+
+        finalGameState.challengeConfig?.let { config ->
+            val challengeStartTime = finalGameState.challengeStartTime ?: System.currentTimeMillis()
+            val timeElapsed = System.currentTimeMillis() - challengeStartTime - finalGameState.totalPauseTime
+
+            val result = com.greenopal.zargon.data.models.ChallengeResult(
+                challengeId = config.getChallengeId(),
+                completedAt = System.currentTimeMillis(),
+                finalStats = com.greenopal.zargon.data.models.ChallengeCompletionStats(
+                    finalLevel = finalGameState.character.level,
+                    totalGoldEarned = finalGameState.character.gold,
+                    monstersDefeated = finalGameState.monstersDefeated,
+                    deathCount = finalGameState.deathCount
+                ),
+                timeElapsedMs = timeElapsed
+            )
+
+            onChallengeComplete?.invoke(result)
+        }
     }
 
     Box(
@@ -76,7 +99,6 @@ fun VictoryScreen(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
-                    // Victory title
                     Text(
                         text = "VICTORY!",
                         style = MaterialTheme.typography.displayMedium,
@@ -86,6 +108,46 @@ fun VictoryScreen(
                     )
 
                     Spacer(modifier = Modifier.height(8.dp))
+
+                    finalGameState.challengeConfig?.let { config ->
+                        Card(
+                            modifier = Modifier.fillMaxWidth(),
+                            colors = CardDefaults.cardColors(
+                                containerColor = Parchment
+                            )
+                        ) {
+                            Column(
+                                modifier = Modifier.padding(12.dp),
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement = Arrangement.spacedBy(4.dp)
+                            ) {
+                                Text(
+                                    text = "CHALLENGE COMPLETED!",
+                                    style = MaterialTheme.typography.titleMedium,
+                                    color = Gold,
+                                    fontWeight = FontWeight.Bold
+                                )
+                                Text(
+                                    text = config.getDisplayName(),
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = DarkStone
+                                )
+                                if (finalGameState.challengeStartTime != null) {
+                                    val challengeStartTime = finalGameState.challengeStartTime
+                                    val timeElapsed = (System.currentTimeMillis() - challengeStartTime - finalGameState.totalPauseTime) / 1000
+                                    val minutes = timeElapsed / 60
+                                    val seconds = timeElapsed % 60
+                                    Text(
+                                        text = "Time: ${minutes}m ${seconds}s",
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = DarkStone,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                }
+                            }
+                        }
+                        Spacer(modifier = Modifier.height(8.dp))
+                    }
 
                     // Victory message
                     Text(

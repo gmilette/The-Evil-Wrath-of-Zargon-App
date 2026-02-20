@@ -1,0 +1,183 @@
+=== LEVEL PROGRESSION ANALYSIS ===
+Equipment: Long Sword + Chain Mail
+
+SLIME x1 (AP=1, HP=5)
+Level | Player Stats      | Win Rate | Avg Turns
+------|-------------------|----------|----------
+  1   | AP=10 HP=20  Def=48 |    100%  |  1.0
+  3   | AP=16 HP=32  Def=60 |    100%  |  1.0
+  5   | AP=22 HP=44  Def=72 |    100%  |  1.0
+  7   | AP=28 HP=56  Def=84 |    100%  |  1.0
+  10  | AP=37 HP=74  Def=102 |    100%  |  1.0
+  15  | AP=52 HP=104 Def=132 |    100%  |  1.0
+
+SLIME x3 (AP=3, HP=15)
+Level | Player Stats      | Win Rate | Avg Turns
+------|-------------------|----------|----------
+  1   | AP=10 HP=20  Def=48 |    100%  |  2.0
+  3   | AP=16 HP=32  Def=60 |    100%  |  1.0
+  5   | AP=22 HP=44  Def=72 |    100%  |  1.0
+  7   | AP=28 HP=56  Def=84 |    100%  |  1.0
+  10  | AP=37 HP=74  Def=102 |    100%  |  1.0
+  15  | AP=52 HP=104 Def=132 |    100%  |  1.0
+
+SLIME x5 (AP=5, HP=25)
+Level | Player Stats      | Win Rate | Avg Turns
+------|-------------------|----------|----------
+  1   | AP=10 HP=20  Def=48 |    100%  |  3.0
+  3   | AP=16 HP=32  Def=60 |    100%  |  2.0
+  5   | AP=22 HP=44  Def=72 |    100%  |  2.0
+  7   | AP=28 HP=56  Def=84 |    100%  |  1.0
+  10  | AP=37 HP=74  Def=102 |    100%  |  1.0
+  15  | AP=52 HP=104 Def=132 |    100%  |  1.0
+
+SLIME x7 (AP=7, HP=35)
+Level | Player Stats      | Win Rate | Avg Turns
+------|-------------------|----------|----------
+  1   | AP=10 HP=20  Def=48 |    100%  |  4.0
+  3   | AP=16 HP=32  Def=60 |    100%  |  3.0
+  5   | AP=22 HP=44  Def=72 |    100%  |  2.0
+  7   | AP=28 HP=56  Def=84 |    100%  |  2.0
+  10  | AP=37 HP=74  Def=102 |    100%  |  1.0
+  15  | AP=52 HP=104 Def=132 |    100%  |  1.0
+
+SLIME x10 (AP=10, HP=50)
+Level | Player Stats      | Win Rate | Avg Turns
+------|-------------------|----------|----------
+  1   | AP=10 HP=20  Def=48 |    100%  |  5.0
+  3   | AP=16 HP=32  Def=60 |    100%  |  4.0
+  5   | AP=22 HP=44  Def=72 |    100%  |  3.0
+  7   | AP=28 HP=56  Def=84 |    100%  |  2.0
+  10  | AP=37 HP=74  Def=102 |    100%  |  2.0
+  15  | AP=52 HP=104 Def=132 |    100%  |  1.0
+
+NECRO x1 (AP=13, HP=30)
+Level | Player Stats      | Win Rate | Avg Turns
+------|-------------------|----------|----------
+  1   | AP=10 HP=20  Def=48 |    100%  |  3.0
+  3   | AP=16 HP=32  Def=60 |    100%  |  2.0
+  5   | AP=22 HP=44  Def=72 |    100%  |  2.0
+  7   | AP=28 HP=56  Def=84 |    100%  |  2.0
+  10  | AP=37 HP=74  Def=102 |    100%  |  1.0
+  15  | AP=52 HP=104 Def=132 |    100%  |  1.0
+
+NECRO x2 (AP=26, HP=60)
+Level | Player Stats      | Win Rate | Avg Turns
+------|-------------------|----------|----------
+  1   | AP=10 HP=20  Def=48 |    100%  |  6.0
+  3   | AP=16 HP=32  Def=60 |    100%  |  4.0
+  5   | AP=22 HP=44  Def=72 |    100%  |  3.0
+  7   | AP=28 HP=56  Def=84 |    100%  |  3.0
+  10  | AP=37 HP=74  Def=102 |    100%  |  2.0
+  15  | AP=52 HP=104 Def=132 |    100%  |  2.0
+
+NECRO x3 (AP=39, HP=90)
+Level | Player Stats      | Win Rate | Avg Turns
+------|-------------------|----------|----------
+  1   | AP=10 HP=20  Def=48 |    100%  |  9.0
+  3   | AP=16 HP=32  Def=60 |    100%  |  6.0
+  5   | AP=22 HP=44  Def=72 |    100%  |  5.0
+  7   | AP=28 HP=56  Def=84 |    100%  |  4.0
+  10  | AP=37 HP=74  Def=102 |    100%  |  3.0
+  15  | AP=52 HP=104 Def=132 |    100%  |  2.0
+
+NECRO x5 (AP=65, HP=150)
+Level | Player Stats      | Win Rate | Avg Turns
+------|-------------------|----------|----------
+  1   | AP=10 HP=20  Def=48 |      0%  |  N/A
+  3   | AP=16 HP=32  Def=60 |      0%  |  N/A
+  5   | AP=22 HP=44  Def=72 |    100%  |  7.0
+  7   | AP=28 HP=56  Def=84 |    100%  |  6.0
+  10  | AP=37 HP=74  Def=102 |    100%  |  5.0
+  15  | AP=52 HP=104 Def=132 |    100%  |  3.0
+
+NECRO x10 (AP=130, HP=300)
+Level | Player Stats      | Win Rate | Avg Turns
+------|-------------------|----------|----------
+  1   | AP=10 HP=20  Def=48 |      0%  |  N/A
+  3   | AP=16 HP=32  Def=60 |      0%  |  N/A
+  5   | AP=22 HP=44  Def=72 |      0%  |  N/A
+  7   | AP=28 HP=56  Def=84 |      0%  |  N/A
+  10  | AP=37 HP=74  Def=102 |      0%  |  N/A
+  15  | AP=52 HP=104 Def=132 |    100%  |  6.0
+
+SKANDER_SNAKE x1 (AP=12, HP=20)
+Level | Player Stats      | Win Rate | Avg Turns
+------|-------------------|----------|----------
+  1   | AP=10 HP=20  Def=48 |    100%  |  2.0
+  3   | AP=16 HP=32  Def=60 |    100%  |  2.0
+  5   | AP=22 HP=44  Def=72 |    100%  |  1.0
+  7   | AP=28 HP=56  Def=84 |    100%  |  1.0
+  10  | AP=37 HP=74  Def=102 |    100%  |  1.0
+  15  | AP=52 HP=104 Def=132 |    100%  |  1.0
+
+SKANDER_SNAKE x2 (AP=24, HP=40)
+Level | Player Stats      | Win Rate | Avg Turns
+------|-------------------|----------|----------
+  1   | AP=10 HP=20  Def=48 |    100%  |  4.0
+  3   | AP=16 HP=32  Def=60 |    100%  |  3.0
+  5   | AP=22 HP=44  Def=72 |    100%  |  2.0
+  7   | AP=28 HP=56  Def=84 |    100%  |  2.0
+  10  | AP=37 HP=74  Def=102 |    100%  |  2.0
+  15  | AP=52 HP=104 Def=132 |    100%  |  1.0
+
+SKANDER_SNAKE x3 (AP=36, HP=60)
+Level | Player Stats      | Win Rate | Avg Turns
+------|-------------------|----------|----------
+  1   | AP=10 HP=20  Def=48 |    100%  |  6.0
+  3   | AP=16 HP=32  Def=60 |    100%  |  4.0
+  5   | AP=22 HP=44  Def=72 |    100%  |  3.0
+  7   | AP=28 HP=56  Def=84 |    100%  |  3.0
+  10  | AP=37 HP=74  Def=102 |    100%  |  2.0
+  15  | AP=52 HP=104 Def=132 |    100%  |  2.0
+
+SKANDER_SNAKE x5 (AP=60, HP=100)
+Level | Player Stats      | Win Rate | Avg Turns
+------|-------------------|----------|----------
+  1   | AP=10 HP=20  Def=48 |      0%  |  N/A
+  3   | AP=16 HP=32  Def=60 |    100%  |  7.0
+  5   | AP=22 HP=44  Def=72 |    100%  |  5.0
+  7   | AP=28 HP=56  Def=84 |    100%  |  4.0
+  10  | AP=37 HP=74  Def=102 |    100%  |  3.0
+  15  | AP=52 HP=104 Def=132 |    100%  |  2.0
+
+SKANDER_SNAKE x10 (AP=120, HP=200)
+Level | Player Stats      | Win Rate | Avg Turns
+------|-------------------|----------|----------
+  1   | AP=10 HP=20  Def=48 |      0%  |  N/A
+  3   | AP=16 HP=32  Def=60 |      0%  |  N/A
+  5   | AP=22 HP=44  Def=72 |      0%  |  N/A
+  7   | AP=28 HP=56  Def=84 |      0%  |  N/A
+  10  | AP=37 HP=74  Def=102 |      0%  |  N/A
+  15  | AP=52 HP=104 Def=132 |    100%  |  4.0
+
+ZARGON x1 (AP=60, HP=300)
+Level | Player Stats      | Win Rate | Avg Turns
+------|-------------------|----------|----------
+  1   | AP=10 HP=20  Def=48 |      0%  |  N/A
+  3   | AP=16 HP=32  Def=60 |    100%  | 19.0
+  5   | AP=22 HP=44  Def=72 |    100%  | 14.0
+  7   | AP=28 HP=56  Def=84 |    100%  | 11.0
+  10  | AP=37 HP=74  Def=102 |    100%  |  9.0
+  15  | AP=52 HP=104 Def=132 |    100%  |  6.0
+
+ZARGON x2 (AP=120, HP=600)
+Level | Player Stats      | Win Rate | Avg Turns
+------|-------------------|----------|----------
+  1   | AP=10 HP=20  Def=48 |      0%  |  N/A
+  3   | AP=16 HP=32  Def=60 |      0%  |  N/A
+  5   | AP=22 HP=44  Def=72 |      0%  |  N/A
+  7   | AP=28 HP=56  Def=84 |      0%  |  N/A
+  10  | AP=37 HP=74  Def=102 |      0%  |  N/A
+  15  | AP=52 HP=104 Def=132 |    100%  | 12.0
+
+ZARGON x3 (AP=180, HP=900)
+Level | Player Stats      | Win Rate | Avg Turns
+------|-------------------|----------|----------
+  1   | AP=10 HP=20  Def=48 |      0%  |  N/A
+  3   | AP=16 HP=32  Def=60 |      0%  |  N/A
+  5   | AP=22 HP=44  Def=72 |      0%  |  N/A
+  7   | AP=28 HP=56  Def=84 |      0%  |  N/A
+  10  | AP=37 HP=74  Def=102 |      0%  |  N/A
+  15  | AP=52 HP=104 Def=132 |      0%  |  N/A
+

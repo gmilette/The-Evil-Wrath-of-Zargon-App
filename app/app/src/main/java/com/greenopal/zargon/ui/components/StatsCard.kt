@@ -15,12 +15,16 @@ import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.greenopal.zargon.data.models.CharacterStats
+import com.greenopal.zargon.data.models.PrestigeData
+import com.greenopal.zargon.data.repository.PrestigeRepository
 
 /**
  * Displays character stats in a retro-styled card.
@@ -29,8 +33,10 @@ import com.greenopal.zargon.data.models.CharacterStats
 @Composable
 fun StatsCard(
     stats: CharacterStats,
+    prestigeRepository: PrestigeRepository,
     modifier: Modifier = Modifier
 ) {
+    val prestige by prestigeRepository.loadPrestigeFlow().collectAsState(initial = PrestigeData())
     Card(
         modifier = modifier,
         colors = CardDefaults.cardColors(
@@ -79,9 +85,25 @@ fun StatsCard(
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            // Combat Stats
-            StatRow(label = "AP", value = stats.totalAP.toString())
-            StatRow(label = "Defense", value = stats.totalDefense.toString())
+            StatRow(
+                label = "AP",
+                value = stats.totalAP.toString(),
+                color = Color.Unspecified
+            )
+
+            StatRow(
+                label = "Defense",
+                value = stats.totalDefense.toString(),
+                color = Color.Unspecified
+            )
+
+            if (prestige.activeBonuses.isNotEmpty()) {
+                StatRow(
+                    label = "Prestige",
+                    value = "${prestige.activeBonuses.size} active",
+                    color = Color(0xFFFF9A3C)
+                )
+            }
 
             Spacer(modifier = Modifier.height(12.dp))
 
@@ -111,7 +133,8 @@ fun StatsCard(
 @Composable
 private fun StatRow(
     label: String,
-    value: String
+    value: String,
+    color: Color = Color.Unspecified
 ) {
     Row(
         modifier = Modifier.fillMaxWidth(),
@@ -124,7 +147,8 @@ private fun StatRow(
         Text(
             text = value,
             style = MaterialTheme.typography.bodyLarge,
-            fontWeight = FontWeight.Bold
+            fontWeight = FontWeight.Bold,
+            color = if (color != Color.Unspecified) color else MaterialTheme.colorScheme.onSurface
         )
     }
 }

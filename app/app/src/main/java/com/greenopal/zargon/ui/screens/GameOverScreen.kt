@@ -24,6 +24,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.greenopal.zargon.data.models.GameState
+import com.greenopal.zargon.ui.theme.EmberOrange
 
 /**
  * Game Over screen when player dies
@@ -34,6 +35,7 @@ fun GameOverScreen(
     onReturnToTitle: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val isPermanentDeath = finalGameState.challengeConfig?.isPermadeath == true
     Box(
         modifier = modifier
             .fillMaxSize()
@@ -56,7 +58,6 @@ fun GameOverScreen(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                // Game Over title
                 Text(
                     text = "GAME OVER",
                     style = MaterialTheme.typography.headlineLarge,
@@ -65,11 +66,24 @@ fun GameOverScreen(
                     textAlign = TextAlign.Center
                 )
 
+                if (isPermanentDeath) {
+                    Text(
+                        text = "PERMANENT DEATH",
+                        style = MaterialTheme.typography.titleLarge,
+                        color = EmberOrange,
+                        fontWeight = FontWeight.Bold,
+                        textAlign = TextAlign.Center
+                    )
+                }
+
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // Death message
                 Text(
-                    text = "You have been defeated...",
+                    text = if (isPermanentDeath) {
+                        "You have been defeated...\nNo saves in Permanent Death mode."
+                    } else {
+                        "You have been defeated..."
+                    },
                     style = MaterialTheme.typography.titleLarge,
                     textAlign = TextAlign.Center
                 )

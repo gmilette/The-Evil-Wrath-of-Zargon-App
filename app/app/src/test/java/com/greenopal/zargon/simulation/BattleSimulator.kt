@@ -1,12 +1,19 @@
 package com.greenopal.zargon.simulation
 
+import com.greenopal.zargon.data.models.ChallengeConfig
 import com.greenopal.zargon.data.models.CharacterStats
 import com.greenopal.zargon.data.models.MonsterStats
+import com.greenopal.zargon.data.models.PrestigeData
+import com.greenopal.zargon.domain.battle.BattleEngine
+import com.greenopal.zargon.domain.challenges.ChallengeModifiers
 import kotlin.random.Random
 
 class BattleSimulator(
     private val random: Random = Random.Default
 ) {
+    private val challengeModifiers = ChallengeModifiers()
+    private val battleEngine = BattleEngine()
+
     sealed class BattleOutcome {
         object PlayerVictory : BattleOutcome()
         object PlayerDefeat : BattleOutcome()
@@ -23,7 +30,9 @@ class BattleSimulator(
 
     fun simulateBattle(
         character: CharacterStats,
-        monster: MonsterStats
+        monster: MonsterStats,
+        config: ChallengeConfig? = null,
+        prestige: PrestigeData? = null
     ): BattleLog {
         var currentPlayerHP = character.currentDP
         var currentMonsterHP = monster.currentHP
@@ -31,16 +40,25 @@ class BattleSimulator(
         var totalPlayerDamageDealt = 0
         var totalPlayerDamageTaken = 0
 
+        val effectiveWeaponBonus = challengeModifiers.getEffectiveWeaponBonus(
+            character.weaponBonus, config, prestige
+        )
+        val effectiveArmorBonus = challengeModifiers.getEffectiveArmorBonus(
+            character.armorBonus, config, prestige
+        )
+
         while (currentPlayerHP > 0 && currentMonsterHP > 0) {
             turns++
 
-            val playerDamage = character.totalAP
+            val playerDamage = battleEngine.calculatePlayerDamage(character, effectiveWeaponBonus)
             currentMonsterHP -= playerDamage
             totalPlayerDamageDealt += playerDamage
 
             if (currentMonsterHP <= 0) break
 
-            val monsterDamage = calculateMonsterDamage(monster, character)
+            val monsterDamage = battleEngine.calculateMonsterDamage(
+                monster, character, effectiveArmorBonus, random
+            )
             currentPlayerHP -= monsterDamage
             totalPlayerDamageTaken += monsterDamage
         }
@@ -59,15 +77,5 @@ class BattleSimulator(
             playerHPRemaining = maxOf(0, currentPlayerHP),
             monsterHPRemaining = maxOf(0, currentMonsterHP)
         )
-    }
-
-    private fun calculateMonsterDamage(monster: MonsterStats, character: CharacterStats): Int {
-        val randomFactor = if (monster.scalingFactor > 0) {
-            random.nextInt(0, monster.scalingFactor + 1)
-        } else {
-            0
-        }
-        val rawDamage = monster.attackPower - character.totalDefense + randomFactor
-        return maxOf(1, rawDamage)
     }
 }

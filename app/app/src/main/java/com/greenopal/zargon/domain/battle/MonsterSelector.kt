@@ -3,64 +3,59 @@ package com.greenopal.zargon.domain.battle
 import com.greenopal.zargon.data.models.GameState
 import com.greenopal.zargon.data.models.MonsterStats
 import com.greenopal.zargon.data.models.MonsterType
+import com.greenopal.zargon.domain.challenges.ChallengeModifiers
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.random.Random
 
-/**
- * Selects random monsters for battles based on player level and game state.
- * Based on SelectMonsta procedure (ZARGON.BAS:3083)
- */
 @Singleton
-class MonsterSelector @Inject constructor() {
+class MonsterSelector @Inject constructor(
+    private val challengeModifiers: ChallengeModifiers
+) {
 
-    /**
-     * Select a monster for battle
-     *
-     * @param gameState Current game state (for level, position, story status)
-     * @return MonsterStats with appropriate scaling
-     */
     fun selectMonster(gameState: GameState): MonsterStats {
         val playerLevel = gameState.character.level
 
-        // Special case: ZARGON at the castle (Map 32)
-        // Castle is at world position (3, 2)
         if (gameState.worldX == 3 && gameState.worldY == 2) {
-            // Castle occupies a 4x3 area, check if player is inside
             if (gameState.characterX in 13..16 && gameState.characterY in 4..6) {
-                return MonsterStats(
+                val baseZargon = MonsterStats(
                     type = MonsterType.ZARGON,
                     attackPower = 60,
                     currentHP = 300,
                     maxHP = 300,
                     scalingFactor = 1
                 )
+                return applyModifiersAndLabel(baseZargon, gameState)
             }
         }
 
-        // Special case: Kraken when in ship
         if (gameState.inShip) {
-            return createMonster(MonsterType.KRAKEN, playerLevel, scalingFactor = 1)
+            val baseKraken = MonsterStats(
+                type = MonsterType.KRAKEN,
+                attackPower = MonsterType.KRAKEN.baseAP,
+                currentHP = MonsterType.KRAKEN.baseDP,
+                maxHP = MonsterType.KRAKEN.baseDP,
+                scalingFactor = 1
+            )
+            return applyModifiersAndLabel(baseKraken, gameState)
         }
 
-        // Special case: Boss Necro at specific location
-        // QBASIC: IF mapx = 4 AND mapy = 2 AND storystatus >= 3 AND cx = 3 AND cy = 2
         if (gameState.worldX == 4 && gameState.worldY == 2 &&
             gameState.storyStatus >= 3.0f &&
             gameState.characterX == 3 && gameState.characterY == 2) {
-            return MonsterStats(
+            val baseNecro = MonsterStats(
                 type = MonsterType.NECRO,
                 attackPower = 45,
                 currentHP = 30,
                 maxHP = 30,
                 scalingFactor = 1
             )
+            return applyModifiersAndLabel(baseNecro, gameState)
         }
 
-        // Regular monster selection with level gating
         var monsterType: MonsterType
         do {
-            val roll = Random.nextInt(1, 22) // 1-21 inclusive
+            val roll = Random.nextInt(1, 22)
 
             monsterType = when (roll) {
                 in 1..4 -> MonsterType.BAT
@@ -68,57 +63,65 @@ class MonsterSelector @Inject constructor() {
                 in 8..9 -> MonsterType.SPOOK
                 in 13..16 -> MonsterType.SLIME
                 in 10..12 -> {
-                    // Beleth requires level 2+
                     if (playerLevel >= 2) MonsterType.BELETH
-                    else continue // Re-roll
+                    else continue
                 }
                 in 17..19 -> {
-                    // SkanderSnake requires level 5+
                     if (playerLevel >= 5) MonsterType.SKANDER_SNAKE
-                    else continue // Re-roll
+                    else continue
                 }
                 in 20..21 -> {
-                    // Necro requires level 6+
                     if (playerLevel >= 6) MonsterType.NECRO
-                    else continue // Re-roll
+                    else continue
                 }
-                else -> continue // Invalid roll, re-roll
+                else -> continue
             }
             break
         } while (true)
 
-        // Calculate scaling factor (howmuchbigger in QBASIC)
-        // For each level above 1, 50% chance to increase scaling
+        val baseMonster = createScaledMonster(monsterType, playerLevel)
+        return applyModifiersAndLabel(baseMonster, gameState)
+    }
+
+    fun selectRandomMonsterType(playerLevel: Int, random: Random = Random): MonsterType {
+        while (true) {
+            val roll = random.nextInt(1, 22)
+            val type = when (roll) {
+                in 1..4 -> MonsterType.BAT
+                in 5..7 -> MonsterType.BABBLE
+                in 8..9 -> MonsterType.SPOOK
+                in 13..16 -> MonsterType.SLIME
+                in 10..12 -> if (playerLevel >= 2) MonsterType.BELETH else continue
+                in 17..19 -> if (playerLevel >= 5) MonsterType.SKANDER_SNAKE else continue
+                in 20..21 -> if (playerLevel >= 6) MonsterType.NECRO else continue
+                else -> continue
+            }
+            return type
+        }
+    }
+
+    fun createScaledMonster(
+        type: MonsterType,
+        playerLevel: Int,
+        random: Random = Random
+    ): MonsterStats {
         var scalingFactor = 1
         var prefix = ""
         for (i in 1 until playerLevel) {
-            val whatlev = Random.nextInt(1, 3) // 1-2
-            if (whatlev == 2) {
+            val whatlev = random.nextInt(1, 4)
+            if (whatlev >= 2) {
                 prefix += "Great "
                 scalingFactor++
             }
         }
 
-        return createMonster(monsterType, playerLevel, scalingFactor, prefix)
-    }
-
-    /**
-     * Create a monster with scaling applied
-     */
-    private fun createMonster(
-        type: MonsterType,
-        playerLevel: Int,
-        scalingFactor: Int,
-        prefix: String = ""
-    ): MonsterStats {
         val scaledAP = type.baseAP * scalingFactor
         val scaledDP = type.baseDP * scalingFactor
 
-        // Build display name with prefix if present
         val displayName = if (prefix.isNotEmpty()) {
             prefix + type.displayName
         } else {
-            null // Use default from type
+            null
         }
 
         return MonsterStats(
@@ -129,5 +132,19 @@ class MonsterSelector @Inject constructor() {
             scalingFactor = scalingFactor,
             displayName = displayName
         )
+    }
+
+    private fun applyModifiersAndLabel(monster: MonsterStats, gameState: GameState): MonsterStats {
+        val config = gameState.challengeConfig ?: return monster
+        val modifiedMonster = challengeModifiers.applyToMonster(monster, config)
+        val label = challengeModifiers.getMonsterDisplayName(
+            modifiedMonster.displayName ?: modifiedMonster.type.displayName,
+            config
+        )
+        return if (label != (modifiedMonster.displayName ?: modifiedMonster.type.displayName)) {
+            modifiedMonster.copy(displayName = label)
+        } else {
+            modifiedMonster
+        }
     }
 }

@@ -1,0 +1,135 @@
+=== ZARGON WIN RATE ANALYSIS ===
+Generated: 2026-02-15T13:46:10.622418
+
+Testing: Level 5 Character with Long Sword + Chain Mail
+
+Player Stats: Level 5, AP=22, HP=44, Defense=72
+
+=== WIN RATES BY MONSTER AND SCALE (100 battles each) ===
+
+Monster: BABBLE (Base: AP=4, HP=12)
+Scale | Monster Stats    | Win Rate | Avg Turns | Avg HP Left
+------|------------------|----------|-----------|------------
+  1   | AP=4   HP=12  |    100%  |   1.0     |   44
+  2   | AP=8   HP=24  |    100%  |   2.0     |   43
+  3   | AP=12  HP=36  |    100%  |   2.0     |   43
+  4   | AP=16  HP=48  |    100%  |   3.0     |   42
+  5   | AP=20  HP=60  |    100%  |   3.0     |   42
+  6   | AP=24  HP=72  |    100%  |   4.0     |   41
+  7   | AP=28  HP=84  |    100%  |   4.0     |   41
+  8   | AP=32  HP=96  |    100%  |   5.0     |   40
+  9   | AP=36  HP=108 |    100%  |   5.0     |   40
+  10  | AP=40  HP=120 |    100%  |   6.0     |   39
+
+Monster: BAT (Base: AP=2, HP=10)
+Scale | Monster Stats    | Win Rate | Avg Turns | Avg HP Left
+------|------------------|----------|-----------|------------
+  1   | AP=2   HP=10  |    100%  |   1.0     |   44
+  2   | AP=4   HP=20  |    100%  |   1.0     |   44
+  3   | AP=6   HP=30  |    100%  |   2.0     |   43
+  4   | AP=8   HP=40  |    100%  |   2.0     |   43
+  5   | AP=10  HP=50  |    100%  |   3.0     |   42
+  6   | AP=12  HP=60  |    100%  |   3.0     |   42
+  7   | AP=14  HP=70  |    100%  |   4.0     |   41
+  8   | AP=16  HP=80  |    100%  |   4.0     |   41
+  9   | AP=18  HP=90  |    100%  |   5.0     |   40
+  10  | AP=20  HP=100 |    100%  |   5.0     |   40
+
+Monster: BELETH (Base: AP=8, HP=16)
+Scale | Monster Stats    | Win Rate | Avg Turns | Avg HP Left
+------|------------------|----------|-----------|------------
+  1   | AP=8   HP=16  |    100%  |   1.0     |   44
+  2   | AP=16  HP=32  |    100%  |   2.0     |   43
+  3   | AP=24  HP=48  |    100%  |   3.0     |   42
+  4   | AP=32  HP=64  |    100%  |   3.0     |   42
+  5   | AP=40  HP=80  |    100%  |   4.0     |   41
+  6   | AP=48  HP=96  |    100%  |   5.0     |   40
+  7   | AP=56  HP=112 |    100%  |   6.0     |   39
+  8   | AP=64  HP=128 |    100%  |   6.0     |   39
+  9   | AP=72  HP=144 |     99%  |   7.0     |   17
+  10  | AP=80  HP=160 |      0%  |   N/A     |  N/A
+
+Monster: KRAKEN (Base: AP=25, HP=60)
+Scale | Monster Stats    | Win Rate | Avg Turns | Avg HP Left
+------|------------------|----------|-----------|------------
+  1   | AP=25  HP=60  |    100%  |   3.0     |   42
+  2   | AP=50  HP=120 |    100%  |   6.0     |   39
+  3   | AP=75  HP=180 |     99%  |   9.0     |    8
+  4   | AP=100 HP=240 |      0%  |   N/A     |  N/A
+  5   | AP=125 HP=300 |      0%  |   N/A     |  N/A
+  6   | AP=150 HP=360 |      0%  |   N/A     |  N/A
+  7   | AP=175 HP=420 |      0%  |   N/A     |  N/A
+  8   | AP=200 HP=480 |      0%  |   N/A     |  N/A
+  9   | AP=225 HP=540 |      0%  |   N/A     |  N/A
+  10  | AP=250 HP=600 |      0%  |   N/A     |  N/A
+
+Monster: NECRO (Base: AP=13, HP=30)
+Scale | Monster Stats    | Win Rate | Avg Turns | Avg HP Left
+------|------------------|----------|-----------|------------
+  1   | AP=13  HP=30  |    100%  |   2.0     |   43
+  2   | AP=26  HP=60  |    100%  |   3.0     |   42
+  3   | AP=39  HP=90  |    100%  |   5.0     |   40
+  4   | AP=52  HP=120 |    100%  |   6.0     |   39
+  5   | AP=65  HP=150 |    100%  |   7.0     |   38
+  6   | AP=78  HP=180 |      0%  |   N/A     |  N/A
+  7   | AP=91  HP=210 |      0%  |   N/A     |  N/A
+  8   | AP=104 HP=240 |      0%  |   N/A     |  N/A
+  9   | AP=117 HP=270 |      0%  |   N/A     |  N/A
+  10  | AP=130 HP=300 |      0%  |   N/A     |  N/A
+
+Monster: SKANDER_SNAKE (Base: AP=12, HP=20)
+Scale | Monster Stats    | Win Rate | Avg Turns | Avg HP Left
+------|------------------|----------|-----------|------------
+  1   | AP=12  HP=20  |    100%  |   1.0     |   44
+  2   | AP=24  HP=40  |    100%  |   2.0     |   43
+  3   | AP=36  HP=60  |    100%  |   3.0     |   42
+  4   | AP=48  HP=80  |    100%  |   4.0     |   41
+  5   | AP=60  HP=100 |    100%  |   5.0     |   40
+  6   | AP=72  HP=120 |    100%  |   6.0     |   28
+  7   | AP=84  HP=140 |      0%  |   N/A     |  N/A
+  8   | AP=96  HP=160 |      0%  |   N/A     |  N/A
+  9   | AP=108 HP=180 |      0%  |   N/A     |  N/A
+  10  | AP=120 HP=200 |      0%  |   N/A     |  N/A
+
+Monster: SLIME (Base: AP=1, HP=5)
+Scale | Monster Stats    | Win Rate | Avg Turns | Avg HP Left
+------|------------------|----------|-----------|------------
+  1   | AP=1   HP=5   |    100%  |   1.0     |   44
+  2   | AP=2   HP=10  |    100%  |   1.0     |   44
+  3   | AP=3   HP=15  |    100%  |   1.0     |   44
+  4   | AP=4   HP=20  |    100%  |   1.0     |   44
+  5   | AP=5   HP=25  |    100%  |   2.0     |   43
+  6   | AP=6   HP=30  |    100%  |   2.0     |   43
+  7   | AP=7   HP=35  |    100%  |   2.0     |   43
+  8   | AP=8   HP=40  |    100%  |   2.0     |   43
+  9   | AP=9   HP=45  |    100%  |   3.0     |   42
+  10  | AP=10  HP=50  |    100%  |   3.0     |   42
+
+Monster: SPOOK (Base: AP=6, HP=14)
+Scale | Monster Stats    | Win Rate | Avg Turns | Avg HP Left
+------|------------------|----------|-----------|------------
+  1   | AP=6   HP=14  |    100%  |   1.0     |   44
+  2   | AP=12  HP=28  |    100%  |   2.0     |   43
+  3   | AP=18  HP=42  |    100%  |   2.0     |   43
+  4   | AP=24  HP=56  |    100%  |   3.0     |   42
+  5   | AP=30  HP=70  |    100%  |   4.0     |   41
+  6   | AP=36  HP=84  |    100%  |   4.0     |   41
+  7   | AP=42  HP=98  |    100%  |   5.0     |   40
+  8   | AP=48  HP=112 |    100%  |   6.0     |   39
+  9   | AP=54  HP=126 |    100%  |   6.0     |   39
+  10  | AP=60  HP=140 |    100%  |   7.0     |   38
+
+Monster: ZARGON (Base: AP=60, HP=300)
+Scale | Monster Stats    | Win Rate | Avg Turns | Avg HP Left
+------|------------------|----------|-----------|------------
+  1   | AP=60  HP=300 |    100%  |  14.0     |   31
+  2   | AP=120 HP=600 |      0%  |   N/A     |  N/A
+  3   | AP=180 HP=900 |      0%  |   N/A     |  N/A
+  4   | AP=240 HP=1200 |      0%  |   N/A     |  N/A
+  5   | AP=300 HP=1500 |      0%  |   N/A     |  N/A
+  6   | AP=360 HP=1800 |      0%  |   N/A     |  N/A
+  7   | AP=420 HP=2100 |      0%  |   N/A     |  N/A
+  8   | AP=480 HP=2400 |      0%  |   N/A     |  N/A
+  9   | AP=540 HP=2700 |      0%  |   N/A     |  N/A
+  10  | AP=600 HP=3000 |      0%  |   N/A     |  N/A
+

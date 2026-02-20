@@ -38,6 +38,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.greenopal.zargon.data.models.GameState
+import com.greenopal.zargon.ui.theme.EmberOrange
 
 /**
  * Healer screen for restoring HP/MP
@@ -193,19 +194,37 @@ fun HealerScreen(
                     }
                 )
 
-                Button(
-                    onClick = {
-                        onSaveGame(updatedGameState)
-                        message = "Game saved!"
-                        showMessageDialog = true
-                    },
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.secondary,
-                        contentColor = MaterialTheme.colorScheme.onSecondary
-                    )
-                ) {
-                    Text("4. shall i save your game?")
+                if (updatedGameState.challengeConfig?.isPermadeath != true) {
+                    Button(
+                        onClick = {
+                            onSaveGame(updatedGameState)
+                            message = "Game saved!"
+                            showMessageDialog = true
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.secondary,
+                            contentColor = MaterialTheme.colorScheme.onSecondary
+                        )
+                    ) {
+                        Text("4. shall i save your game?")
+                    }
+                } else {
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.surface
+                        )
+                    ) {
+                        Text(
+                            text = "PERMANENT DEATH MODE - No saves available",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = EmberOrange,
+                            fontWeight = FontWeight.Bold,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.padding(12.dp)
+                        )
+                    }
                 }
 
                 Button(
@@ -216,7 +235,7 @@ fun HealerScreen(
                         contentColor = MaterialTheme.colorScheme.onTertiary
                     )
                 ) {
-                    Text("5. i've had enough of this guy")
+                    Text(if (updatedGameState.challengeConfig?.isPermadeath == true) "4. i've had enough of this guy" else "5. i've had enough of this guy")
                 }
             }
 

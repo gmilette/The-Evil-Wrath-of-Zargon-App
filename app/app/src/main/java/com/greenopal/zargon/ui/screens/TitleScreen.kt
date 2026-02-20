@@ -15,6 +15,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -34,12 +36,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.greenopal.zargon.R
 import com.greenopal.zargon.data.repository.SaveSlotInfo
-
-val Gold = Color(0xFFD4AF37)
-val DarkStone = Color(0xFF3A3A3A)
-val MidStone = Color(0xFF5B5B5B)
-val Parchment = Color(0xFFD8C8A0)
-val EmberOrange = Color(0xFFFF9A3C)
+import com.greenopal.zargon.ui.theme.Gold
+import com.greenopal.zargon.ui.theme.DarkStone
+import com.greenopal.zargon.ui.theme.MidStone
+import com.greenopal.zargon.ui.theme.Parchment
+import com.greenopal.zargon.ui.theme.EmberOrange
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -48,6 +49,8 @@ fun TitleScreen(
     onNewGame: (Int) -> Unit,
     onContinue: (Int) -> Unit,
     onDeleteSave: (Int) -> Unit,
+    onRestartChallenge: (Int) -> Unit,
+    onViewProgress: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     var slotToDelete by remember { mutableStateOf<Int?>(null) }
@@ -101,7 +104,27 @@ fun TitleScreen(
                         if (slot.exists) {
                             slotToDelete = slot.slot
                         }
-                    }
+                    },
+                    onRestartChallenge = { onRestartChallenge(slot.slot) }
+                )
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Button(
+                onClick = onViewProgress,
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Gold,
+                    contentColor = DarkStone
+                )
+            ) {
+                Text(
+                    text = "View Challenge Progress",
+                    style = MaterialTheme.typography.titleMedium.copy(
+                        fontSize = 16.sp
+                    ),
+                    fontWeight = FontWeight.Bold
                 )
             }
 
@@ -150,65 +173,101 @@ private fun SaveSlotButton(
     slot: SaveSlotInfo,
     onClick: () -> Unit,
     onLongClick: () -> Unit,
+    onRestartChallenge: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Box(
+    androidx.compose.foundation.layout.Row(
         modifier = modifier
             .fillMaxWidth()
-            .height(95.dp)
-            .padding(vertical = 4.dp)
-            .background(
-                color = MidStone,
-                shape = RoundedCornerShape(8.dp)
-            )
-            .combinedClickable(
-                onClick = onClick,
-                onLongClick = onLongClick
-            ),
-        contentAlignment = Alignment.Center
+            .padding(vertical = 4.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        Column(
-            modifier = Modifier.padding(12.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
-        ) {
-            if (slot.exists) {
-                Text(
-                    text = "Slot ${slot.slot} - Continue",
-                    style = MaterialTheme.typography.titleMedium.copy(
-                        fontSize = 18.sp
-                    ),
-                    color = Gold,
-                    fontWeight = FontWeight.Bold
+        Box(
+            modifier = Modifier
+                .weight(1f)
+                .height(95.dp)
+                .background(
+                    color = MidStone,
+                    shape = RoundedCornerShape(8.dp)
                 )
-                Spacer(modifier = Modifier.height(2.dp))
-                slot.gameState?.let { state ->
+                .combinedClickable(
+                    onClick = onClick,
+                    onLongClick = onLongClick
+                ),
+            contentAlignment = Alignment.Center
+        ) {
+            Column(
+                modifier = Modifier.padding(12.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                if (slot.exists) {
                     Text(
-                        text = "Level ${state.character.level} | ${state.character.gold} gold | Map ${state.worldX}${state.worldY}",
+                        text = "Slot ${slot.slot} - Continue",
+                        style = MaterialTheme.typography.titleMedium.copy(
+                            fontSize = 16.sp
+                        ),
+                        color = Gold,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Spacer(modifier = Modifier.height(2.dp))
+                    slot.gameState?.let { state ->
+                        Text(
+                            text = "Level ${state.character.level} | ${state.character.gold} gold",
+                            style = MaterialTheme.typography.bodyMedium.copy(
+                                fontSize = 11.sp
+                            ),
+                            color = Parchment
+                        )
+                        state.challengeConfig?.let { config ->
+                            Text(
+                                text = config.getDisplayName(),
+                                style = MaterialTheme.typography.bodySmall.copy(
+                                    fontSize = 10.sp
+                                ),
+                                color = EmberOrange,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
+                    }
+                } else {
+                    Text(
+                        text = "Slot ${slot.slot} - New Game",
+                        style = MaterialTheme.typography.titleMedium.copy(
+                            fontSize = 16.sp
+                        ),
+                        color = Gold,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Spacer(modifier = Modifier.height(2.dp))
+                    Text(
+                        text = "Empty",
                         style = MaterialTheme.typography.bodyMedium.copy(
                             fontSize = 12.sp
                         ),
-                        color = Parchment
+                        color = MidStone
                     )
                 }
-            } else {
-                Text(
-                    text = "Slot ${slot.slot} - New Game",
-                    style = MaterialTheme.typography.titleMedium.copy(
-                        fontSize = 18.sp
-                    ),
-                    color = Gold,
-                    fontWeight = FontWeight.Bold
-                )
-                Spacer(modifier = Modifier.height(2.dp))
-                Text(
-                    text = "Empty",
-                    style = MaterialTheme.typography.bodyMedium.copy(
-                        fontSize = 12.sp
-                    ),
-                    color = MidStone
-                )
             }
+        }
+
+        Button(
+            onClick = onRestartChallenge,
+            modifier = Modifier
+                .height(95.dp),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = Parchment,
+                contentColor = DarkStone
+            ),
+            shape = RoundedCornerShape(8.dp)
+        ) {
+            Text(
+                text = "Restart",
+                style = MaterialTheme.typography.bodyMedium.copy(
+                    fontSize = 13.sp
+                ),
+                fontWeight = FontWeight.Bold
+            )
         }
     }
 }

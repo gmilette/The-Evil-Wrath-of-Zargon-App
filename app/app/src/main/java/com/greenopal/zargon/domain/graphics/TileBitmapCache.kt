@@ -60,7 +60,7 @@ class TileBitmapCache @Inject constructor(
         "Trees" to R.drawable.trees1,
         "TREE2" to R.drawable.trees2,
         "WATER" to R.drawable.water,
-        "SHALLOW_WATER" to R.drawable.water,
+        "SHALLOW_WATER" to R.drawable.shallow_water_tile,
         "GRAVE" to R.drawable.gravestone,
         "Gravestone" to R.drawable.gravestone,
 

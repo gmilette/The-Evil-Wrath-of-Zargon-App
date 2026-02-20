@@ -28,7 +28,8 @@ data class CharacterStats(
 ) {
     // Computed properties
     val totalAP: Int get() = baseAP + weaponBonus
-    val totalDefense: Int get() = armorBonus
+    val totalDefense: Int get() = baseDP + armorBonus  // Total defense including base DP and armor
+    val armorDefenseBonus: Int get() = armorBonus  // Armor bonus only
     val maxDP: Int get() = baseDP
     val maxMP: Int get() = baseMP
 

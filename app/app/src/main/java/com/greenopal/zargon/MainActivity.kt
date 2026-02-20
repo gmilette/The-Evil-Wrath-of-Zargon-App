@@ -13,9 +13,14 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.sp
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -27,6 +32,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.greenopal.zargon.data.models.NpcType
 import com.greenopal.zargon.data.models.StoryAction
+import com.greenopal.zargon.data.repository.PrestigeRepository
 import com.greenopal.zargon.data.repository.SaveGameRepository
 import com.greenopal.zargon.domain.battle.BattleResult
 import com.greenopal.zargon.domain.graphics.Sprite
@@ -36,26 +42,34 @@ import com.greenopal.zargon.domain.story.StoryProgressionChecker
 import com.greenopal.zargon.ui.components.SpriteView
 import com.greenopal.zargon.ui.components.StatsCard
 import com.greenopal.zargon.ui.screens.BattleScreen
+import com.greenopal.zargon.ui.screens.ChallengeProgressScreen
+import com.greenopal.zargon.ui.screens.ChallengeSelectScreen
 import com.greenopal.zargon.ui.screens.DialogScreen
+import com.greenopal.zargon.ui.theme.DarkStone
+import com.greenopal.zargon.ui.theme.EmberOrange
 import com.greenopal.zargon.ui.screens.FountainScreen
 import com.greenopal.zargon.ui.screens.GameOverScreen
+import com.greenopal.zargon.ui.theme.Gold
 import com.greenopal.zargon.ui.screens.HealerScreen
 import com.greenopal.zargon.ui.screens.HintsScreen
 import com.greenopal.zargon.ui.screens.MapScreen
 import com.greenopal.zargon.ui.screens.MenuScreen
+import com.greenopal.zargon.ui.theme.Parchment
 import com.greenopal.zargon.ui.screens.QuestProgressScreen
 import com.greenopal.zargon.ui.screens.StatsScreen
 import com.greenopal.zargon.ui.screens.TitleScreen
 import com.greenopal.zargon.ui.screens.VictoryScreen
 import com.greenopal.zargon.ui.screens.WeaponShopScreen
 import com.greenopal.zargon.ui.theme.ZargonTheme
+import com.greenopal.zargon.ui.viewmodels.ChallengeViewModel
 import com.greenopal.zargon.ui.viewmodels.GameViewModel
 import com.greenopal.zargon.ui.viewmodels.TileInteraction
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.delay
 import javax.inject.Inject
 
 enum class ScreenState {
-    TITLE, MENU, MAP, BATTLE, STATS, QUEST_PROGRESS, DIALOG, WEAPON_SHOP, HEALER, FOUNTAIN, GAME_OVER, VICTORY, HINTS
+    TITLE, MENU, MAP, BATTLE, STATS, QUEST_PROGRESS, DIALOG, WEAPON_SHOP, HEALER, FOUNTAIN, GAME_OVER, VICTORY, HINTS, CHALLENGE_SELECT, CHALLENGE_PROGRESS
 }
 
 @AndroidEntryPoint
@@ -70,10 +84,16 @@ class MainActivity : ComponentActivity() {
     lateinit var saveRepository: SaveGameRepository
 
     @Inject
+    lateinit var prestigeRepository: PrestigeRepository
+
+    @Inject
     lateinit var tileBitmapCache: com.greenopal.zargon.domain.graphics.TileBitmapCache
 
     @Inject
     lateinit var mapParser: com.greenopal.zargon.domain.map.MapParser
+
+    @Inject
+    lateinit var challengeModifiers: com.greenopal.zargon.domain.challenges.ChallengeModifiers
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -81,7 +101,9 @@ class MainActivity : ComponentActivity() {
         setContent {
             ZargonTheme {
                 val viewModel: GameViewModel = hiltViewModel()
+                val challengeViewModel: ChallengeViewModel = hiltViewModel()
                 val gameState by viewModel.gameState.collectAsState()
+
 
                 // Load sprites
                 var playerSprite by remember { mutableStateOf<Sprite?>(null) }
@@ -92,6 +114,11 @@ class MainActivity : ComponentActivity() {
                 var currentNpcType by remember { mutableStateOf<NpcType?>(null) }
                 var isExplorationMode by remember { mutableStateOf(false) }
                 var saveSlots by remember { mutableStateOf(saveRepository.getAllSaves()) }
+                var challengeRestartSlot by remember { mutableStateOf<Int?>(null) }
+                var challengeProgressReturnToMenu by remember { mutableStateOf(false) }
+
+                LaunchedEffect(gameState.challengeConfig, gameState.challengeStartTime) {
+                }
 
                 fun isOnInteractiveTile(state: com.greenopal.zargon.data.models.GameState): Boolean {
                     val currentMap = mapParser.parseMap(state.worldX, state.worldY)
@@ -169,7 +196,8 @@ class MainActivity : ComponentActivity() {
                 }
 
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    when (screenState) {
+                    Box(modifier = Modifier.fillMaxSize()) {
+                        when (screenState) {
                         ScreenState.TITLE -> {
                             TitleScreen(
                                 saveSlots = saveSlots,
@@ -196,6 +224,13 @@ class MainActivity : ComponentActivity() {
                                     saveRepository.deleteSave(slot)
                                     saveSlots = saveRepository.getAllSaves()
                                 },
+                                onRestartChallenge = { slot ->
+                                    challengeRestartSlot = slot
+                                    screenState = ScreenState.CHALLENGE_SELECT
+                                },
+                                onViewProgress = {
+                                    screenState = ScreenState.CHALLENGE_PROGRESS
+                                },
                                 modifier = Modifier
                                     .fillMaxSize()
                                     .padding(innerPadding)
@@ -221,10 +256,14 @@ class MainActivity : ComponentActivity() {
                                 onViewHints = {
                                     screenState = ScreenState.HINTS
                                 },
+                                onViewChallengeProgress = {
+                                    challengeProgressReturnToMenu = true
+                                    screenState = ScreenState.CHALLENGE_PROGRESS
+                                },
                                 onBack = {
-                                    // Return to map when closing menu
                                     screenState = ScreenState.MAP
                                 },
+                                activeChallengeName = gameState.challengeConfig?.getDisplayName(),
                                 modifier = Modifier
                                     .fillMaxSize()
                                     .padding(innerPadding)
@@ -336,6 +375,7 @@ class MainActivity : ComponentActivity() {
                             StatsScreen(
                                 gameState = gameState,
                                 onBack = { screenState = ScreenState.MENU },
+                                prestigeRepository = prestigeRepository,
                                 modifier = Modifier
                                     .fillMaxSize()
                                     .padding(innerPadding)
@@ -526,6 +566,7 @@ class MainActivity : ComponentActivity() {
                         ScreenState.WEAPON_SHOP -> {
                             WeaponShopScreen(
                                 gameState = gameState,
+                                challengeModifiers = challengeModifiers,
                                 onShopExit = { updatedState ->
                                     val stateWithMovedPlayer = movePlayerOutsideInteraction(updatedState)
                                     android.util.Log.d("MainActivity", "Exiting shop - Moved player from (${updatedState.characterX}, ${updatedState.characterY}) to (${stateWithMovedPlayer.characterX}, ${stateWithMovedPlayer.characterY})")
@@ -589,6 +630,7 @@ class MainActivity : ComponentActivity() {
                                 finalGameState = gameState,
                                 onReturnToTitle = {
                                     viewModel.newGame()
+                                    saveSlots = saveRepository.getAllSaves()
                                     screenState = ScreenState.TITLE
                                 },
                                 modifier = Modifier
@@ -602,13 +644,23 @@ class MainActivity : ComponentActivity() {
                                 finalGameState = gameState,
                                 onReturnToTitle = {
                                     viewModel.newGame()
+                                    saveSlots = saveRepository.getAllSaves()
                                     screenState = ScreenState.TITLE
                                 },
                                 onReturnToGEF = { updatedGameState ->
-                                    // Update game state with new position and Zargon trophy
                                     viewModel.updateGameState(updatedGameState)
-                                    // Return to map screen
                                     screenState = ScreenState.MAP
+                                },
+                                onChallengeComplete = { result ->
+                                    val prestigeRepo = com.greenopal.zargon.data.repository.PrestigeRepository(this@MainActivity)
+                                    val currentPrestige = prestigeRepo.loadPrestige()
+                                    val prestigeSystem = com.greenopal.zargon.domain.challenges.PrestigeSystem()
+
+                                    gameState.challengeConfig?.let { config ->
+                                        val newPrestige = prestigeSystem.calculatePrestigeRewards(config, currentPrestige)
+                                        prestigeRepo.savePrestige(newPrestige)
+                                        prestigeRepo.saveChallengeResult(result)
+                                    }
                                 },
                                 modifier = Modifier
                                     .fillMaxSize()
@@ -626,6 +678,51 @@ class MainActivity : ComponentActivity() {
                                     .padding(innerPadding)
                             )
                         }
+
+                        ScreenState.CHALLENGE_SELECT -> {
+                            ChallengeSelectScreen(
+                                onStartChallenge = { config ->
+                                    challengeViewModel.applyPreset(config)
+                                    val slot = challengeRestartSlot ?: 1
+                                    val startingState = challengeViewModel.getStartingGameState(slot)
+                                    val correctedState = ensurePlayerNotOnInteractiveTile(startingState)
+                                    viewModel.updateGameState(correctedState)
+                                    saveRepository.saveGame(correctedState, slot)
+                                    saveSlots = saveRepository.getAllSaves()
+                                    challengeRestartSlot = null
+                                    isExplorationMode = true
+                                    screenState = ScreenState.MAP
+                                },
+                                onBack = {
+                                    challengeRestartSlot = null
+                                    screenState = ScreenState.TITLE
+                                },
+                                viewModel = challengeViewModel,
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .padding(innerPadding)
+                            )
+                        }
+
+                        ScreenState.CHALLENGE_PROGRESS -> {
+                            ChallengeProgressScreen(
+                                onBack = {
+                                    if (challengeProgressReturnToMenu) {
+                                        challengeProgressReturnToMenu = false
+                                        screenState = ScreenState.MENU
+                                    } else {
+                                        screenState = ScreenState.TITLE
+                                    }
+                                },
+                                activeChallengeName = gameState.challengeConfig?.getDisplayName(),
+                                viewModel = challengeViewModel,
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .padding(innerPadding)
+                            )
+                        }
+                    }
+
                     }
                 }
             }
