@@ -10,9 +10,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import javax.inject.Inject
 
-/**
- * Main game state ViewModel
- */
 @HiltViewModel
 class GameViewModel @Inject constructor(
     private val challengeTimer: ChallengeTimer
@@ -24,32 +21,18 @@ class GameViewModel @Inject constructor(
     private val _timerExpired = MutableStateFlow(false)
     val timerExpired: StateFlow<Boolean> = _timerExpired.asStateFlow()
 
-    /**
-     * Initialize new game
-     */
     fun newGame(saveSlot: Int = 1, challengeConfig: ChallengeConfig? = null) {
-        val startTime = if (challengeConfig?.timedChallenge?.durationMinutes != null) {
-            System.currentTimeMillis()
-        } else null
-
         _gameState.value = GameState(
             saveSlot = saveSlot,
-            challengeConfig = challengeConfig,
-            challengeStartTime = startTime
+            challengeConfig = challengeConfig
         )
         _timerExpired.value = false
     }
 
-    /**
-     * Update game state
-     */
     fun updateGameState(newState: GameState) {
         _gameState.value = newState
     }
 
-    /**
-     * Update character stats
-     */
     fun updateCharacterStats(updater: (GameState) -> GameState) {
         _gameState.value = updater(_gameState.value)
     }
@@ -77,6 +60,6 @@ class GameViewModel @Inject constructor(
     }
 
     fun canSave(): Boolean {
-        return _gameState.value.challengeConfig?.permanentDeath != true
+        return _gameState.value.challengeConfig?.isPermadeath != true
     }
 }

@@ -20,14 +20,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 
-/**
- * In-game menu for viewing stats and quest progress
- */
 @Composable
 fun MenuScreen(
     onStartExploration: () -> Unit,
@@ -35,7 +31,9 @@ fun MenuScreen(
     onViewStats: () -> Unit,
     onViewQuestProgress: () -> Unit,
     onViewHints: () -> Unit,
+    onViewChallengeProgress: () -> Unit,
     onBack: () -> Unit,
+    activeChallengeName: String? = null,
     modifier: Modifier = Modifier
 ) {
     // Handle back button
@@ -73,6 +71,16 @@ fun MenuScreen(
                     fontWeight = FontWeight.Bold,
                     textAlign = TextAlign.Center
                 )
+
+                if (activeChallengeName != null) {
+                    Text(
+                        text = "Active: $activeChallengeName",
+                        style = MaterialTheme.typography.titleSmall,
+                        color = MaterialTheme.colorScheme.tertiary,
+                        fontWeight = FontWeight.Bold,
+                        textAlign = TextAlign.Center
+                    )
+                }
 
                 Spacer(modifier = Modifier.height(8.dp))
 
@@ -117,6 +125,20 @@ fun MenuScreen(
                         text = "Map Guide & Hints",
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold
+                    )
+                }
+
+                Button(
+                    onClick = onViewChallengeProgress,
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        contentColor = MaterialTheme.colorScheme.onPrimary
+                    )
+                ) {
+                    Text(
+                        text = "Challenges",
+                        style = MaterialTheme.typography.titleMedium
                     )
                 }
 

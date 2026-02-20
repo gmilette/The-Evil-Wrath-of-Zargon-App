@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.Button
@@ -32,35 +31,28 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
 import com.greenopal.zargon.data.models.GameState
-import com.greenopal.zargon.data.models.EquipmentMode
+import com.greenopal.zargon.data.models.PrestigeData
 import com.greenopal.zargon.domain.challenges.ChallengeModifiers
 import com.greenopal.zargon.ui.theme.EmberOrange
 
-/**
- * Weapon shop screen (Gothox Slothair)
- * Based on QBASIC wepshop procedure (ZARGON.BAS:3356-3439)
- */
 @Composable
 fun WeaponShopScreen(
     gameState: GameState,
     challengeModifiers: ChallengeModifiers,
     onShopExit: (GameState) -> Unit,
+    prestige: PrestigeData? = null,
     modifier: Modifier = Modifier
 ) {
-    val priceMultiplier = 1.0f
     val challengeConfig = gameState.challengeConfig
 
     var currentScreen by remember { mutableStateOf(ShopScreen.MAIN) }
     var message by remember { mutableStateOf<String?>(null) }
     var updatedGameState by remember { mutableStateOf(gameState) }
 
-    // Handle Android back button
     BackHandler {
         when (currentScreen) {
             ShopScreen.MAIN -> onShopExit(updatedGameState)
@@ -84,7 +76,6 @@ fun WeaponShopScreen(
             border = BorderStroke(3.dp, MaterialTheme.colorScheme.primary)
         ) {
             Box {
-                // Exit button in top-left corner
                 IconButton(
                     onClick = { onShopExit(updatedGameState) },
                     modifier = Modifier
@@ -120,43 +111,29 @@ fun WeaponShopScreen(
                 )
 
                 if (challengeConfig != null) {
-                    Card(
-                        modifier = Modifier.fillMaxWidth(),
-                        colors = CardDefaults.cardColors(
-                            containerColor = EmberOrange.copy(alpha = 0.3f)
-                        )
-                    ) {
-                        Column(
-                            modifier = Modifier.padding(8.dp),
-                            horizontalAlignment = Alignment.CenterHorizontally
+                    val activeDesc = challengeConfig.getDisplayName()
+                    if (activeDesc != "Normal") {
+                        Card(
+                            modifier = Modifier.fillMaxWidth(),
+                            colors = CardDefaults.cardColors(
+                                containerColor = EmberOrange.copy(alpha = 0.3f)
+                            )
                         ) {
-                            if (challengeConfig.weaponMode != EquipmentMode.NORMAL || challengeConfig.armorMode != EquipmentMode.NORMAL) {
+                            Column(
+                                modifier = Modifier.padding(8.dp),
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
                                 Text(
-                                    text = "CHALLENGE MODE ACTIVE",
+                                    text = "CHALLENGE: $activeDesc",
                                     style = MaterialTheme.typography.titleSmall,
                                     color = EmberOrange,
                                     fontWeight = FontWeight.Bold
-                                )
-                            }
-                            if (challengeConfig.weaponMode != EquipmentMode.NORMAL) {
-                                Text(
-                                    text = "${challengeConfig.weaponMode.weaponDisplayName}: ${challengeConfig.weaponMode.powerMultiplier}x Power, ${challengeConfig.weaponMode.costMultiplier}x Cost",
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onSurface
-                                )
-                            }
-                            if (challengeConfig.armorMode != EquipmentMode.NORMAL) {
-                                Text(
-                                    text = "${challengeConfig.armorMode.armorDisplayName}: ${challengeConfig.armorMode.powerMultiplier}x Power, ${challengeConfig.armorMode.costMultiplier}x Cost",
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onSurface
                                 )
                             }
                         }
                     }
                 }
 
-                // Gold display
                 Card(
                     colors = CardDefaults.cardColors(
                         containerColor = MaterialTheme.colorScheme.surface
@@ -173,7 +150,6 @@ fun WeaponShopScreen(
 
                 Spacer(modifier = Modifier.height(8.dp))
 
-                // Message display
                 if (message != null) {
                     Card(
                         modifier = Modifier.fillMaxWidth(),
@@ -191,7 +167,6 @@ fun WeaponShopScreen(
 
                 Spacer(modifier = Modifier.height(8.dp))
 
-                // Screen content
                 when (currentScreen) {
                     ShopScreen.MAIN -> MainMenu(
                         onBuyWeapon = { currentScreen = ShopScreen.WEAPONS },
@@ -200,20 +175,13 @@ fun WeaponShopScreen(
                     )
 
                     ShopScreen.WEAPONS -> WeaponList(
-                        priceMultiplier = priceMultiplier,
                         currentGold = updatedGameState.character.gold,
                         currentWeaponStatus = updatedGameState.character.weaponStatus,
                         challengeConfig = challengeConfig,
                         challengeModifiers = challengeModifiers,
-                        onPurchase = { weapon, bonusMultiplier, costMultiplier, displayName ->
-                            if (!challengeModifiers.canPurchaseWeapons(challengeConfig)) {
-                                message = "Weapons disabled in this challenge mode!"
-                                return@WeaponList
-                            }
-                            val baseCost = (weapon.basePrice * priceMultiplier).toInt()
-                            val cost = (baseCost * costMultiplier).toInt()
-                            val effectiveBonus = (weapon.attackBonus * bonusMultiplier).toInt()
-
+                        prestige = prestige,
+                        onPurchase = { weapon, effectiveBonus, displayName ->
+                            val cost = weapon.basePrice
                             if (updatedGameState.character.gold >= cost) {
                                 updatedGameState = updatedGameState.updateCharacter(
                                     updatedGameState.character.copy(
@@ -232,20 +200,13 @@ fun WeaponShopScreen(
                     )
 
                     ShopScreen.ARMOR -> ArmorList(
-                        priceMultiplier = priceMultiplier,
                         currentGold = updatedGameState.character.gold,
                         currentArmorStatus = updatedGameState.character.armorStatus,
                         challengeConfig = challengeConfig,
                         challengeModifiers = challengeModifiers,
-                        onPurchase = { armor, bonusMultiplier, costMultiplier, displayName ->
-                            if (!challengeModifiers.canPurchaseArmor(challengeConfig)) {
-                                message = "Armor disabled in this challenge mode!"
-                                return@ArmorList
-                            }
-                            val baseCost = (armor.basePrice * priceMultiplier).toInt()
-                            val cost = (baseCost * costMultiplier).toInt()
-                            val effectiveBonus = (armor.defenseBonus * bonusMultiplier).toInt()
-
+                        prestige = prestige,
+                        onPurchase = { armor, effectiveBonus, displayName ->
+                            val cost = armor.basePrice
                             if (updatedGameState.character.gold >= cost) {
                                 updatedGameState = updatedGameState.updateCharacter(
                                     updatedGameState.character.copy(
@@ -311,15 +272,14 @@ private fun MainMenu(
 
 @Composable
 private fun WeaponList(
-    priceMultiplier: Float,
     currentGold: Int,
     currentWeaponStatus: Int,
     challengeConfig: com.greenopal.zargon.data.models.ChallengeConfig?,
     challengeModifiers: ChallengeModifiers,
-    onPurchase: (Weapon, Float, Float, String) -> Unit,
+    prestige: PrestigeData?,
+    onPurchase: (Weapon, Int, String) -> Unit,
     onBack: () -> Unit
 ) {
-    val canPurchase = challengeModifiers.canPurchaseWeapons(challengeConfig)
     Column(
         modifier = Modifier.fillMaxWidth()
     ) {
@@ -329,24 +289,6 @@ private fun WeaponList(
             modifier = Modifier.padding(bottom = 8.dp)
         )
 
-        if (!canPurchase) {
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(
-                    containerColor = EmberOrange.copy(alpha = 0.3f)
-                )
-            ) {
-                Text(
-                    text = "Weapons are disabled in this challenge mode!",
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = EmberOrange,
-                    fontWeight = FontWeight.Bold,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.padding(16.dp)
-                )
-            }
-        }
-
         LazyColumn(
             modifier = Modifier
                 .fillMaxWidth()
@@ -354,49 +296,23 @@ private fun WeaponList(
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             Weapon.values().forEach { weapon ->
-                val baseCost = (weapon.basePrice * priceMultiplier).toInt()
+                val displayName = challengeModifiers.getWeaponDisplayName(
+                    weapon.displayName, challengeConfig, prestige
+                )
+                val effectiveBonus = challengeModifiers.getEffectiveWeaponBonus(
+                    weapon.attackBonus, challengeConfig, prestige
+                )
                 val isEquipped = weapon.ordinal == currentWeaponStatus
 
                 item {
                     WeaponItem(
-                        name = weapon.displayName,
-                        price = baseCost,
-                        effectiveBonus = weapon.attackBonus,
-                        canAfford = currentGold >= baseCost && canPurchase,
-                        isEquipped = isEquipped,
-                        isDisabled = !canPurchase
+                        name = displayName,
+                        price = weapon.basePrice,
+                        effectiveBonus = effectiveBonus,
+                        canAfford = currentGold >= weapon.basePrice,
+                        isEquipped = isEquipped
                     ) {
-                        onPurchase(weapon, 1f, 1f, weapon.displayName)
-                    }
-                }
-
-                if (challengeConfig?.weaponMode == EquipmentMode.GREAT) {
-                    item {
-                        WeaponItem(
-                            name = "great ${weapon.displayName}",
-                            price = (baseCost * 2),
-                            effectiveBonus = weapon.attackBonus * 2,
-                            canAfford = currentGold >= (baseCost * 2) && canPurchase,
-                            isEquipped = false,
-                            isDisabled = !canPurchase
-                        ) {
-                            onPurchase(weapon, 2f, 2f, "great ${weapon.displayName}")
-                        }
-                    }
-                }
-
-                if (challengeConfig?.weaponMode == EquipmentMode.BEATDOWN) {
-                    item {
-                        WeaponItem(
-                            name = "beatdown ${weapon.displayName}",
-                            price = (baseCost * 10),
-                            effectiveBonus = weapon.attackBonus * 10,
-                            canAfford = currentGold >= (baseCost * 10) && canPurchase,
-                            isEquipped = false,
-                            isDisabled = !canPurchase
-                        ) {
-                            onPurchase(weapon, 10f, 10f, "beatdown ${weapon.displayName}")
-                        }
+                        onPurchase(weapon, effectiveBonus, displayName)
                     }
                 }
             }
@@ -424,17 +340,16 @@ private fun WeaponItem(
     effectiveBonus: Int,
     canAfford: Boolean,
     isEquipped: Boolean,
-    isDisabled: Boolean = false,
     onPurchase: () -> Unit
 ) {
     Button(
         onClick = onPurchase,
         modifier = Modifier.fillMaxWidth(),
-        enabled = canAfford && !isEquipped && !isDisabled,
+        enabled = canAfford && !isEquipped,
         colors = ButtonDefaults.buttonColors(
             containerColor = when {
                 isEquipped -> MaterialTheme.colorScheme.secondary
-                canAfford && !isDisabled -> MaterialTheme.colorScheme.primary
+                canAfford -> MaterialTheme.colorScheme.primary
                 else -> MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)
             },
             contentColor = when {
@@ -476,15 +391,14 @@ private fun WeaponItem(
 
 @Composable
 private fun ArmorList(
-    priceMultiplier: Float,
     currentGold: Int,
     currentArmorStatus: Int,
     challengeConfig: com.greenopal.zargon.data.models.ChallengeConfig?,
     challengeModifiers: ChallengeModifiers,
-    onPurchase: (Armor, Float, Float, String) -> Unit,
+    prestige: PrestigeData?,
+    onPurchase: (Armor, Int, String) -> Unit,
     onBack: () -> Unit
 ) {
-    val canPurchase = challengeModifiers.canPurchaseArmor(challengeConfig)
     Column(
         modifier = Modifier.fillMaxWidth()
     ) {
@@ -494,24 +408,6 @@ private fun ArmorList(
             modifier = Modifier.padding(bottom = 8.dp)
         )
 
-        if (!canPurchase) {
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(
-                    containerColor = EmberOrange.copy(alpha = 0.3f)
-                )
-            ) {
-                Text(
-                    text = "Armor is disabled in this challenge mode!",
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = EmberOrange,
-                    fontWeight = FontWeight.Bold,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.padding(16.dp)
-                )
-            }
-        }
-
         LazyColumn(
             modifier = Modifier
                 .fillMaxWidth()
@@ -519,49 +415,23 @@ private fun ArmorList(
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             Armor.values().forEach { armor ->
-                val baseCost = (armor.basePrice * priceMultiplier).toInt()
+                val displayName = challengeModifiers.getArmorDisplayName(
+                    armor.displayName, challengeConfig, prestige
+                )
+                val effectiveBonus = challengeModifiers.getEffectiveArmorBonus(
+                    armor.defenseBonus, challengeConfig, prestige
+                )
                 val isEquipped = armor.ordinal == currentArmorStatus
 
                 item {
                     ArmorItem(
-                        name = armor.displayName,
-                        price = baseCost,
-                        effectiveBonus = armor.defenseBonus,
-                        canAfford = currentGold >= baseCost && canPurchase,
-                        isEquipped = isEquipped,
-                        isDisabled = !canPurchase
+                        name = displayName,
+                        price = armor.basePrice,
+                        effectiveBonus = effectiveBonus,
+                        canAfford = currentGold >= armor.basePrice,
+                        isEquipped = isEquipped
                     ) {
-                        onPurchase(armor, 1f, 1f, armor.displayName)
-                    }
-                }
-
-                if (challengeConfig?.armorMode == EquipmentMode.GREAT) {
-                    item {
-                        ArmorItem(
-                            name = "great ${armor.displayName}",
-                            price = (baseCost * 2),
-                            effectiveBonus = armor.defenseBonus * 2,
-                            canAfford = currentGold >= (baseCost * 2) && canPurchase,
-                            isEquipped = false,
-                            isDisabled = !canPurchase
-                        ) {
-                            onPurchase(armor, 2f, 2f, "great ${armor.displayName}")
-                        }
-                    }
-                }
-
-                if (challengeConfig?.armorMode == EquipmentMode.BEATDOWN) {
-                    item {
-                        ArmorItem(
-                            name = "beatdown ${armor.displayName}",
-                            price = (baseCost * 10),
-                            effectiveBonus = armor.defenseBonus * 10,
-                            canAfford = currentGold >= (baseCost * 10) && canPurchase,
-                            isEquipped = false,
-                            isDisabled = !canPurchase
-                        ) {
-                            onPurchase(armor, 10f, 10f, "beatdown ${armor.displayName}")
-                        }
+                        onPurchase(armor, effectiveBonus, displayName)
                     }
                 }
             }
@@ -589,17 +459,16 @@ private fun ArmorItem(
     effectiveBonus: Int,
     canAfford: Boolean,
     isEquipped: Boolean,
-    isDisabled: Boolean = false,
     onPurchase: () -> Unit
 ) {
     Button(
         onClick = onPurchase,
         modifier = Modifier.fillMaxWidth(),
-        enabled = canAfford && !isEquipped && !isDisabled,
+        enabled = canAfford && !isEquipped,
         colors = ButtonDefaults.buttonColors(
             containerColor = when {
                 isEquipped -> MaterialTheme.colorScheme.secondary
-                canAfford && !isDisabled -> MaterialTheme.colorScheme.primary
+                canAfford -> MaterialTheme.colorScheme.primary
                 else -> MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)
             },
             contentColor = when {
@@ -657,9 +526,6 @@ enum class Weapon(val displayName: String, val basePrice: Int, val attackBonus: 
     BROAD_SWORD("broad sword", 103, 9),
     TWOHANDED_SWORD("twohanded sword", 250, 15),
     ATLANTEAN_SWORD("Atlantean Sword", 500, 25),
-    // too powerful
-//    GERMANIC_WARCLEAVER("Germanic WarCleaver", 834, 40),
-//    SIR_BEATDOWN("Sir Beatdown", 2500, 60)
 }
 
 enum class Armor(val displayName: String, val basePrice: Int, val defenseBonus: Int) {
@@ -669,20 +535,12 @@ enum class Armor(val displayName: String, val basePrice: Int, val defenseBonus: 
     SPIKED_LEATHER("spiked leather", 98, 20),
     CHAIN_MAIL("chain mail", 134, 28),
     PLATEMAIL("platemail", 279, 50),
-//    SPLINT_MAIL("Splintmail", 578, 80),
-//    RITE_OF_TOUGH_SKIN("Rite of tough skin", 1004, 120)
 }
 
-/**
- * Get weapon name from weaponStatus ordinal
- */
 fun getWeaponName(weaponStatus: Int): String {
     return Weapon.values().getOrNull(weaponStatus)?.displayName ?: "None"
 }
 
-/**
- * Get armor name from armorStatus ordinal
- */
 fun getArmorName(armorStatus: Int): String {
     return Armor.values().getOrNull(armorStatus)?.displayName ?: "None"
 }

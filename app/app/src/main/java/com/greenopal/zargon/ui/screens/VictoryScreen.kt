@@ -132,8 +132,8 @@ fun VictoryScreen(
                                     style = MaterialTheme.typography.bodyMedium,
                                     color = DarkStone
                                 )
-                                if (config.timedChallenge != com.greenopal.zargon.data.models.TimedChallenge.NONE) {
-                                    val challengeStartTime = finalGameState.challengeStartTime ?: System.currentTimeMillis()
+                                if (finalGameState.challengeStartTime != null) {
+                                    val challengeStartTime = finalGameState.challengeStartTime
                                     val timeElapsed = (System.currentTimeMillis() - challengeStartTime - finalGameState.totalPauseTime) / 1000
                                     val minutes = timeElapsed / 60
                                     val seconds = timeElapsed % 60

@@ -3,53 +3,39 @@ package com.greenopal.zargon.data.models
 import kotlinx.serialization.Serializable
 
 @Serializable
+enum class Challenge(
+    val displayName: String,
+    val description: String
+) {
+    WEAK_ARMOR("Weak Armor", "Armor is less effective"),
+    WEAK_WEAPONS("Weak Weapons", "Weapons are less effective"),
+    STRONG_ENEMIES("Strong Enemies", "Enemies are much stronger"),
+    STRONGER_ENEMIES("Stronger Enemies", "Enemies are far stronger"),
+    ONE_DEATH("Permadeath", "Game over if Joe dies"),
+    NO_MAGIC("No Magic", "Cannot use any spells"),
+    IMPOSSIBLE_MISSION("Impossible Mission", "Permadeath with strong enemies"),
+    MAGE_QUEST("Mage Quest", "Weak equipment — rely on spells"),
+    WARRIOR_MODE("Warrior Mode", "No magic with stronger enemies")
+}
+
+@Serializable
 data class ChallengeConfig(
-    val difficulty: DifficultyLevel = DifficultyLevel.NORMAL,
-    val weaponMode: EquipmentMode = EquipmentMode.NORMAL,
-    val armorMode: EquipmentMode = EquipmentMode.NORMAL,
-    val permanentDeath: Boolean = false,
-    val timedChallenge: TimedChallenge = TimedChallenge.NONE,
-    val presetName: String? = null  // For tracking which preset was used
+    val challenges: Set<Challenge> = emptySet()
 ) {
     fun getChallengeId(): String {
-        return "${difficulty.name}_${weaponMode.name}_${armorMode.name}_${permanentDeath}_${timedChallenge.name}"
+        val parts = mutableListOf<String>()
+        challenges.sorted().forEach { parts.add(it.name) }
+        return parts.joinToString("_").ifEmpty { "NORMAL" }
     }
 
-    fun getDisplayName(): String = presetName ?: "Custom Challenge"
-}
+    fun getDisplayName(): String {
+        if (challenges.isEmpty()) return "Normal"
+        return challenges.joinToString(" + ") { it.displayName }
+    }
 
-@Serializable
-enum class DifficultyLevel(
-    val displayName: String,
-    val monsterMultiplier: Float,
-    val label: String?
-) {
-    NORMAL("Normal", 1f, null),
-    HARD("Hard", 3f, "huge"),
-    INSANE("Insane", 5f, "massive")
-}
+    val isPermadeath: Boolean get() =
+        Challenge.ONE_DEATH in challenges || Challenge.IMPOSSIBLE_MISSION in challenges
 
-@Serializable
-enum class EquipmentMode(
-    val displayName: String,
-    val weaponDisplayName: String,
-    val armorDisplayName: String,
-    val powerMultiplier: Float,
-    val costMultiplier: Float,
-    val enabled: Boolean = true
-) {
-    NONE("None", "No Weapons", "No Armor", 0f, 0f, enabled = false),
-    NORMAL("Normal", "Normal Weapons", "Normal Armor", 1f, 1f),
-    GREAT("Great", "Great Weapons", "Great Armor", 2f, 2f),
-    BEATDOWN("Beatdown", "Beatdown Weapons", "Beatdown Armor", 10f, 10f)
-}
-
-@Serializable
-enum class TimedChallenge(
-    val displayName: String,
-    val durationMinutes: Int?
-) {
-    NONE("No Time Limit", null),
-    QUICK("Quick (10 min)", 10),
-    FAST("Fast (30 min)", 30)
+    val isNoMagic: Boolean get() =
+        Challenge.NO_MAGIC in challenges || Challenge.WARRIOR_MODE in challenges
 }

@@ -85,36 +85,22 @@ fun StatsCard(
 
             Spacer(modifier = Modifier.height(12.dp))
 
-            // Combat Stats with prestige bonuses
-            val apWithPrestige = stats.totalAP + prestige.permanentAPBonus
-            val apDisplay = if (prestige.permanentAPBonus > 0) {
-                "${stats.baseAP} + ${stats.weaponBonus} + ${prestige.permanentAPBonus} = $apWithPrestige"
-            } else {
-                apWithPrestige.toString()
-            }
             StatRow(
                 label = "AP",
-                value = apDisplay,
-                color = if (prestige.permanentAPBonus > 0) Color(0xFFFF9A3C) else Color.Unspecified
+                value = stats.totalAP.toString(),
+                color = Color.Unspecified
             )
 
-            val defenseWithPrestige = stats.totalDefense + prestige.permanentDPBonus
-            val defenseDisplay = if (prestige.permanentDPBonus > 0) {
-                "${stats.baseDP} + ${stats.armorBonus} + ${prestige.permanentDPBonus} = $defenseWithPrestige"
-            } else {
-                defenseWithPrestige.toString()
-            }
             StatRow(
                 label = "Defense",
-                value = defenseDisplay,
-                color = if (prestige.permanentDPBonus > 0) Color(0xFFFF9A3C) else Color.Unspecified
+                value = stats.totalDefense.toString(),
+                color = Color.Unspecified
             )
 
-            if (prestige.xpMultiplierBonus > 0f) {
-                val multiplier = String.format("%.0f%%", prestige.xpMultiplierBonus * 100)
+            if (prestige.activeBonuses.isNotEmpty()) {
                 StatRow(
-                    label = "XP Bonus",
-                    value = "+$multiplier",
+                    label = "Prestige",
+                    value = "${prestige.activeBonuses.size} active",
                     color = Color(0xFFFF9A3C)
                 )
             }

@@ -194,7 +194,7 @@ fun HealerScreen(
                     }
                 )
 
-                if (updatedGameState.challengeConfig?.permanentDeath != true) {
+                if (updatedGameState.challengeConfig?.isPermadeath != true) {
                     Button(
                         onClick = {
                             onSaveGame(updatedGameState)
@@ -235,7 +235,7 @@ fun HealerScreen(
                         contentColor = MaterialTheme.colorScheme.onTertiary
                     )
                 ) {
-                    Text(if (updatedGameState.challengeConfig?.permanentDeath == true) "4. i've had enough of this guy" else "5. i've had enough of this guy")
+                    Text(if (updatedGameState.challengeConfig?.isPermadeath == true) "4. i've had enough of this guy" else "5. i've had enough of this guy")
                 }
             }
 

@@ -1,13 +1,12 @@
 package com.greenopal.zargon.ui.viewmodels
 
 import androidx.lifecycle.ViewModel
+import com.greenopal.zargon.data.models.Challenge
 import com.greenopal.zargon.data.models.ChallengeConfig
 import com.greenopal.zargon.data.models.CharacterStats
-import com.greenopal.zargon.data.models.DifficultyLevel
-import com.greenopal.zargon.data.models.EquipmentMode
 import com.greenopal.zargon.data.models.GameState
+import com.greenopal.zargon.data.models.PrestigeBonus
 import com.greenopal.zargon.data.models.PrestigeData
-import com.greenopal.zargon.data.models.TimedChallenge
 import com.greenopal.zargon.data.repository.PrestigeRepository
 import com.greenopal.zargon.domain.challenges.PrestigeSystem
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -36,43 +35,31 @@ class ChallengeViewModel @Inject constructor(
         _prestigeData.value = prestigeRepository.loadPrestige()
     }
 
-    fun setDifficulty(difficulty: DifficultyLevel) {
-        _challengeConfig.value = _challengeConfig.value.copy(
-            difficulty = difficulty,
-            presetName = null
-        )
-    }
-
-    fun setWeaponMode(mode: EquipmentMode) {
-        _challengeConfig.value = _challengeConfig.value.copy(
-            weaponMode = mode,
-            presetName = null
-        )
-    }
-
-    fun setArmorMode(mode: EquipmentMode) {
-        _challengeConfig.value = _challengeConfig.value.copy(
-            armorMode = mode,
-            presetName = null
-        )
-    }
-
-    fun setPermanentDeath(enabled: Boolean) {
-        _challengeConfig.value = _challengeConfig.value.copy(
-            permanentDeath = enabled,
-            presetName = null
-        )
-    }
-
-    fun setTimedChallenge(timed: TimedChallenge) {
-        _challengeConfig.value = _challengeConfig.value.copy(
-            timedChallenge = timed,
-            presetName = null
-        )
+    fun selectChallenge(challenge: Challenge) {
+        val current = _challengeConfig.value
+        val newChallenges = if (challenge in current.challenges) {
+            emptySet()
+        } else {
+            setOf(challenge)
+        }
+        _challengeConfig.value = current.copy(challenges = newChallenges)
     }
 
     fun applyPreset(preset: ChallengeConfig) {
         _challengeConfig.value = preset
+    }
+
+    fun togglePrestigeBonus(bonus: PrestigeBonus) {
+        val current = _prestigeData.value
+        if (bonus !in current.unlockedBonuses) return
+        val newActive = if (bonus in current.activeBonuses) {
+            current.activeBonuses - bonus
+        } else {
+            current.activeBonuses + bonus
+        }
+        val updated = current.copy(activeBonuses = newActive)
+        _prestigeData.value = updated
+        prestigeRepository.savePrestige(updated)
     }
 
     fun getStartingGameState(saveSlot: Int): GameState {
@@ -88,14 +75,15 @@ class ChallengeViewModel @Inject constructor(
         return GameState(
             saveSlot = saveSlot,
             character = prestigeCharacter,
-            challengeConfig = config,
-            challengeStartTime = if (config.timedChallenge != TimedChallenge.NONE) {
-                System.currentTimeMillis()
-            } else null
+            challengeConfig = if (config.challenges.isNotEmpty()) config else null
         )
     }
 
     fun isChallengeCompleted(challengeId: String): Boolean {
         return challengeId in _prestigeData.value.completedChallenges
+    }
+
+    fun getRewardForChallenge(challenge: Challenge): PrestigeBonus? {
+        return prestigeSystem.getRewardForConfig(ChallengeConfig(challenges = setOf(challenge)))
     }
 }

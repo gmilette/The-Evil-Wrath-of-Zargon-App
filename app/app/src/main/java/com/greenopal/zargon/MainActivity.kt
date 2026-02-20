@@ -103,7 +103,7 @@ class MainActivity : ComponentActivity() {
                 val viewModel: GameViewModel = hiltViewModel()
                 val challengeViewModel: ChallengeViewModel = hiltViewModel()
                 val gameState by viewModel.gameState.collectAsState()
-                var timeRemaining by remember { mutableStateOf<Long?>(null) }
+
 
                 // Load sprites
                 var playerSprite by remember { mutableStateOf<Sprite?>(null) }
@@ -115,24 +115,9 @@ class MainActivity : ComponentActivity() {
                 var isExplorationMode by remember { mutableStateOf(false) }
                 var saveSlots by remember { mutableStateOf(saveRepository.getAllSaves()) }
                 var challengeRestartSlot by remember { mutableStateOf<Int?>(null) }
+                var challengeProgressReturnToMenu by remember { mutableStateOf(false) }
 
                 LaunchedEffect(gameState.challengeConfig, gameState.challengeStartTime) {
-                    val challengeConfig = gameState.challengeConfig
-                    while (challengeConfig?.timedChallenge?.durationMinutes != null) {
-                        val challengeStartTime = gameState.challengeStartTime ?: System.currentTimeMillis()
-                        val durationMs = (challengeConfig.timedChallenge.durationMinutes ?: 0) * 60 * 1000L
-                        val elapsed = System.currentTimeMillis() - challengeStartTime - gameState.totalPauseTime
-                        val remaining = durationMs - elapsed
-
-                        timeRemaining = remaining
-
-                        if (remaining <= 0) {
-                            screenState = ScreenState.GAME_OVER
-                            break
-                        }
-
-                        delay(1000)
-                    }
                 }
 
                 fun isOnInteractiveTile(state: com.greenopal.zargon.data.models.GameState): Boolean {
@@ -271,10 +256,14 @@ class MainActivity : ComponentActivity() {
                                 onViewHints = {
                                     screenState = ScreenState.HINTS
                                 },
+                                onViewChallengeProgress = {
+                                    challengeProgressReturnToMenu = true
+                                    screenState = ScreenState.CHALLENGE_PROGRESS
+                                },
                                 onBack = {
-                                    // Return to map when closing menu
                                     screenState = ScreenState.MAP
                                 },
+                                activeChallengeName = gameState.challengeConfig?.getDisplayName(),
                                 modifier = Modifier
                                     .fillMaxSize()
                                     .padding(innerPadding)
@@ -693,6 +682,7 @@ class MainActivity : ComponentActivity() {
                         ScreenState.CHALLENGE_SELECT -> {
                             ChallengeSelectScreen(
                                 onStartChallenge = { config ->
+                                    challengeViewModel.applyPreset(config)
                                     val slot = challengeRestartSlot ?: 1
                                     val startingState = challengeViewModel.getStartingGameState(slot)
                                     val correctedState = ensurePlayerNotOnInteractiveTile(startingState)
@@ -717,8 +707,14 @@ class MainActivity : ComponentActivity() {
                         ScreenState.CHALLENGE_PROGRESS -> {
                             ChallengeProgressScreen(
                                 onBack = {
-                                    screenState = ScreenState.TITLE
+                                    if (challengeProgressReturnToMenu) {
+                                        challengeProgressReturnToMenu = false
+                                        screenState = ScreenState.MENU
+                                    } else {
+                                        screenState = ScreenState.TITLE
+                                    }
                                 },
+                                activeChallengeName = gameState.challengeConfig?.getDisplayName(),
                                 viewModel = challengeViewModel,
                                 modifier = Modifier
                                     .fillMaxSize()
@@ -727,29 +723,6 @@ class MainActivity : ComponentActivity() {
                         }
                     }
 
-                        if (timeRemaining != null && timeRemaining!! > 0) {
-                            Card(
-                                modifier = Modifier
-                                    .align(Alignment.TopCenter)
-                                    .padding(top = 60.dp),
-                                colors = CardDefaults.cardColors(
-                                    containerColor = DarkStone.copy(alpha = 0.9f)
-                                )
-                            ) {
-                                val totalSeconds = timeRemaining!! / 1000
-                                val minutes = totalSeconds / 60
-                                val seconds = totalSeconds % 60
-                                Text(
-                                    text = "TIME: ${minutes}m ${seconds}s",
-                                    style = androidx.compose.material3.MaterialTheme.typography.titleLarge.copy(
-                                        fontSize = 20.sp
-                                    ),
-                                    color = if (timeRemaining!! < 60000) EmberOrange else Gold,
-                                    fontWeight = FontWeight.Bold,
-                                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
-                                )
-                            }
-                        }
                     }
                 }
             }

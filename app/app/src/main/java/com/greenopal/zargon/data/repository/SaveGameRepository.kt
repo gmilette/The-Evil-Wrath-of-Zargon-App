@@ -28,7 +28,7 @@ class SaveGameRepository @Inject constructor(
      * Save game to a slot (1-4)
      */
     fun saveGame(gameState: GameState, slot: Int = 1): Boolean {
-        if (gameState.challengeConfig?.permanentDeath == true) {
+        if (gameState.challengeConfig?.isPermadeath == true) {
             android.util.Log.d("SaveGameRepository", "Save blocked - Permanent Death mode active")
             return false
         }

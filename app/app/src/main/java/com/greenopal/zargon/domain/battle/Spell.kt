@@ -19,16 +19,15 @@ data class Spell(
      * @param playerLevel Character level for scaling
      * @return Damage dealt or HP healed
      */
-    fun calculateEffect(playerLevel: Int): Int {
-        // QBASIC formula: Gain = INT(RND * randomBonus) + 1 * lev
-        // Fix: Handle randomBonus == 0 to prevent Random.nextInt crash
+    fun calculateEffect(playerLevel: Int, effectMultiplier: Float = 1.0f): Int {
         val randomComponent = if (randomBonus > 0) {
             Random.nextInt(1, randomBonus + 1)
         } else {
             0
         }
         val gain = randomComponent + playerLevel
-        return baseDamage + gain
+        val baseEffect = baseDamage + gain
+        return (baseEffect * effectMultiplier).toInt()
     }
 
     /**

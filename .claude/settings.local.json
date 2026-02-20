@@ -4,9 +4,30 @@
       "Bash(./gradlew build:*)",
       "Bash(xargs cat:*)",
       "Bash(./gradlew:*)",
-      "Bash(find:*)"
+      "Bash(find:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(pip3 install:*)",
+      "Bash(python3:*)",
+      "Bash(ls:*)",
+      "Bash(./app/gradlew:*)",
+      "Bash(xxd:*)",
+      "WebSearch",
+      "Bash(grep:*)",
+      "Bash(cat:*)",
+      "Bash(done)",
+      "Bash(mv:*)",
+      "Bash(rm:*)",
+      "mcp__pixellab__create_map_object",
+      "mcp__pixellab__get_map_object",
+      "Bash(curl:*)",
+      "mcp__pixellab__get_topdown_tileset",
+      "mcp__pixellab__create_character"
     ],
     "deny": [],
     "ask": []
+  },
+  "env": {
+    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
   }
 }

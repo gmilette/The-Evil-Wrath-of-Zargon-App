@@ -8,28 +8,15 @@ import javax.inject.Singleton
 class ChallengeTimer @Inject constructor() {
 
     fun getRemainingTimeMs(gameState: GameState): Long? {
-        val config = gameState.challengeConfig ?: return null
-        val durationMs = config.timedChallenge.durationMinutes?.let { it * 60 * 1000L }
-            ?: return null
-        val startTime = gameState.challengeStartTime ?: return null
-
-        val elapsedMs = System.currentTimeMillis() - startTime - gameState.totalPauseTime
-        val remainingMs = durationMs - elapsedMs
-
-        return maxOf(0L, remainingMs)
+        return null
     }
 
     fun isTimeExpired(gameState: GameState): Boolean {
-        val remaining = getRemainingTimeMs(gameState) ?: return false
-        return remaining <= 0
+        return false
     }
 
     fun formatRemainingTime(gameState: GameState): String? {
-        val remainingMs = getRemainingTimeMs(gameState) ?: return null
-        val totalSeconds = remainingMs / 1000
-        val minutes = totalSeconds / 60
-        val seconds = totalSeconds % 60
-        return "%02d:%02d".format(minutes, seconds)
+        return null
     }
 
     fun getElapsedTimeMs(gameState: GameState): Long {

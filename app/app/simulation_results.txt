@@ -1,9 +1,9 @@
 === ZARGON WIN RATE ANALYSIS ===
-Generated: 2025-12-30T11:33:13.853634
+Generated: 2026-02-15T13:46:10.622418
 
 Testing: Level 5 Character with Long Sword + Chain Mail
 
-Player Stats: Level 5, AP=22, HP=44, Defense=28
+Player Stats: Level 5, AP=22, HP=44, Defense=72
 
 === WIN RATES BY MONSTER AND SCALE (100 battles each) ===
 
@@ -16,10 +16,10 @@ Scale | Monster Stats    | Win Rate | Avg Turns | Avg HP Left
   4   | AP=16  HP=48  |    100%  |   3.0     |   42
   5   | AP=20  HP=60  |    100%  |   3.0     |   42
   6   | AP=24  HP=72  |    100%  |   4.0     |   41
-  7   | AP=28  HP=84  |    100%  |   4.0     |   34
-  8   | AP=32  HP=96  |     99%  |   5.0     |   12
-  9   | AP=36  HP=108 |     16%  |   5.0     |    3
-  10  | AP=40  HP=120 |      0%  |   N/A     |  N/A
+  7   | AP=28  HP=84  |    100%  |   4.0     |   41
+  8   | AP=32  HP=96  |    100%  |   5.0     |   40
+  9   | AP=36  HP=108 |    100%  |   5.0     |   40
+  10  | AP=40  HP=120 |    100%  |   6.0     |   39
 
 Monster: BAT (Base: AP=2, HP=10)
 Scale | Monster Stats    | Win Rate | Avg Turns | Avg HP Left
@@ -41,20 +41,20 @@ Scale | Monster Stats    | Win Rate | Avg Turns | Avg HP Left
   1   | AP=8   HP=16  |    100%  |   1.0     |   44
   2   | AP=16  HP=32  |    100%  |   2.0     |   43
   3   | AP=24  HP=48  |    100%  |   3.0     |   42
-  4   | AP=32  HP=64  |    100%  |   3.0     |   32
-  5   | AP=40  HP=80  |     53%  |   4.0     |    3
-  6   | AP=48  HP=96  |      0%  |   N/A     |  N/A
-  7   | AP=56  HP=112 |      0%  |   N/A     |  N/A
-  8   | AP=64  HP=128 |      0%  |   N/A     |  N/A
-  9   | AP=72  HP=144 |      0%  |   N/A     |  N/A
+  4   | AP=32  HP=64  |    100%  |   3.0     |   42
+  5   | AP=40  HP=80  |    100%  |   4.0     |   41
+  6   | AP=48  HP=96  |    100%  |   5.0     |   40
+  7   | AP=56  HP=112 |    100%  |   6.0     |   39
+  8   | AP=64  HP=128 |    100%  |   6.0     |   39
+  9   | AP=72  HP=144 |     99%  |   7.0     |   17
   10  | AP=80  HP=160 |      0%  |   N/A     |  N/A
 
 Monster: KRAKEN (Base: AP=25, HP=60)
 Scale | Monster Stats    | Win Rate | Avg Turns | Avg HP Left
 ------|------------------|----------|-----------|------------
   1   | AP=25  HP=60  |    100%  |   3.0     |   42
-  2   | AP=50  HP=120 |      0%  |   N/A     |  N/A
-  3   | AP=75  HP=180 |      0%  |   N/A     |  N/A
+  2   | AP=50  HP=120 |    100%  |   6.0     |   39
+  3   | AP=75  HP=180 |     99%  |   9.0     |    8
   4   | AP=100 HP=240 |      0%  |   N/A     |  N/A
   5   | AP=125 HP=300 |      0%  |   N/A     |  N/A
   6   | AP=150 HP=360 |      0%  |   N/A     |  N/A
@@ -68,9 +68,9 @@ Scale | Monster Stats    | Win Rate | Avg Turns | Avg HP Left
 ------|------------------|----------|-----------|------------
   1   | AP=13  HP=30  |    100%  |   2.0     |   43
   2   | AP=26  HP=60  |    100%  |   3.0     |   42
-  3   | AP=39  HP=90  |      0%  |   N/A     |  N/A
-  4   | AP=52  HP=120 |      0%  |   N/A     |  N/A
-  5   | AP=65  HP=150 |      0%  |   N/A     |  N/A
+  3   | AP=39  HP=90  |    100%  |   5.0     |   40
+  4   | AP=52  HP=120 |    100%  |   6.0     |   39
+  5   | AP=65  HP=150 |    100%  |   7.0     |   38
   6   | AP=78  HP=180 |      0%  |   N/A     |  N/A
   7   | AP=91  HP=210 |      0%  |   N/A     |  N/A
   8   | AP=104 HP=240 |      0%  |   N/A     |  N/A
@@ -82,10 +82,10 @@ Scale | Monster Stats    | Win Rate | Avg Turns | Avg HP Left
 ------|------------------|----------|-----------|------------
   1   | AP=12  HP=20  |    100%  |   1.0     |   44
   2   | AP=24  HP=40  |    100%  |   2.0     |   43
-  3   | AP=36  HP=60  |    100%  |   3.0     |   25
-  4   | AP=48  HP=80  |      0%  |   N/A     |  N/A
-  5   | AP=60  HP=100 |      0%  |   N/A     |  N/A
-  6   | AP=72  HP=120 |      0%  |   N/A     |  N/A
+  3   | AP=36  HP=60  |    100%  |   3.0     |   42
+  4   | AP=48  HP=80  |    100%  |   4.0     |   41
+  5   | AP=60  HP=100 |    100%  |   5.0     |   40
+  6   | AP=72  HP=120 |    100%  |   6.0     |   28
   7   | AP=84  HP=140 |      0%  |   N/A     |  N/A
   8   | AP=96  HP=160 |      0%  |   N/A     |  N/A
   9   | AP=108 HP=180 |      0%  |   N/A     |  N/A
@@ -112,17 +112,17 @@ Scale | Monster Stats    | Win Rate | Avg Turns | Avg HP Left
   2   | AP=12  HP=28  |    100%  |   2.0     |   43
   3   | AP=18  HP=42  |    100%  |   2.0     |   43
   4   | AP=24  HP=56  |    100%  |   3.0     |   42
-  5   | AP=30  HP=70  |    100%  |   4.0     |   31
-  6   | AP=36  HP=84  |    100%  |   4.0     |   11
-  7   | AP=42  HP=98  |      0%  |   N/A     |  N/A
-  8   | AP=48  HP=112 |      0%  |   N/A     |  N/A
-  9   | AP=54  HP=126 |      0%  |   N/A     |  N/A
-  10  | AP=60  HP=140 |      0%  |   N/A     |  N/A
+  5   | AP=30  HP=70  |    100%  |   4.0     |   41
+  6   | AP=36  HP=84  |    100%  |   4.0     |   41
+  7   | AP=42  HP=98  |    100%  |   5.0     |   40
+  8   | AP=48  HP=112 |    100%  |   6.0     |   39
+  9   | AP=54  HP=126 |    100%  |   6.0     |   39
+  10  | AP=60  HP=140 |    100%  |   7.0     |   38
 
 Monster: ZARGON (Base: AP=60, HP=300)
 Scale | Monster Stats    | Win Rate | Avg Turns | Avg HP Left
 ------|------------------|----------|-----------|------------
-  1   | AP=60  HP=300 |      0%  |   N/A     |  N/A
+  1   | AP=60  HP=300 |    100%  |  14.0     |   31
   2   | AP=120 HP=600 |      0%  |   N/A     |  N/A
   3   | AP=180 HP=900 |      0%  |   N/A     |  N/A
   4   | AP=240 HP=1200 |      0%  |   N/A     |  N/A

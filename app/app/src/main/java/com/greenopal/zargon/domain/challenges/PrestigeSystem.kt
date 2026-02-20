@@ -1,11 +1,10 @@
 package com.greenopal.zargon.domain.challenges
 
+import com.greenopal.zargon.data.models.Challenge
 import com.greenopal.zargon.data.models.ChallengeConfig
 import com.greenopal.zargon.data.models.CharacterStats
-import com.greenopal.zargon.data.models.DifficultyLevel
-import com.greenopal.zargon.data.models.EquipmentMode
+import com.greenopal.zargon.data.models.PrestigeBonus
 import com.greenopal.zargon.data.models.PrestigeData
-import com.greenopal.zargon.data.models.TimedChallenge
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -16,54 +15,60 @@ class PrestigeSystem @Inject constructor() {
         config: ChallengeConfig,
         currentPrestige: PrestigeData
     ): PrestigeData {
-        if (config.getChallengeId() in currentPrestige.completedChallenges) {
+        val challengeId = config.getChallengeId()
+        if (challengeId in currentPrestige.completedChallenges) {
             return currentPrestige
         }
 
         var newPrestige = currentPrestige.copy(
-            completedChallenges = currentPrestige.completedChallenges + config.getChallengeId(),
+            completedChallenges = currentPrestige.completedChallenges + challengeId,
             totalCompletions = currentPrestige.totalCompletions + 1
         )
 
-        // Award permanent AP bonus (one-time, on first challenge completion)
-        if (!currentPrestige.hasAPBonus) {
+        val reward = getRewardForConfig(config)
+        if (reward != null && reward !in newPrestige.unlockedBonuses) {
             newPrestige = newPrestige.copy(
-                hasAPBonus = true
-            )
-        }
-
-        // Award permanent DP bonus (one-time, on first challenge completion)
-        if (!currentPrestige.hasDPBonus) {
-            newPrestige = newPrestige.copy(
-                hasDPBonus = true
-            )
-        }
-
-        if (config.timedChallenge != TimedChallenge.NONE) {
-            newPrestige = newPrestige.copy(
-                startingGoldBonus = minOf(newPrestige.startingGoldBonus + 10, 100)
-            )
-        }
-
-        if (config.difficulty == DifficultyLevel.INSANE) {
-            newPrestige = newPrestige.copy(
-                xpMultiplierBonus = minOf(newPrestige.xpMultiplierBonus + 0.05f, 0.5f)
+                unlockedBonuses = newPrestige.unlockedBonuses + reward,
+                activeBonuses = newPrestige.activeBonuses + reward
             )
         }
 
         return newPrestige
     }
 
+    fun getRewardForConfig(config: ChallengeConfig): PrestigeBonus? {
+        val challenges = config.challenges
+        return when {
+            Challenge.IMPOSSIBLE_MISSION in challenges -> PrestigeBonus.XP_BOOST
+            Challenge.MAGE_QUEST in challenges -> PrestigeBonus.XP_BOOST
+            Challenge.WARRIOR_MODE in challenges -> PrestigeBonus.XP_BOOST
+            Challenge.ONE_DEATH in challenges -> PrestigeBonus.STARTING_GOLD
+            Challenge.STRONG_ENEMIES in challenges || Challenge.STRONGER_ENEMIES in challenges -> PrestigeBonus.GOLD_BOOST
+            Challenge.WEAK_WEAPONS in challenges -> PrestigeBonus.GREAT_WEAPONS
+            Challenge.WEAK_ARMOR in challenges -> PrestigeBonus.GREATER_ARMOR
+            Challenge.NO_MAGIC in challenges -> PrestigeBonus.MASTER_SPELLBOOK
+            else -> null
+        }
+    }
+
     fun applyPrestigeBonusesToCharacter(
         baseStats: CharacterStats,
         prestige: PrestigeData
     ): CharacterStats {
-        return baseStats.copy(
-            gold = baseStats.gold + prestige.startingGoldBonus
-        )
+        var stats = baseStats
+        if (prestige.isBonusActive(PrestigeBonus.STARTING_GOLD)) {
+            stats = stats.copy(gold = stats.gold + 100)
+        }
+        return stats
     }
 
     fun getXPMultiplier(prestige: PrestigeData): Float {
-        return 1.0f + prestige.xpMultiplierBonus
+        var multiplier = 1.0f
+        if (prestige.isBonusActive(PrestigeBonus.XP_BOOST)) multiplier *= 1.1f
+        return multiplier
+    }
+
+    fun getGoldMultiplier(prestige: PrestigeData): Float {
+        return if (prestige.isBonusActive(PrestigeBonus.GOLD_BOOST)) 1.1f else 1.0f
     }
 }

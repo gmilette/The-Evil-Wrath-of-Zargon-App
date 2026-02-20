@@ -101,28 +101,15 @@ fun StatsScreen(
                         StatRow("Hit Points", "${gameState.character.currentDP} / ${gameState.character.maxDP}")
                         StatRow("Magic Points", "${gameState.character.currentMP} / ${gameState.character.maxMP}")
 
-                        // Attack Power with prestige bonus
-                        val apWithPrestige = gameState.character.totalAP + prestige.permanentAPBonus
-                        val apDisplay = if (prestige.permanentAPBonus > 0) {
-                            "${gameState.character.baseAP} + ${gameState.character.weaponBonus} + ${prestige.permanentAPBonus} = $apWithPrestige"
-                        } else {
-                            apWithPrestige.toString()
-                        }
-                        StatRow("Attack Power", apDisplay, if (prestige.permanentAPBonus > 0) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.onSurface)
+                        StatRow("Attack Power", gameState.character.totalAP.toString())
+                        StatRow("Defense Power", gameState.character.totalDefense.toString())
 
-                        // Defense Power with prestige bonus
-                        val defenseWithPrestige = gameState.character.totalDefense + prestige.permanentDPBonus
-                        val defenseDisplay = if (prestige.permanentDPBonus > 0) {
-                            "${gameState.character.baseDP} + ${gameState.character.armorBonus} + ${prestige.permanentDPBonus} = $defenseWithPrestige"
-                        } else {
-                            defenseWithPrestige.toString()
-                        }
-                        StatRow("Defense Power", defenseDisplay, if (prestige.permanentDPBonus > 0) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.onSurface)
-
-                        // XP Multiplier if prestige XP bonus exists
-                        if (prestige.xpMultiplierBonus > 0f) {
-                            val multiplier = String.format("%.0f%%", prestige.xpMultiplierBonus * 100)
-                            StatRow("XP Multiplier", "+$multiplier", MaterialTheme.colorScheme.tertiary)
+                        if (prestige.activeBonuses.isNotEmpty()) {
+                            StatRow(
+                                "Prestige",
+                                "${prestige.activeBonuses.size} active",
+                                MaterialTheme.colorScheme.tertiary
+                            )
                         }
 
                         StatRow("Gold", "${gameState.character.gold}g", MaterialTheme.colorScheme.primary)

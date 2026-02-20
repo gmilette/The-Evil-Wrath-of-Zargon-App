@@ -35,7 +35,7 @@ fun GameOverScreen(
     onReturnToTitle: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val isPermanentDeath = finalGameState.challengeConfig?.permanentDeath == true
+    val isPermanentDeath = finalGameState.challengeConfig?.isPermadeath == true
     Box(
         modifier = modifier
             .fillMaxSize()
