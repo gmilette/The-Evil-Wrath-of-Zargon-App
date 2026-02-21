@@ -19,13 +19,14 @@ class BattleEngine @Inject constructor() {
         effectiveArmorBonus: Int,
         random: Random = Random
     ): Int {
-        val randomFactor = if (monster.scalingFactor > 0) {
-            random.nextInt(0, monster.scalingFactor + 1)
-        } else {
-            0
-        }
+        val randomMultiplier = 0.84 + random.nextDouble() * 0.32
         val totalDefense = character.baseDP + effectiveArmorBonus
-        val rawDamage = monster.attackPower - totalDefense + randomFactor
-        return maxOf(1, rawDamage)
+        val rawDamage = monster.attackPower.toDouble() * DAMAGE_K /
+            (totalDefense + DAMAGE_K) * randomMultiplier
+        return maxOf(1, rawDamage.toInt())
+    }
+
+    companion object {
+        private const val DAMAGE_K = 20.0
     }
 }
