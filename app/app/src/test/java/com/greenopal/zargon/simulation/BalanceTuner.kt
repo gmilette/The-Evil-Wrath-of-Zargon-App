@@ -46,7 +46,8 @@ class BalanceTuner {
         return CharacterStats(
             baseAP = baseAP,
             baseDP = baseDP,
-            currentDP = baseDP,
+            maxHP = baseDP,
+            currentHP = baseDP,
             baseMP = baseMP,
             currentMP = baseMP,
             level = level,

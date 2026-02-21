@@ -98,7 +98,7 @@ fun StatsScreen(
                         HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
 
                         // Stats
-                        StatRow("Hit Points", "${gameState.character.currentHP} / ${gameState.character.maxDP}")
+                        StatRow("Hit Points", "${gameState.character.currentHP} / ${gameState.character.maxHP}")
                         StatRow("Magic Points", "${gameState.character.currentMP} / ${gameState.character.maxMP}")
 
                         StatRow("Attack Power", gameState.character.totalAP.toString())

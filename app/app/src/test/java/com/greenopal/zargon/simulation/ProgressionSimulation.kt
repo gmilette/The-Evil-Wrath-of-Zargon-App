@@ -73,7 +73,7 @@ class ProgressionSimulation {
                 val xpGained = rewardSystem.calculateXP(monsterType, monster.scalingFactor)
                 val goldGained = rewardSystem.calculateGold(monsterType, monster.scalingFactor)
                 character = character.copy(
-                    currentDP = log.playerHPRemaining,
+                    currentHP = log.playerHPRemaining,
                     experience = character.experience + xpGained,
                     gold = character.gold + goldGained
                 )
@@ -84,7 +84,7 @@ class ProgressionSimulation {
                 }
             } else {
                 character = character.copy(
-                    currentDP = character.maxDP,
+                    currentHP = character.maxHP,
                     currentMP = character.maxMP
                 )
             }
@@ -166,7 +166,7 @@ class ProgressionSimulation {
                 val xpGained = (baseXP * xpMultiplier).toInt()
                 val goldGained = (baseGold * goldMultiplier).toInt()
                 character = character.copy(
-                    currentDP = log.playerHPRemaining,
+                    currentHP = log.playerHPRemaining,
                     experience = character.experience + xpGained,
                     gold = character.gold + goldGained
                 )
@@ -185,7 +185,7 @@ class ProgressionSimulation {
                 }
             } else {
                 character = character.copy(
-                    currentDP = character.maxDP,
+                    currentHP = character.maxHP,
                     currentMP = character.maxMP
                 )
             }

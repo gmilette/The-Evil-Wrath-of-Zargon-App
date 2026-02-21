@@ -117,7 +117,7 @@ fun HealerScreen(
                             color = MaterialTheme.colorScheme.secondary
                         )
                         Text(
-                            text = "HP: ${updatedGameState.character.currentHP}/${updatedGameState.character.maxDP}",
+                            text = "HP: ${updatedGameState.character.currentHP}/${updatedGameState.character.maxHP}",
                             color = MaterialTheme.colorScheme.onSurface
                         )
                         Text(
@@ -146,10 +146,10 @@ fun HealerScreen(
                     service = "healing",
                     cost = 3,
                     enabled = updatedGameState.character.gold >= 3 &&
-                            updatedGameState.character.currentHP < updatedGameState.character.maxDP,
+                            updatedGameState.character.currentHP < updatedGameState.character.maxHP,
                     onClick = {
                         val newChar = updatedGameState.character.copy(
-                            currentHP = updatedGameState.character.maxDP,
+                            currentHP = updatedGameState.character.maxHP,
                             gold = updatedGameState.character.gold - 3
                         )
                         updatedGameState = updatedGameState.updateCharacter(newChar)
@@ -180,11 +180,11 @@ fun HealerScreen(
                     service = "complete rest",
                     cost = 5,
                     enabled = updatedGameState.character.gold >= 5 &&
-                            (updatedGameState.character.currentHP < updatedGameState.character.maxDP ||
+                            (updatedGameState.character.currentHP < updatedGameState.character.maxHP ||
                                     updatedGameState.character.currentMP < updatedGameState.character.maxMP),
                     onClick = {
                         val newChar = updatedGameState.character.copy(
-                            currentHP = updatedGameState.character.maxDP,
+                            currentHP = updatedGameState.character.maxHP,
                             currentMP = updatedGameState.character.maxMP,
                             gold = updatedGameState.character.gold - 5
                         )

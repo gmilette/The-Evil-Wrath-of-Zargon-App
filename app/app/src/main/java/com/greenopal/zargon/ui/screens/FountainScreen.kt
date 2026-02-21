@@ -127,7 +127,7 @@ fun FountainScreen(
                             color = MaterialTheme.colorScheme.secondary
                         )
                         Text(
-                            text = "HP: ${updatedGameState.character.currentHP}/${updatedGameState.character.maxDP}",
+                            text = "HP: ${updatedGameState.character.currentHP}/${updatedGameState.character.maxHP}",
                             color = MaterialTheme.colorScheme.onSurface
                         )
                         Text(
@@ -141,7 +141,7 @@ fun FountainScreen(
                 Button(
                     onClick = {
                         val healedCharacter = updatedGameState.character.copy(
-                            currentHP = updatedGameState.character.maxDP,
+                            currentHP = updatedGameState.character.maxHP,
                             currentMP = updatedGameState.character.maxMP
                         )
                         updatedGameState = updatedGameState.updateCharacter(healedCharacter)
@@ -149,7 +149,7 @@ fun FountainScreen(
                         showMessageDialog = true
                     },
                     modifier = Modifier.fillMaxWidth(),
-                    enabled = updatedGameState.character.currentHP < updatedGameState.character.maxDP ||
+                    enabled = updatedGameState.character.currentHP < updatedGameState.character.maxHP ||
                             updatedGameState.character.currentMP < updatedGameState.character.maxMP,
                     colors = ButtonDefaults.buttonColors(
                         containerColor = MaterialTheme.colorScheme.primary,
@@ -164,7 +164,7 @@ fun FountainScreen(
                 Button(
                     onClick = {
                         val healedCharacter = updatedGameState.character.copy(
-                            currentHP = updatedGameState.character.maxDP,
+                            currentHP = updatedGameState.character.maxHP,
                             currentMP = updatedGameState.character.maxMP
                         )
                         updatedGameState = updatedGameState.updateCharacter(healedCharacter)
@@ -172,7 +172,7 @@ fun FountainScreen(
                         showMessageDialog = true
                     },
                     modifier = Modifier.fillMaxWidth(),
-                    enabled = updatedGameState.character.currentHP < updatedGameState.character.maxDP ||
+                    enabled = updatedGameState.character.currentHP < updatedGameState.character.maxHP ||
                             updatedGameState.character.currentMP < updatedGameState.character.maxMP,
                     colors = ButtonDefaults.buttonColors(
                         containerColor = MaterialTheme.colorScheme.primary,
