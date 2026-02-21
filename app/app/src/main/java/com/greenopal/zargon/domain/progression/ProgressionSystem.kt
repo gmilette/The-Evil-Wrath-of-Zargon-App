@@ -113,10 +113,11 @@ class LevelingSystem @Inject constructor() {
 
         // Random stat gains (QBASIC: INT(RND * lev) + bonus)
         val apGain = Random.nextInt(0, currentLevel + 1) + 2
+        val hpGain = Random.nextInt(3, 8)
         val dpGain = 4
         val mpGain = 3 + Random.nextInt(0, currentLevel + 1) + 1
 
-        return character.levelUp(apGain, dpGain, mpGain)
+        return character.levelUp(apGain, hpGain, dpGain, mpGain)
     }
 
     /**
@@ -146,6 +147,7 @@ data class BattleRewards(
     val leveledUp: Boolean = false,
     val newLevel: Int? = null,
     val apGain: Int? = null,
+    val hpGain: Int? = null,
     val dpGain: Int? = null,
     val mpGain: Int? = null
 )

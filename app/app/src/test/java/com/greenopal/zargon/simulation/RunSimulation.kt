@@ -19,7 +19,7 @@ fun main() {
     val character = createCharacter(5, Weapon.LONG_SWORD, Armor.CHAIN_MAIL)
     val monster = createMonster(MonsterType.NECRO, 2)
 
-    println("Player: AP=${character.totalAP}, HP=${character.currentDP}, Defense=${character.totalDefense}")
+    println("Player: AP=${character.totalAP}, HP=${character.currentHP}, Defense=${character.totalDefense}")
     println("Monster: AP=${monster.attackPower}, HP=${monster.currentHP}, Scale=${monster.scalingFactor}")
     println()
 
@@ -107,13 +107,15 @@ private fun runFullSimulation(config: SimulationConfig): SimulationSummary {
 
 private fun createCharacter(level: Int, weapon: Weapon, armor: Armor): CharacterStats {
     val baseAP = 5 + (level - 1) * 3
-    val baseDP = 20 + (level - 1) * 6
+    val baseDP = 20 + (level - 1) * 4
+    val maxHP = 20 + (level - 1) * 5
     val baseMP = 10 + (level - 1) * 4
 
     return CharacterStats(
         baseAP = baseAP,
         baseDP = baseDP,
-        currentDP = baseDP,
+        maxHP = maxHP,
+        currentHP = maxHP,
         baseMP = baseMP,
         currentMP = baseMP,
         level = level,

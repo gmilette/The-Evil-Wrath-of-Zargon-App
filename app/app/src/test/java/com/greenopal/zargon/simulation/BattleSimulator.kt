@@ -34,7 +34,7 @@ class BattleSimulator(
         config: ChallengeConfig? = null,
         prestige: PrestigeData? = null
     ): BattleLog {
-        var currentPlayerHP = character.currentDP
+        var currentPlayerHP = character.currentHP
         var currentMonsterHP = monster.currentHP
         var turns = 0
         var totalPlayerDamageDealt = 0
