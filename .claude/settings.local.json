@@ -1,4 +1,7 @@
 {
+  "env": {
+    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
+  },
   "permissions": {
     "allow": [
       "Bash(./gradlew build:*)",
@@ -22,12 +25,12 @@
       "mcp__pixellab__get_map_object",
       "Bash(curl:*)",
       "mcp__pixellab__get_topdown_tileset",
-      "mcp__pixellab__create_character"
+      "mcp__pixellab__create_character",
+      "Bash(git rebase:*)",
+      "Bash(GIT_EDITOR=true git rebase:*)",
+      "Bash(git cherry-pick:*)"
     ],
     "deny": [],
     "ask": []
-  },
-  "env": {
-    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"
   }
 }
