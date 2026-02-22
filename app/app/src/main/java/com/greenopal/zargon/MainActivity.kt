@@ -263,7 +263,50 @@ class MainActivity : ComponentActivity() {
                                 onBack = {
                                     screenState = ScreenState.MAP
                                 },
-                                activeChallengeName = gameState.challengeConfig?.getDisplayName(),
+                                onExitToTitle = {
+                                    saveRepository.saveGame(gameState, gameState.saveSlot)
+                                    saveSlots = saveRepository.getAllSaves()
+                                    screenState = ScreenState.TITLE
+                                },
+                                onDebugSetup = if (com.greenopal.zargon.BuildConfig.DEBUG) {
+                                    {
+                                        val questItemNames = listOf(
+                                            "dynamite", "dead wood", "rutter", "cloth",
+                                            "wood", "boat plans", "trapped soul", "ship"
+                                        )
+                                        var debugState = gameState.copy(
+                                            character = gameState.character.copy(
+                                                level = 8,
+                                                baseAP = 25,
+                                                maxHP = 55,
+                                                currentHP = 55,
+                                                baseDP = 48,
+                                                baseMP = 40,
+                                                currentMP = 40,
+                                                weaponBonus = 35,  // Atlantean Sword
+                                                weaponStatus = 6,
+                                                armorBonus = 50,   // Platemail
+                                                armorStatus = 5,
+                                                experience = 7410
+                                            ),
+                                            nextLevelXP = 15060,
+                                            storyStatus = 5.5f,
+                                            inventory = emptyList(),
+                                            discoveredItems = questItemNames.toSet()
+                                        )
+                                        questItemNames.forEach { name ->
+                                            debugState = debugState.addItem(
+                                                com.greenopal.zargon.data.models.Item(
+                                                    name = name,
+                                                    description = "",
+                                                    type = com.greenopal.zargon.data.models.ItemType.KEY_ITEM
+                                                )
+                                            )
+                                        }
+                                        viewModel.updateGameState(debugState)
+                                        screenState = ScreenState.MAP
+                                    }
+                                } else null,
                                 modifier = Modifier
                                     .fillMaxSize()
                                     .padding(innerPadding)
@@ -466,8 +509,7 @@ class MainActivity : ComponentActivity() {
                                                 if (updatedState.character.gold >= storyAction.cost) {
                                                     val updatedCharacter = updatedState.character.copy(
                                                         gold = updatedState.character.gold - storyAction.cost,
-                                                        baseDP = updatedState.character.baseDP + 1,
-                                                        currentHP = updatedState.character.currentHP + 1
+                                                        baseDP = updatedState.character.baseDP + 1
                                                     )
                                                     updatedState.updateCharacter(updatedCharacter)
                                                 } else {
@@ -526,8 +568,7 @@ class MainActivity : ComponentActivity() {
                                                             if (currentState.character.gold >= action.cost) {
                                                                 val updatedChar = currentState.character.copy(
                                                                     gold = currentState.character.gold - action.cost,
-                                                                    baseDP = currentState.character.baseDP + 1,
-                                                                    currentHP = currentState.character.currentHP + 1
+                                                                    baseDP = currentState.character.baseDP + 1
                                                                 )
                                                                 currentState.updateCharacter(updatedChar)
                                                             } else {
@@ -710,7 +751,7 @@ class MainActivity : ComponentActivity() {
                                         screenState = ScreenState.TITLE
                                     }
                                 },
-                                activeChallengeName = gameState.challengeConfig?.getDisplayName(),
+                                activeChallengeConfig = gameState.challengeConfig,
                                 viewModel = challengeViewModel,
                                 modifier = Modifier
                                     .fillMaxSize()

@@ -31,7 +31,6 @@ data class CharacterStats(
     val totalAP: Int get() = baseAP + weaponBonus
     val totalDefense: Int get() = baseDP + armorBonus
     val armorDefenseBonus: Int get() = armorBonus
-    val maxDP: Int get() = baseDP
     val maxMP: Int get() = baseMP
 
     val isAlive: Boolean get() = currentHP > 0

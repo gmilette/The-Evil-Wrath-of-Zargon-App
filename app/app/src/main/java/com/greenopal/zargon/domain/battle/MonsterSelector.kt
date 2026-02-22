@@ -24,7 +24,7 @@ class MonsterSelector @Inject constructor(
             if (gameState.characterX in 13..16 && gameState.characterY in 4..6) {
                 val baseZargon = MonsterStats(
                     type = MonsterType.ZARGON,
-                    attackPower = 100,
+                    attackPower = 135,
                     currentHP = 400,
                     maxHP = 400,
                     scalingFactor = 1

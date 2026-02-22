@@ -29,7 +29,7 @@ class RewardSystem @Inject constructor() {
             MonsterType.NECRO -> 20
             MonsterType.SKANDER_SNAKE -> 25
             MonsterType.KRAKEN -> 45 // No scaling for Kraken
-            MonsterType.ZARGON -> 100 // Special boss
+            MonsterType.ZARGON -> 1000 // Special boss
         }
 
         return if (monsterType == MonsterType.KRAKEN || monsterType == MonsterType.ZARGON) {

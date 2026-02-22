@@ -37,7 +37,7 @@ class SaveGameRepository @Inject constructor(
             android.util.Log.d("SaveGameRepository", "Saving game to slot $slot:")
             android.util.Log.d("SaveGameRepository", "  Story Status: ${gameState.storyStatus}")
             android.util.Log.d("SaveGameRepository", "  Position: Map ${gameState.worldX}${gameState.worldY} at (${gameState.characterX}, ${gameState.characterY})")
-            android.util.Log.d("SaveGameRepository", "  HP: ${gameState.character.currentHP}/${gameState.character.maxDP}, MP: ${gameState.character.currentMP}/${gameState.character.maxMP}")
+            android.util.Log.d("SaveGameRepository", "  HP: ${gameState.character.currentHP}/${gameState.character.maxHP}, MP: ${gameState.character.currentMP}/${gameState.character.maxMP}")
             android.util.Log.d("SaveGameRepository", "  Inventory (${gameState.inventory.size} items): ${gameState.inventory.map { it.name }}")
 
             val jsonString = json.encodeToString(gameState)
@@ -67,11 +67,43 @@ class SaveGameRepository @Inject constructor(
             android.util.Log.d("SaveGameRepository", "Game loaded successfully:")
             android.util.Log.d("SaveGameRepository", "  Story Status (saved): ${loadedState.storyStatus}")
             android.util.Log.d("SaveGameRepository", "  Position: Map ${loadedState.worldX}${loadedState.worldY} at (${loadedState.characterX}, ${loadedState.characterY})")
-            android.util.Log.d("SaveGameRepository", "  HP: ${loadedState.character.currentHP}/${loadedState.character.maxDP}, MP: ${loadedState.character.currentMP}/${loadedState.character.maxMP}")
+            android.util.Log.d("SaveGameRepository", "  HP: ${loadedState.character.currentHP}/${loadedState.character.maxHP}, MP: ${loadedState.character.currentMP}/${loadedState.character.maxMP}")
             android.util.Log.d("SaveGameRepository", "  Inventory (${loadedState.inventory.size} items): ${loadedState.inventory.map { it.name }}")
 
+            // Guard against corrupted saves where maxHP ended up below currentHP.
+            val character = loadedState.character
+            val migratedCharacter = if (character.maxHP < character.currentHP) {
+                android.util.Log.w("SaveGameRepository", "Migrating save: maxHP(${character.maxHP}) < currentHP(${character.currentHP}), fixing")
+                character.copy(maxHP = character.currentHP)
+            } else {
+                character
+            }
+            val afterHpMigration = if (migratedCharacter !== character) loadedState.copy(character = migratedCharacter) else loadedState
+
+            // Reconstruct discoveredItems for saves created before this field existed.
+            // Items consumed during story progression won't be in the current inventory,
+            // so infer them from storyStatus.
+            val status = afterHpMigration.storyStatus
+            val storyInferredItems = buildSet {
+                afterHpMigration.inventory.forEach { add(it.name.lowercase()) }
+                if (status >= 2.5f) add("dynamite")           // used to rescue boatman
+                if (status >= 3.8f) {                          // all 4 materials given to boatman
+                    add("wood"); add("dead wood"); add("cloth"); add("rutter")
+                }
+                if (status >= 4.0f) add("boat plans")          // received from boatman
+                if (status >= 5.0f) add("trapped soul")        // given to necromancer
+                if (status >= 5.5f) add("ship")                // built by boatman
+            }
+            val mergedDiscovered = afterHpMigration.discoveredItems + storyInferredItems
+            val migratedState = if (mergedDiscovered != afterHpMigration.discoveredItems) {
+                android.util.Log.d("SaveGameRepository", "Reconstructed discoveredItems: $mergedDiscovered")
+                afterHpMigration.copy(discoveredItems = mergedDiscovered)
+            } else {
+                afterHpMigration
+            }
+
             // Auto-advance story based on inventory (in case items were obtained out of order)
-            val gameState = StoryProgressionChecker.checkAndAdvanceStory(loadedState)
+            val gameState = StoryProgressionChecker.checkAndAdvanceStory(migratedState)
 
             if (gameState.storyStatus != loadedState.storyStatus) {
                 android.util.Log.d("SaveGameRepository", "  Story Status (corrected): ${gameState.storyStatus}")
