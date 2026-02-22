@@ -52,6 +52,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.greenopal.zargon.data.models.GameState
 import com.greenopal.zargon.data.models.Item
+import com.greenopal.zargon.data.models.MapItems
 import com.greenopal.zargon.domain.graphics.Sprite
 import com.greenopal.zargon.domain.map.GameMap
 import com.greenopal.zargon.domain.map.TileType
@@ -172,12 +173,21 @@ fun MapScreen(
 
 
                 // Map display
+                val itemMarkers = if (currentGameState!!.showMapItemMarkers) {
+                    MapItems.getMarkersForWorld(
+                        currentGameState!!.worldX,
+                        currentGameState!!.worldY,
+                        currentGameState!!.inventory
+                    )
+                } else emptyList()
+
                 MapView(
                     map = currentMap!!,
                     playerX = currentGameState!!.characterX,
                     playerY = currentGameState!!.characterY,
                     playerSprite = playerSprite,
                     tileBitmapCache = tileBitmapCache,
+                    itemMarkers = itemMarkers,
                     modifier = Modifier
                         .fillMaxWidth()
                         .weight(1f)
@@ -347,6 +357,7 @@ private fun MapView(
     playerY: Int,
     playerSprite: Sprite?,
     tileBitmapCache: com.greenopal.zargon.domain.graphics.TileBitmapCache? = null,
+    itemMarkers: List<Pair<Int, Int>> = emptyList(),
     modifier: Modifier = Modifier
 ) {
     Card(
@@ -421,6 +432,23 @@ private fun MapView(
                             }
                         }
                     }
+                }
+
+                // Draw item location markers
+                for ((spotX, spotY) in itemMarkers) {
+                    val cx = offsetX + spotX * tileSize + tileSize / 2
+                    val cy = offsetY + spotY * tileSize + tileSize / 2
+                    val radius = tileSize * 0.18f
+                    drawCircle(
+                        color = Color(0xFFFFD700).copy(alpha = 0.8f),
+                        radius = radius,
+                        center = Offset(cx, cy)
+                    )
+                    drawCircle(
+                        color = Color.White.copy(alpha = 0.9f),
+                        radius = radius * 0.4f,
+                        center = Offset(cx, cy)
+                    )
                 }
 
                 // Draw player sprite

@@ -2,6 +2,7 @@ package com.greenopal.zargon
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.Arrangement
@@ -116,6 +117,11 @@ class MainActivity : ComponentActivity() {
                 var saveSlots by remember { mutableStateOf(saveRepository.getAllSaves()) }
                 var challengeRestartSlot by remember { mutableStateOf<Int?>(null) }
                 var challengeProgressReturnToMenu by remember { mutableStateOf(false) }
+                var victoryEarnedBonus by remember { mutableStateOf<com.greenopal.zargon.data.models.PrestigeBonus?>(null) }
+
+                BackHandler(enabled = screenState == ScreenState.MENU) {
+                    screenState = ScreenState.MAP
+                }
 
                 LaunchedEffect(gameState.challengeConfig, gameState.challengeStartTime) {
                 }
@@ -214,6 +220,9 @@ class MainActivity : ComponentActivity() {
                                 },
                                 onContinue = { slot ->
                                     saveRepository.loadGame(slot)?.let { savedState ->
+                                        // Sync any prestige victories stored in the save file
+                                        // back into the live ChallengeViewModel / PrestigeRepository.
+                                        challengeViewModel.syncPrestige(savedState.prestigeData)
                                         val correctedState = ensurePlayerNotOnInteractiveTile(savedState)
                                         viewModel.updateGameState(correctedState)
                                         isExplorationMode = true
@@ -270,41 +279,51 @@ class MainActivity : ComponentActivity() {
                                 },
                                 onDebugSetup = if (com.greenopal.zargon.BuildConfig.DEBUG) {
                                     {
-                                        val questItemNames = listOf(
-                                            "dynamite", "dead wood", "rutter", "cloth",
-                                            "wood", "boat plans", "trapped soul", "ship"
-                                        )
-                                        var debugState = gameState.copy(
-                                            character = gameState.character.copy(
-                                                level = 8,
-                                                baseAP = 25,
-                                                maxHP = 55,
-                                                currentHP = 55,
-                                                baseDP = 48,
-                                                baseMP = 40,
-                                                currentMP = 40,
-                                                weaponBonus = 35,  // Atlantean Sword
-                                                weaponStatus = 6,
-                                                armorBonus = 50,   // Platemail
-                                                armorStatus = 5,
-                                                experience = 7410
-                                            ),
-                                            nextLevelXP = 15060,
-                                            storyStatus = 5.5f,
-                                            inventory = emptyList(),
-                                            discoveredItems = questItemNames.toSet()
-                                        )
-                                        questItemNames.forEach { name ->
-                                            debugState = debugState.addItem(
-                                                com.greenopal.zargon.data.models.Item(
-                                                    name = name,
-                                                    description = "",
-                                                    type = com.greenopal.zargon.data.models.ItemType.KEY_ITEM
-                                                )
+                                        if (gameState.character.level >= 8) {
+                                            val char = gameState.character
+                                            val apGain = kotlin.random.Random.nextInt(0, char.level + 1) + 2
+                                            val hpGain = kotlin.random.Random.nextInt(3, 8)
+                                            val dpGain = 4
+                                            val mpGain = 3 + kotlin.random.Random.nextInt(0, char.level + 1) + 1
+                                            val leveled = char.levelUp(apGain, hpGain, dpGain, mpGain)
+                                            viewModel.updateGameState(gameState.copy(character = leveled))
+                                        } else {
+                                            val questItemNames = listOf(
+                                                "dynamite", "dead wood", "rutter", "cloth",
+                                                "wood", "boat plans", "trapped soul", "ship"
                                             )
+                                            var debugState = gameState.copy(
+                                                character = gameState.character.copy(
+                                                    level = 8,
+                                                    baseAP = 25,
+                                                    maxHP = 55,
+                                                    currentHP = 55,
+                                                    baseDP = 48,
+                                                    baseMP = 40,
+                                                    currentMP = 40,
+                                                    weaponBonus = 35,  // Atlantean Sword
+                                                    weaponStatus = 6,
+                                                    armorBonus = 50,   // Platemail
+                                                    armorStatus = 5,
+                                                    experience = 7410
+                                                ),
+                                                nextLevelXP = 15060,
+                                                storyStatus = 5.5f,
+                                                inventory = emptyList(),
+                                                discoveredItems = questItemNames.toSet()
+                                            )
+                                            questItemNames.forEach { name ->
+                                                debugState = debugState.addItem(
+                                                    com.greenopal.zargon.data.models.Item(
+                                                        name = name,
+                                                        description = "",
+                                                        type = com.greenopal.zargon.data.models.ItemType.KEY_ITEM
+                                                    )
+                                                )
+                                            }
+                                            viewModel.updateGameState(debugState)
+                                            screenState = ScreenState.MAP
                                         }
-                                        viewModel.updateGameState(debugState)
-                                        screenState = ScreenState.MAP
                                     }
                                 } else null,
                                 modifier = Modifier
@@ -388,10 +407,14 @@ class MainActivity : ComponentActivity() {
                                                     updatedGameState.characterY in 4..6
 
                                             // After battle victory, return to map (or victory screen if ZARGON defeated)
-                                            screenState = if (defeatedZargon) {
-                                                ScreenState.VICTORY
+                                            if (defeatedZargon) {
+                                                victoryEarnedBonus = updatedGameState.challengeConfig?.let {
+                                                    challengeViewModel.getEarnedBonusIfNew(it)
+                                                }
+                                                saveRepository.saveGame(updatedGameState, updatedGameState.saveSlot)
+                                                screenState = ScreenState.VICTORY
                                             } else {
-                                                ScreenState.MAP
+                                                screenState = ScreenState.MAP
                                             }
                                         }
                                         is BattleResult.Defeat -> {
@@ -415,7 +438,6 @@ class MainActivity : ComponentActivity() {
                             StatsScreen(
                                 gameState = gameState,
                                 onBack = { screenState = ScreenState.MENU },
-                                prestigeRepository = prestigeRepository,
                                 modifier = Modifier
                                     .fillMaxSize()
                                     .padding(innerPadding)
@@ -604,6 +626,7 @@ class MainActivity : ComponentActivity() {
                             WeaponShopScreen(
                                 gameState = gameState,
                                 challengeModifiers = challengeModifiers,
+                                prestige = gameState.prestigeData,
                                 onShopExit = { updatedState ->
                                     val stateWithMovedPlayer = movePlayerOutsideInteraction(updatedState)
                                     android.util.Log.d("MainActivity", "Exiting shop - Moved player from (${updatedState.characterX}, ${updatedState.characterY}) to (${stateWithMovedPlayer.characterX}, ${stateWithMovedPlayer.characterY})")
@@ -689,16 +712,21 @@ class MainActivity : ComponentActivity() {
                                     screenState = ScreenState.MAP
                                 },
                                 onChallengeComplete = { result ->
-                                    val prestigeRepo = com.greenopal.zargon.data.repository.PrestigeRepository(this@MainActivity)
-                                    val currentPrestige = prestigeRepo.loadPrestige()
-                                    val prestigeSystem = com.greenopal.zargon.domain.challenges.PrestigeSystem()
-
                                     gameState.challengeConfig?.let { config ->
-                                        val newPrestige = prestigeSystem.calculatePrestigeRewards(config, currentPrestige)
-                                        prestigeRepo.savePrestige(newPrestige)
-                                        prestigeRepo.saveChallengeResult(result)
+                                        challengeViewModel.completeChallenge(config, result)
+                                        // Embed the updated prestige in the game state and
+                                        // persist it so the save file is the source of truth.
+                                        // Clear challengeConfig — the run is over — so that
+                                        // permadeath saves are not blocked.
+                                        val updatedState = gameState.copy(
+                                            prestigeData = challengeViewModel.prestigeData.value,
+                                            challengeConfig = null
+                                        )
+                                        viewModel.updateGameState(updatedState)
+                                        saveRepository.saveGame(updatedState, updatedState.saveSlot)
                                     }
                                 },
+                                earnedBonus = victoryEarnedBonus,
                                 modifier = Modifier
                                     .fillMaxSize()
                                     .padding(innerPadding)

@@ -161,7 +161,7 @@ fun WeaponShopScreen(
                                 updatedGameState = updatedGameState.updateCharacter(
                                     updatedGameState.character.copy(
                                         gold = updatedGameState.character.gold - cost,
-                                        weaponBonus = effectiveBonus,
+                                        weaponBonus = weapon.attackBonus,
                                         weaponStatus = weapon.ordinal
                                     )
                                 )
@@ -186,7 +186,7 @@ fun WeaponShopScreen(
                                 updatedGameState = updatedGameState.updateCharacter(
                                     updatedGameState.character.copy(
                                         gold = updatedGameState.character.gold - cost,
-                                        armorBonus = effectiveBonus,
+                                        armorBonus = armor.defenseBonus,
                                         armorStatus = armor.ordinal
                                     )
                                 )

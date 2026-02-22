@@ -5,14 +5,16 @@ import com.greenopal.zargon.data.models.CharacterStats
 import com.greenopal.zargon.data.models.MonsterStats
 import com.greenopal.zargon.data.models.PrestigeData
 import com.greenopal.zargon.domain.battle.BattleEngine
+import com.greenopal.zargon.domain.battle.BattleResult
+import com.greenopal.zargon.domain.battle.BattleState
+import com.greenopal.zargon.domain.battle.BattleUseCase
 import com.greenopal.zargon.domain.challenges.ChallengeModifiers
 import kotlin.random.Random
 
 class BattleSimulator(
     private val random: Random = Random.Default
 ) {
-    private val challengeModifiers = ChallengeModifiers()
-    private val battleEngine = BattleEngine()
+    private val battleUseCase = BattleUseCase(BattleEngine(), ChallengeModifiers())
 
     sealed class BattleOutcome {
         object PlayerVictory : BattleOutcome()
@@ -34,39 +36,36 @@ class BattleSimulator(
         config: ChallengeConfig? = null,
         prestige: PrestigeData? = null
     ): BattleLog {
-        var currentPlayerHP = character.currentHP
-        var currentMonsterHP = monster.currentHP
+        val effectivePrestige = prestige ?: PrestigeData()
+        var state = BattleState(
+            character = character,
+            monster = monster
+        )
         var turns = 0
         var totalPlayerDamageDealt = 0
         var totalPlayerDamageTaken = 0
 
-        val effectiveWeaponBonus = challengeModifiers.getEffectiveWeaponBonus(
-            character.weaponBonus, config, prestige
-        )
-        val effectiveArmorBonus = challengeModifiers.getEffectiveArmorBonus(
-            character.armorBonus, config, prestige
-        )
+        val hpBefore = character.currentHP
+        val monsterHPBefore = monster.currentHP
 
-        while (currentPlayerHP > 0 && currentMonsterHP > 0) {
+        while (state.battleResult == BattleResult.InProgress) {
             turns++
 
-            val playerDamage = battleEngine.calculatePlayerDamage(character, effectiveWeaponBonus)
-            currentMonsterHP -= playerDamage
-            totalPlayerDamageDealt += playerDamage
+            val hpBeforeAttack = state.monster.currentHP
+            state = battleUseCase.executePlayerAttack(state, config, effectivePrestige)
+            totalPlayerDamageDealt += hpBeforeAttack - maxOf(0, state.monster.currentHP)
 
-            if (currentMonsterHP <= 0) break
+            if (state.battleResult != BattleResult.InProgress) break
 
-            val monsterDamage = battleEngine.calculateMonsterDamage(
-                monster, character, effectiveArmorBonus, random
-            )
-            currentPlayerHP -= monsterDamage
-            totalPlayerDamageTaken += monsterDamage
+            val playerHPBefore = state.character.currentHP
+            state = battleUseCase.executeMonsterCounterattack(state, config, effectivePrestige)
+            totalPlayerDamageTaken += playerHPBefore - maxOf(0, state.character.currentHP)
         }
 
-        val outcome = when {
-            currentPlayerHP <= 0 -> BattleOutcome.PlayerDefeat
-            currentMonsterHP <= 0 -> BattleOutcome.PlayerVictory
-            else -> throw IllegalStateException("Battle ended without resolution")
+        val outcome = when (state.battleResult) {
+            is BattleResult.Victory -> BattleOutcome.PlayerVictory
+            is BattleResult.Defeat -> BattleOutcome.PlayerDefeat
+            else -> throw IllegalStateException("Battle ended without resolution: ${state.battleResult}")
         }
 
         return BattleLog(
@@ -74,8 +73,8 @@ class BattleSimulator(
             turnsElapsed = turns,
             playerDamageDealt = totalPlayerDamageDealt,
             playerDamageTaken = totalPlayerDamageTaken,
-            playerHPRemaining = maxOf(0, currentPlayerHP),
-            monsterHPRemaining = maxOf(0, currentMonsterHP)
+            playerHPRemaining = maxOf(0, state.character.currentHP),
+            monsterHPRemaining = maxOf(0, state.monster.currentHP)
         )
     }
 }

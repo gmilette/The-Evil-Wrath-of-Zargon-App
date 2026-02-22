@@ -109,4 +109,15 @@ object MapItems {
     fun hasItemAt(worldX: Int, worldY: Int, spotX: Int, spotY: Int): Boolean {
         return getItemAt(worldX, worldY, spotX, spotY) != null
     }
+
+    /**
+     * Get marker positions for items on the given world that haven't been collected yet
+     */
+    fun getMarkersForWorld(worldX: Int, worldY: Int, inventory: List<Item>): List<Pair<Int, Int>> {
+        val inventoryNames = inventory.map { it.name.lowercase() }.toSet()
+        return allItems
+            .filter { it.worldX == worldX && it.worldY == worldY }
+            .filter { it.item.name.lowercase() !in inventoryNames }
+            .map { Pair(it.spotX, it.spotY) }
+    }
 }
