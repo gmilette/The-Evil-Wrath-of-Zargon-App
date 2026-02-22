@@ -143,23 +143,6 @@ fun MenuScreen(
                     )
                 }
 
-                Spacer(modifier = Modifier.height(8.dp))
-
-                // Close button
-                Button(
-                    onClick = onBack,
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.surface,
-                        contentColor = MaterialTheme.colorScheme.onSurface
-                    )
-                ) {
-                    Text(
-                        text = "Close",
-                        style = MaterialTheme.typography.titleMedium
-                    )
-                }
-
                 // Exit to title screen
                 Button(
                     onClick = onExitToTitle,
@@ -173,6 +156,23 @@ fun MenuScreen(
                         text = "Exit to Main Menu",
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                // Close button
+                Button(
+                    onClick = onBack,
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.secondary,
+                        contentColor = MaterialTheme.colorScheme.onSecondary
+                    )
+                ) {
+                    Text(
+                        text = "Close",
+                        style = MaterialTheme.typography.titleMedium
                     )
                 }
             }
