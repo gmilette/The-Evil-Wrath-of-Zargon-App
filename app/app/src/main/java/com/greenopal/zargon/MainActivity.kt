@@ -433,10 +433,10 @@ class MainActivity : ComponentActivity() {
                                             is StoryAction.HealPlayer -> {
                                                 // Fully restore HP and MP
                                                 val healedCharacter = updatedState.character.copy(
-                                                    currentDP = updatedState.character.maxDP,
+                                                    currentHP = updatedState.character.maxDP,
                                                     currentMP = updatedState.character.maxMP
                                                 )
-                                                android.util.Log.d("MainActivity", "Fountain healing - HP: ${healedCharacter.currentDP}/${healedCharacter.maxDP}, MP: ${healedCharacter.currentMP}/${healedCharacter.maxMP}")
+                                                android.util.Log.d("MainActivity", "Fountain healing - HP: ${healedCharacter.currentHP}/${healedCharacter.maxDP}, MP: ${healedCharacter.currentMP}/${healedCharacter.maxMP}")
                                                 updatedState.updateCharacter(healedCharacter)
                                             }
                                             is StoryAction.BuildBoat -> {
@@ -471,7 +471,7 @@ class MainActivity : ComponentActivity() {
                                                     val updatedCharacter = updatedState.character.copy(
                                                         gold = updatedState.character.gold - storyAction.cost,
                                                         baseDP = updatedState.character.baseDP + 1,
-                                                        currentDP = updatedState.character.currentDP + 1
+                                                        currentHP = updatedState.character.currentHP + 1
                                                     )
                                                     updatedState.updateCharacter(updatedCharacter)
                                                 } else {
@@ -502,7 +502,7 @@ class MainActivity : ComponentActivity() {
                                                         }
                                                         is StoryAction.HealPlayer -> {
                                                             val healedChar = currentState.character.copy(
-                                                                currentDP = currentState.character.maxDP,
+                                                                currentHP = currentState.character.maxDP,
                                                                 currentMP = currentState.character.maxMP
                                                             )
                                                             currentState.updateCharacter(healedChar)
@@ -531,7 +531,7 @@ class MainActivity : ComponentActivity() {
                                                                 val updatedChar = currentState.character.copy(
                                                                     gold = currentState.character.gold - action.cost,
                                                                     baseDP = currentState.character.baseDP + 1,
-                                                                    currentDP = currentState.character.currentDP + 1
+                                                                    currentHP = currentState.character.currentHP + 1
                                                                 )
                                                                 currentState.updateCharacter(updatedChar)
                                                             } else {
@@ -585,14 +585,14 @@ class MainActivity : ComponentActivity() {
                             HealerScreen(
                                 gameState = gameState,
                                 onSaveGame = { stateToSave ->
-                                    android.util.Log.d("MainActivity", "Saving game to slot ${stateToSave.saveSlot} - HP: ${stateToSave.character.currentDP}/${stateToSave.character.maxDP}, MP: ${stateToSave.character.currentMP}/${stateToSave.character.maxMP}")
+                                    android.util.Log.d("MainActivity", "Saving game to slot ${stateToSave.saveSlot} - HP: ${stateToSave.character.currentHP}/${stateToSave.character.maxDP}, MP: ${stateToSave.character.currentMP}/${stateToSave.character.maxMP}")
                                     saveRepository.saveGame(stateToSave, stateToSave.saveSlot)
                                     saveSlots = saveRepository.getAllSaves()
                                 },
                                 onHealerExit = { updatedState ->
                                     val stateWithMovedPlayer = movePlayerOutsideInteraction(updatedState)
                                     android.util.Log.d("MainActivity", "Exiting healer - Moved player from (${updatedState.characterX}, ${updatedState.characterY}) to (${stateWithMovedPlayer.characterX}, ${stateWithMovedPlayer.characterY})")
-                                    android.util.Log.d("MainActivity", "Exiting healer - HP: ${stateWithMovedPlayer.character.currentDP}/${stateWithMovedPlayer.character.maxDP}")
+                                    android.util.Log.d("MainActivity", "Exiting healer - HP: ${stateWithMovedPlayer.character.currentHP}/${stateWithMovedPlayer.character.maxDP}")
                                     viewModel.updateGameState(stateWithMovedPlayer)
                                     android.util.Log.d("MainActivity", "After healer exit - Position: World (${viewModel.gameState.value.worldX}, ${viewModel.gameState.value.worldY}), Char (${viewModel.gameState.value.characterX}, ${viewModel.gameState.value.characterY})")
                                     screenState = ScreenState.MAP
@@ -608,14 +608,14 @@ class MainActivity : ComponentActivity() {
                                 gameState = gameState,
                                 onSaveGame = { stateToSave ->
                                     android.util.Log.d("MainActivity", "Saving game to slot ${stateToSave.saveSlot} at fountain - Position: World (${stateToSave.worldX}, ${stateToSave.worldY}), Char (${stateToSave.characterX}, ${stateToSave.characterY})")
-                                    android.util.Log.d("MainActivity", "Saving game - HP: ${stateToSave.character.currentDP}/${stateToSave.character.maxDP}, MP: ${stateToSave.character.currentMP}/${stateToSave.character.maxMP}")
+                                    android.util.Log.d("MainActivity", "Saving game - HP: ${stateToSave.character.currentHP}/${stateToSave.character.maxDP}, MP: ${stateToSave.character.currentMP}/${stateToSave.character.maxMP}")
                                     saveRepository.saveGame(stateToSave, stateToSave.saveSlot)
                                     saveSlots = saveRepository.getAllSaves()
                                 },
                                 onFountainExit = { updatedState ->
                                     val stateWithMovedPlayer = movePlayerOutsideInteraction(updatedState)
                                     android.util.Log.d("MainActivity", "Exiting fountain - Moved player from (${updatedState.characterX}, ${updatedState.characterY}) to (${stateWithMovedPlayer.characterX}, ${stateWithMovedPlayer.characterY})")
-                                    android.util.Log.d("MainActivity", "Exiting fountain - HP: ${stateWithMovedPlayer.character.currentDP}/${stateWithMovedPlayer.character.maxDP}")
+                                    android.util.Log.d("MainActivity", "Exiting fountain - HP: ${stateWithMovedPlayer.character.currentHP}/${stateWithMovedPlayer.character.maxDP}")
                                     viewModel.updateGameState(stateWithMovedPlayer)
                                     screenState = ScreenState.MAP
                                 },

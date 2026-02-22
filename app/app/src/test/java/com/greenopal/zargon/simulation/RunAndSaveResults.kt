@@ -25,7 +25,7 @@ class RunAndSaveResults {
         val simulator = BattleSimulator(Random(12345))
         val character = createCharacter(5, Weapon.LONG_SWORD, Armor.CHAIN_MAIL)
 
-        output.appendLine("Player Stats: Level ${character.level}, AP=${character.totalAP}, HP=${character.currentDP}, Defense=${character.totalDefense}")
+        output.appendLine("Player Stats: Level ${character.level}, AP=${character.totalAP}, HP=${character.currentHP}, Defense=${character.totalDefense}")
         output.appendLine()
         output.appendLine("=== WIN RATES BY MONSTER AND SCALE (100 battles each) ===")
         output.appendLine()
@@ -101,7 +101,7 @@ class RunAndSaveResults {
                         .average()
 
                     val turnsStr = if (avgTurns.isNaN()) " N/A" else String.format("%4.1f", avgTurns)
-                    val statsStr = "AP=${character.totalAP.toString().padEnd(2)} HP=${character.currentDP.toString().padEnd(3)} Def=${character.totalDefense}"
+                    val statsStr = "AP=${character.totalAP.toString().padEnd(2)} HP=${character.currentHP.toString().padEnd(3)} Def=${character.totalDefense}"
 
                     output.appendLine("  ${level.toString().padEnd(3)} | $statsStr | ${String.format("%6.0f", winRate * 100)}%  | $turnsStr")
                 }
@@ -117,13 +117,15 @@ class RunAndSaveResults {
 
     private fun createCharacter(level: Int, weapon: Weapon, armor: Armor): CharacterStats {
         val baseAP = 5 + (level - 1) * 3
-        val baseDP = 20 + (level - 1) * 6
+        val baseDP = 20 + (level - 1) * 4
+        val maxHP = 20 + (level - 1) * 5
         val baseMP = 10 + (level - 1) * 4
 
         return CharacterStats(
             baseAP = baseAP,
             baseDP = baseDP,
-            currentDP = baseDP,
+            maxHP = maxHP,
+            currentHP = maxHP,
             baseMP = baseMP,
             currentMP = baseMP,
             level = level,

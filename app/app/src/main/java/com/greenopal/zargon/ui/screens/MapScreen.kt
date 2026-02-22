@@ -310,7 +310,7 @@ private fun HeaderBar(
                     }
                 )
                 Text(
-                    text = "HP:${gameState.character.currentDP}/${gameState.character.maxDP}",
+                    text = "HP:${gameState.character.currentHP}/${gameState.character.maxDP}",
                     style = MaterialTheme.typography.bodyMedium
                 )
                 Text(

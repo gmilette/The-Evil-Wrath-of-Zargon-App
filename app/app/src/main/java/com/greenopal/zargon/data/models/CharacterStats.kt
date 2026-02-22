@@ -10,8 +10,9 @@ import kotlinx.serialization.Serializable
 data class CharacterStats(
     // Combat stats (QBASIC: cAP, cDP, cMP)
     val baseAP: Int = 5,        // Base Attack Power (BcAP in QBASIC)
-    val baseDP: Int = 20,       // Base Defense/HP (BcDP in QBASIC)
-    val currentDP: Int = 20,    // Current HP (cDP in QBASIC)
+    val baseDP: Int = 20,       // Base Defense — damage absorption only (BcDP in QBASIC)
+    val maxHP: Int = 20,        // Maximum hit points — separate from defense
+    val currentHP: Int = 20,    // Current HP (cDP in QBASIC)
     val baseMP: Int = 10,       // Base Magic Power (BcMP in QBASIC)
     val currentMP: Int = 10,    // Current MP (cMP in QBASIC)
 
@@ -28,27 +29,27 @@ data class CharacterStats(
 ) {
     // Computed properties
     val totalAP: Int get() = baseAP + weaponBonus
-    val totalDefense: Int get() = baseDP + armorBonus  // Total defense including base DP and armor
-    val armorDefenseBonus: Int get() = armorBonus  // Armor bonus only
+    val totalDefense: Int get() = baseDP + armorBonus
+    val armorDefenseBonus: Int get() = armorBonus
     val maxDP: Int get() = baseDP
     val maxMP: Int get() = baseMP
 
-    val isAlive: Boolean get() = currentDP > 0
-    val hpPercentage: Float get() = currentDP.toFloat() / maxDP.toFloat()
+    val isAlive: Boolean get() = currentHP > 0
+    val hpPercentage: Float get() = currentHP.toFloat() / maxHP.toFloat()
     val mpPercentage: Float get() = currentMP.toFloat() / maxMP.toFloat()
 
     /**
      * Take damage and return updated stats
      */
     fun takeDamage(damage: Int): CharacterStats {
-        return copy(currentDP = maxOf(0, currentDP - damage))
+        return copy(currentHP = maxOf(0, currentHP - damage))
     }
 
     /**
      * Restore HP and return updated stats
      */
     fun heal(amount: Int): CharacterStats {
-        return copy(currentDP = minOf(maxDP, currentDP + amount))
+        return copy(currentHP = minOf(maxHP, currentHP + amount))
     }
 
     /**
@@ -69,7 +70,7 @@ data class CharacterStats(
      * Fully restore HP and MP (for level-up)
      */
     fun fullRestore(): CharacterStats {
-        return copy(currentDP = maxDP, currentMP = maxMP)
+        return copy(currentHP = maxHP, currentMP = maxMP)
     }
 
     /**
@@ -105,13 +106,14 @@ data class CharacterStats(
      * Level up with stat increases
      * Based on CheckLevel procedure (ZARGON.BAS:836)
      */
-    fun levelUp(apGain: Int, dpGain: Int, mpGain: Int): CharacterStats {
+    fun levelUp(apGain: Int, hpGain: Int, dpGain: Int, mpGain: Int): CharacterStats {
         return copy(
             level = level + 1,
             baseAP = baseAP + apGain,
+            maxHP = maxHP + hpGain,
             baseDP = baseDP + dpGain,
             baseMP = baseMP + mpGain,
-            currentDP = baseDP + dpGain,  // Full restore on level-up
+            currentHP = maxHP + hpGain,  // Full restore on level-up
             currentMP = baseMP + mpGain
         )
     }

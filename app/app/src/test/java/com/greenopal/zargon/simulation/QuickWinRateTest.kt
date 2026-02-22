@@ -105,13 +105,15 @@ class QuickWinRateTest {
 
     private fun createCharacter(level: Int, weapon: Weapon, armor: Armor): CharacterStats {
         val baseAP = 5 + (level - 1) * 3
-        val baseDP = 20 + (level - 1) * 6
+        val baseDP = 20 + (level - 1) * 4
+        val maxHP = 20 + (level - 1) * 5
         val baseMP = 10 + (level - 1) * 4
 
         return CharacterStats(
             baseAP = baseAP,
             baseDP = baseDP,
-            currentDP = baseDP,
+            maxHP = maxHP,
+            currentHP = maxHP,
             baseMP = baseMP,
             currentMP = baseMP,
             level = level,

@@ -519,22 +519,22 @@ enum class ShopMood(val displayName: String, val priceMultiplier: Float) {
 }
 
 enum class Weapon(val displayName: String, val basePrice: Int, val attackBonus: Int) {
-    DAGGER("dagger", 20, 2),
-    SHORT_SWORD("short sword", 30, 3),
-    LONG_SWORD("long sword", 65, 5),
-    SWORD_OF_THORNS("sword of thorns", 88, 7),
-    BROAD_SWORD("broad sword", 103, 9),
-    TWOHANDED_SWORD("twohanded sword", 250, 15),
-    ATLANTEAN_SWORD("Atlantean Sword", 500, 25),
+    DAGGER("dagger", 20, 5),
+    SHORT_SWORD("short sword", 45, 8),
+    LONG_SWORD("long sword", 100, 13),
+    SWORD_OF_THORNS("sword of thorns", 175, 18),
+    BROAD_SWORD("broad sword", 280, 23),
+    TWOHANDED_SWORD("twohanded sword", 400, 28),
+    ATLANTEAN_SWORD("Atlantean Sword", 600, 35),
 }
 
 enum class Armor(val displayName: String, val basePrice: Int, val defenseBonus: Int) {
-    CLOTH("cloth", 20, 5),
-    LEATHER("leather", 40, 10),
-    PLATED_LEATHER("plated leather", 88, 18),
-    SPIKED_LEATHER("spiked leather", 98, 20),
-    CHAIN_MAIL("chain mail", 134, 28),
-    PLATEMAIL("platemail", 279, 50),
+    CLOTH("cloth", 15, 5),
+    LEATHER("leather", 35, 8),
+    PLATED_LEATHER("plated leather", 80, 15),
+    SPIKED_LEATHER("spiked leather", 160, 20),
+    CHAIN_MAIL("chain mail", 300, 30),
+    PLATEMAIL("platemail", 550, 42),
 }
 
 fun getWeaponName(weaponStatus: Int): String {

@@ -11,13 +11,13 @@ enum class MonsterType(
     val baseDP: Int,  // Base defense/HP
     val minLevel: Int // Minimum player level to encounter
 ) {
-    SLIME("Slime", baseAP = 1, baseDP = 6, minLevel = 1),
-    BAT("Bat", baseAP = 3, baseDP = 12, minLevel = 1),
-    BABBLE("Babble", baseAP = 5, baseDP = 15, minLevel = 1),
-    SPOOK("Spook", baseAP = 7, baseDP = 18, minLevel = 1),
-    BELETH("Beleth", baseAP = 10, baseDP = 20, minLevel = 2),
-    SKANDER_SNAKE("SkanderSnake", baseAP = 15, baseDP = 25, minLevel = 5),
-    NECRO("Necro", baseAP = 16, baseDP = 38, minLevel = 6),
-    KRAKEN("Kraken", baseAP = 31, baseDP = 75, minLevel = 1),
-    ZARGON("ZARGON", baseAP = 75, baseDP = 375, minLevel = 1);
+    SLIME("Slime", baseAP = 1, baseDP = 5, minLevel = 1),
+    BAT("Bat", baseAP = 2, baseDP = 10, minLevel = 1),
+    BABBLE("Babble", baseAP = 5, baseDP = 12, minLevel = 1),
+    SPOOK("Spook", baseAP = 7, baseDP = 14, minLevel = 1),
+    BELETH("Beleth", baseAP = 8, baseDP = 16, minLevel = 2),
+    SKANDER_SNAKE("SkanderSnake", baseAP = 12, baseDP = 20, minLevel = 5),
+    NECRO("Necro", baseAP = 13, baseDP = 30, minLevel = 6),
+    KRAKEN("Kraken", baseAP = 25, baseDP = 60, minLevel = 1),
+    ZARGON("ZARGON", baseAP = 100, baseDP = 400, minLevel = 1);
 }

@@ -13,6 +13,10 @@ class MonsterSelector @Inject constructor(
     private val challengeModifiers: ChallengeModifiers
 ) {
 
+    companion object {
+        private const val MAX_SCALING_FACTOR = 6
+    }
+
     fun selectMonster(gameState: GameState): MonsterStats {
         val playerLevel = gameState.character.level
 
@@ -20,9 +24,9 @@ class MonsterSelector @Inject constructor(
             if (gameState.characterX in 13..16 && gameState.characterY in 4..6) {
                 val baseZargon = MonsterStats(
                     type = MonsterType.ZARGON,
-                    attackPower = 60,
-                    currentHP = 300,
-                    maxHP = 300,
+                    attackPower = 100,
+                    currentHP = 400,
+                    maxHP = 400,
                     scalingFactor = 1
                 )
                 return applyModifiersAndLabel(baseZargon, gameState)
@@ -53,32 +57,7 @@ class MonsterSelector @Inject constructor(
             return applyModifiersAndLabel(baseNecro, gameState)
         }
 
-        var monsterType: MonsterType
-        do {
-            val roll = Random.nextInt(1, 22)
-
-            monsterType = when (roll) {
-                in 1..4 -> MonsterType.BAT
-                in 5..7 -> MonsterType.BABBLE
-                in 8..9 -> MonsterType.SPOOK
-                in 13..16 -> MonsterType.SLIME
-                in 10..12 -> {
-                    if (playerLevel >= 2) MonsterType.BELETH
-                    else continue
-                }
-                in 17..19 -> {
-                    if (playerLevel >= 5) MonsterType.SKANDER_SNAKE
-                    else continue
-                }
-                in 20..21 -> {
-                    if (playerLevel >= 6) MonsterType.NECRO
-                    else continue
-                }
-                else -> continue
-            }
-            break
-        } while (true)
-
+        val monsterType = selectRandomMonsterType(playerLevel)
         val baseMonster = createScaledMonster(monsterType, playerLevel)
         return applyModifiersAndLabel(baseMonster, gameState)
     }
@@ -87,13 +66,13 @@ class MonsterSelector @Inject constructor(
         while (true) {
             val roll = random.nextInt(1, 22)
             val type = when (roll) {
-                in 1..4 -> MonsterType.BAT
-                in 5..7 -> MonsterType.BABBLE
-                in 8..9 -> MonsterType.SPOOK
-                in 13..16 -> MonsterType.SLIME
-                in 10..12 -> if (playerLevel >= 2) MonsterType.BELETH else continue
-                in 17..19 -> if (playerLevel >= 5) MonsterType.SKANDER_SNAKE else continue
-                in 20..21 -> if (playerLevel >= 6) MonsterType.NECRO else continue
+                in 1..3 -> MonsterType.SLIME
+                in 4..6 -> MonsterType.BAT
+                in 7..9 -> MonsterType.BABBLE
+                in 10..12 -> MonsterType.SPOOK
+                in 13..15 -> if (playerLevel >= 2) MonsterType.BELETH else continue
+                in 16..18 -> if (playerLevel >= 5) MonsterType.SKANDER_SNAKE else continue
+                in 19..21 -> if (playerLevel >= 6) MonsterType.NECRO else continue
                 else -> continue
             }
             return type
@@ -108,6 +87,7 @@ class MonsterSelector @Inject constructor(
         var scalingFactor = 1
         var prefix = ""
         for (i in 1 until playerLevel) {
+            if (scalingFactor >= MAX_SCALING_FACTOR) break
             val whatlev = random.nextInt(1, 4)
             if (whatlev >= 2) {
                 prefix += "Great "

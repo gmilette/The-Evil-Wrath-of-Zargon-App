@@ -349,7 +349,7 @@ private fun CharacterStatsMini(
                 style = MaterialTheme.typography.bodySmall
             )
             Text(
-                text = "HP: ${character.currentDP}/${character.maxDP}",
+                text = "HP: ${character.currentHP}/${character.maxDP}",
                 style = MaterialTheme.typography.bodySmall
             )
             Text(

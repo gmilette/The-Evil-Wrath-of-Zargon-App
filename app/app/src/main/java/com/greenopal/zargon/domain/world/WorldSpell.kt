@@ -44,15 +44,15 @@ sealed class WorldSpell(
             val healAmount = Random.nextInt(1, 7) + 6 * gameState.character.level
 
             val newDP = minOf(
-                gameState.character.currentDP + healAmount,
+                gameState.character.currentHP + healAmount,
                 gameState.character.maxDP
             )
 
-            val actualHealed = newDP - gameState.character.currentDP
+            val actualHealed = newDP - gameState.character.currentHP
 
             val updatedState = gameState.copy(
                 character = gameState.character.copy(
-                    currentDP = newDP,
+                    currentHP = newDP,
                     currentMP = gameState.character.currentMP - mpCost
                 )
             )
@@ -77,15 +77,15 @@ sealed class WorldSpell(
             val healAmount = Random.nextInt(1, 11) + 10 * gameState.character.level
 
             val newDP = minOf(
-                gameState.character.currentDP + healAmount,
+                gameState.character.currentHP + healAmount,
                 gameState.character.maxDP
             )
 
-            val actualHealed = newDP - gameState.character.currentDP
+            val actualHealed = newDP - gameState.character.currentHP
 
             val updatedState = gameState.copy(
                 character = gameState.character.copy(
-                    currentDP = newDP,
+                    currentHP = newDP,
                     currentMP = gameState.character.currentMP - mpCost
                 )
             )

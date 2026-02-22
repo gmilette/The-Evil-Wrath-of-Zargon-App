@@ -311,6 +311,7 @@ class BattleViewModel @Inject constructor(
         val rewards = if (didLevelUp) {
             updatedCharacter = leveledCharacter
             val apGain = leveledCharacter.baseAP - state.character.baseAP
+            val hpGain = leveledCharacter.maxHP - state.character.maxHP
             val dpGain = leveledCharacter.baseDP - state.character.baseDP
             val mpGain = leveledCharacter.baseMP - state.character.baseMP
 
@@ -321,6 +322,7 @@ class BattleViewModel @Inject constructor(
                 leveledUp = true,
                 newLevel = leveledCharacter.level,
                 apGain = apGain,
+                hpGain = hpGain,
                 dpGain = dpGain,
                 mpGain = mpGain
             )
