@@ -40,19 +40,22 @@ sealed class WorldSpell(
         description = "Restore hit points"
     ) {
         override fun cast(gameState: GameState): Pair<GameState, String> {
+            if (gameState.character.currentHP >= gameState.character.maxHP) {
+                return gameState to "Already at full health!"
+            }
             // QBASIC: damage = INT(RND * 6) + 6 * lev
             val healAmount = Random.nextInt(1, 7) + 6 * gameState.character.level
 
-            val newDP = minOf(
+            val newHP = minOf(
                 gameState.character.currentHP + healAmount,
-                gameState.character.maxDP
+                gameState.character.maxHP
             )
 
-            val actualHealed = newDP - gameState.character.currentHP
+            val actualHealed = newHP - gameState.character.currentHP
 
             val updatedState = gameState.copy(
                 character = gameState.character.copy(
-                    currentHP = newDP,
+                    currentHP = newHP,
                     currentMP = gameState.character.currentMP - mpCost
                 )
             )
@@ -74,18 +77,21 @@ sealed class WorldSpell(
         description = "Restore more hit points"
     ) {
         override fun cast(gameState: GameState): Pair<GameState, String> {
+            if (gameState.character.currentHP >= gameState.character.maxHP) {
+                return gameState to "Already at full health!"
+            }
             val healAmount = Random.nextInt(1, 11) + 10 * gameState.character.level
 
-            val newDP = minOf(
+            val newHP = minOf(
                 gameState.character.currentHP + healAmount,
-                gameState.character.maxDP
+                gameState.character.maxHP
             )
 
-            val actualHealed = newDP - gameState.character.currentHP
+            val actualHealed = newHP - gameState.character.currentHP
 
             val updatedState = gameState.copy(
                 character = gameState.character.copy(
-                    currentHP = newDP,
+                    currentHP = newHP,
                     currentMP = gameState.character.currentMP - mpCost
                 )
             )

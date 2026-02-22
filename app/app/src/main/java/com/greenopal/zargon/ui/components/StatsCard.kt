@@ -111,7 +111,7 @@ fun StatsCard(
             StatBar(
                 label = "HP",
                 current = stats.currentHP,
-                max = stats.maxDP,
+                max = stats.maxHP,
                 percentage = stats.hpPercentage,
                 color = Color(0xFFFF5555) // Red
             )

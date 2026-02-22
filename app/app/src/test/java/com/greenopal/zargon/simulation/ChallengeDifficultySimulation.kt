@@ -63,7 +63,7 @@ class ChallengeDifficultySimulation {
 
             if (log.outcome == BattleSimulator.BattleOutcome.PlayerDefeat) break
 
-            character = character.copy(currentDP = log.playerHPRemaining)
+            character = character.copy(currentHP = log.playerHPRemaining)
         }
 
         return battleCount
