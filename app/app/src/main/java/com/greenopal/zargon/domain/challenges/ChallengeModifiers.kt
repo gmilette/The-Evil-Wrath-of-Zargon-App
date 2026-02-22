@@ -56,7 +56,7 @@ class ChallengeModifiers @Inject constructor() {
             val challenges = config.challenges
             if (Challenge.WEAK_ARMOR in challenges || Challenge.MAGE_QUEST in challenges) multiplier *= 0.5f
         }
-        if (prestige?.isBonusActive(PrestigeBonus.GREATER_ARMOR) == true) multiplier *= 2.0f
+        if (prestige?.isBonusActive(PrestigeBonus.GREATER_ARMOR) == true) multiplier *= 2.5f
         return (baseBonus * multiplier).toInt()
     }
 

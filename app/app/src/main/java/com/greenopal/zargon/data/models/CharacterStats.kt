@@ -29,6 +29,9 @@ data class CharacterStats(
 ) {
     val maxMP: Int get() = baseMP
 
+    val totalAP: Int get() = baseAP + weaponBonus
+    val totalDefense: Int get() = baseDP + armorBonus
+
     val isAlive: Boolean get() = currentHP > 0
     val hpPercentage: Float get() = currentHP.toFloat() / maxHP.toFloat()
     val mpPercentage: Float get() = currentMP.toFloat() / maxMP.toFloat()

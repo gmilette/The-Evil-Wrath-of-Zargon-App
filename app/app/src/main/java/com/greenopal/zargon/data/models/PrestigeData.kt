@@ -11,7 +11,7 @@ enum class PrestigeBonus(
     STARTING_GOLD("Starting Gold", "+100 starting gold"),
     GOLD_BOOST("Gold Boost", "+10% gold per enemy"),
     GREAT_WEAPONS("Great Weapons", "Weapons 150% more effective"),
-    GREATER_ARMOR("Greater Armor", "Armor 100% more effective"),
+    GREATER_ARMOR("Greater Armor", "Armor 150% more effective"),
     MASTER_SPELLBOOK("Master Spellbook", "All spells 50% more effective")
 }
 
