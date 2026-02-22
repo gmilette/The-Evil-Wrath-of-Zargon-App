@@ -35,7 +35,6 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.greenopal.zargon.data.models.Challenge
 import com.greenopal.zargon.data.models.ChallengeConfig
-import com.greenopal.zargon.data.models.PrestigeBonus
 import com.greenopal.zargon.ui.theme.DarkStone
 import com.greenopal.zargon.ui.theme.EmberOrange
 import com.greenopal.zargon.ui.theme.Gold
@@ -166,7 +165,7 @@ fun ChallengeProgressScreen(
                                 )
                                 if (reward != null) {
                                     Text(
-                                        text = "Reward: ${reward.displayName}",
+                                        text = "Reward: ${reward.description}",
                                         style = MaterialTheme.typography.bodySmall,
                                         color = when {
                                             isActive -> EmberOrange.copy(alpha = 0.8f)
@@ -203,36 +202,6 @@ fun ChallengeProgressScreen(
                     color = Parchment
                 )
 
-                // Prizes section
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(containerColor = DarkStone),
-                    border = BorderStroke(2.dp, Parchment)
-                ) {
-                    Column(
-                        modifier = Modifier.padding(16.dp),
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        Text(
-                            text = "Prizes",
-                            style = MaterialTheme.typography.titleLarge,
-                            color = Gold,
-                            fontWeight = FontWeight.Bold
-                        )
-
-                        PrestigeBonus.values().forEach { bonus ->
-                            val isUnlocked = bonus in prestigeData.unlockedBonuses
-                            val isActive = bonus in prestigeData.activeBonuses
-                            PrizeRow(
-                                label = bonus.displayName,
-                                description = bonus.description,
-                                isUnlocked = isUnlocked,
-                                isActive = isActive
-                            )
-                        }
-                    }
-                }
-
                 Spacer(modifier = Modifier.height(8.dp))
 
                 Button(
@@ -253,43 +222,3 @@ fun ChallengeProgressScreen(
     }
 }
 
-@Composable
-private fun PrizeRow(
-    label: String,
-    description: String,
-    isUnlocked: Boolean,
-    isActive: Boolean
-) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Column(modifier = Modifier.weight(1f)) {
-            Text(
-                text = label,
-                style = MaterialTheme.typography.bodyLarge,
-                color = if (isUnlocked) Parchment else MidStone
-            )
-            Text(
-                text = description,
-                style = MaterialTheme.typography.bodySmall,
-                color = if (isUnlocked) Parchment.copy(alpha = 0.7f) else MidStone
-            )
-        }
-        Text(
-            text = when {
-                isActive -> "ACTIVE"
-                isUnlocked -> "UNLOCKED"
-                else -> "LOCKED"
-            },
-            style = MaterialTheme.typography.bodyMedium,
-            color = when {
-                isActive -> Gold
-                isUnlocked -> Parchment
-                else -> MidStone
-            },
-            fontWeight = FontWeight.Bold
-        )
-    }
-}
