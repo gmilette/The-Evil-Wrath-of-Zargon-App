@@ -263,6 +263,11 @@ class MainActivity : ComponentActivity() {
                                 onBack = {
                                     screenState = ScreenState.MAP
                                 },
+                                onExitToTitle = {
+                                    saveRepository.saveGame(gameState, gameState.saveSlot)
+                                    saveSlots = saveRepository.getAllSaves()
+                                    screenState = ScreenState.TITLE
+                                },
                                 activeChallengeName = gameState.challengeConfig?.getDisplayName(),
                                 modifier = Modifier
                                     .fillMaxSize()
@@ -466,8 +471,7 @@ class MainActivity : ComponentActivity() {
                                                 if (updatedState.character.gold >= storyAction.cost) {
                                                     val updatedCharacter = updatedState.character.copy(
                                                         gold = updatedState.character.gold - storyAction.cost,
-                                                        baseDP = updatedState.character.baseDP + 1,
-                                                        currentHP = updatedState.character.currentHP + 1
+                                                        baseDP = updatedState.character.baseDP + 1
                                                     )
                                                     updatedState.updateCharacter(updatedCharacter)
                                                 } else {
@@ -526,8 +530,7 @@ class MainActivity : ComponentActivity() {
                                                             if (currentState.character.gold >= action.cost) {
                                                                 val updatedChar = currentState.character.copy(
                                                                     gold = currentState.character.gold - action.cost,
-                                                                    baseDP = currentState.character.baseDP + 1,
-                                                                    currentHP = currentState.character.currentHP + 1
+                                                                    baseDP = currentState.character.baseDP + 1
                                                                 )
                                                                 currentState.updateCharacter(updatedChar)
                                                             } else {

@@ -20,7 +20,7 @@ class ChallengeModifiers @Inject constructor() {
         val challenges = config.challenges
         val multiplier = when {
             Challenge.STRONGER_ENEMIES in challenges || Challenge.WARRIOR_MODE in challenges -> 2.5f
-            Challenge.STRONG_ENEMIES in challenges || Challenge.IMPOSSIBLE_MISSION in challenges -> 2.0f
+            Challenge.STRONG_ENEMIES in challenges || Challenge.IMPOSSIBLE_MISSION in challenges -> 1.75f
             else -> return baseStats
         }
 

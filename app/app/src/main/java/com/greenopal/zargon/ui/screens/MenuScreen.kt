@@ -33,6 +33,7 @@ fun MenuScreen(
     onViewHints: () -> Unit,
     onViewChallengeProgress: () -> Unit,
     onBack: () -> Unit,
+    onExitToTitle: () -> Unit,
     activeChallengeName: String? = null,
     modifier: Modifier = Modifier
 ) {
@@ -156,6 +157,22 @@ fun MenuScreen(
                     Text(
                         text = "Close",
                         style = MaterialTheme.typography.titleMedium
+                    )
+                }
+
+                // Exit to title screen
+                Button(
+                    onClick = onExitToTitle,
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.tertiary,
+                        contentColor = MaterialTheme.colorScheme.onTertiary
+                    )
+                ) {
+                    Text(
+                        text = "Exit to Main Menu",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold
                     )
                 }
             }
