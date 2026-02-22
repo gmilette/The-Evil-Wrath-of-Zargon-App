@@ -29,7 +29,7 @@ class BattleEngine @Inject constructor() {
     ): Int {
         // More powerful monsters have a wider damage spread.
         // spread grows from ±15% (weak) up to ±40% (boss-tier), driven by scaled attackPower.
-        val spread = (0.05 + monster.attackPower / 1000.0).coerceAtMost(0.15)
+        val spread = (0.05 + monster.attackPower / 1000.0).coerceAtMost(0.30)
         val randomMultiplier = (1.0 - spread) + random.nextDouble() * (2.0 * spread)
         val totalDefense = character.baseDP + effectiveArmorBonus
         val rawDamage = monster.attackPower.toDouble() * DAMAGE_K /
