@@ -268,6 +268,45 @@ class MainActivity : ComponentActivity() {
                                     saveSlots = saveRepository.getAllSaves()
                                     screenState = ScreenState.TITLE
                                 },
+                                onDebugSetup = if (com.greenopal.zargon.BuildConfig.DEBUG) {
+                                    {
+                                        val questItemNames = listOf(
+                                            "dynamite", "dead wood", "rutter", "cloth",
+                                            "wood", "boat plans", "trapped soul", "ship"
+                                        )
+                                        var debugState = gameState.copy(
+                                            character = gameState.character.copy(
+                                                level = 8,
+                                                baseAP = 25,
+                                                maxHP = 55,
+                                                currentHP = 55,
+                                                baseDP = 48,
+                                                baseMP = 40,
+                                                currentMP = 40,
+                                                weaponBonus = 35,  // Atlantean Sword
+                                                weaponStatus = 6,
+                                                armorBonus = 50,   // Platemail
+                                                armorStatus = 5,
+                                                experience = 7410
+                                            ),
+                                            nextLevelXP = 15060,
+                                            storyStatus = 5.5f,
+                                            inventory = emptyList(),
+                                            discoveredItems = questItemNames.toSet()
+                                        )
+                                        questItemNames.forEach { name ->
+                                            debugState = debugState.addItem(
+                                                com.greenopal.zargon.data.models.Item(
+                                                    name = name,
+                                                    description = "",
+                                                    type = com.greenopal.zargon.data.models.ItemType.KEY_ITEM
+                                                )
+                                            )
+                                        }
+                                        viewModel.updateGameState(debugState)
+                                        screenState = ScreenState.MAP
+                                    }
+                                } else null,
                                 modifier = Modifier
                                     .fillMaxSize()
                                     .padding(innerPadding)

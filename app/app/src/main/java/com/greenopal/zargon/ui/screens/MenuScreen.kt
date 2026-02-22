@@ -34,6 +34,7 @@ fun MenuScreen(
     onViewChallengeProgress: () -> Unit,
     onBack: () -> Unit,
     onExitToTitle: () -> Unit,
+    onDebugSetup: (() -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
     // Handle back button
@@ -163,6 +164,23 @@ fun MenuScreen(
                         text = "Close",
                         style = MaterialTheme.typography.titleMedium
                     )
+                }
+
+                if (onDebugSetup != null) {
+                    Button(
+                        onClick = onDebugSetup,
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = androidx.compose.ui.graphics.Color(0xFF00C853),
+                            contentColor = androidx.compose.ui.graphics.Color.White
+                        )
+                    ) {
+                        Text(
+                            text = "[DEBUG] Max Joe Out",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
                 }
             }
         }
