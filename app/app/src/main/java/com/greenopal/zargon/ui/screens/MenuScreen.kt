@@ -34,7 +34,6 @@ fun MenuScreen(
     onViewChallengeProgress: () -> Unit,
     onBack: () -> Unit,
     onExitToTitle: () -> Unit,
-    activeChallengeName: String? = null,
     modifier: Modifier = Modifier
 ) {
     // Handle back button
@@ -72,16 +71,6 @@ fun MenuScreen(
                     fontWeight = FontWeight.Bold,
                     textAlign = TextAlign.Center
                 )
-
-                if (activeChallengeName != null) {
-                    Text(
-                        text = "Active: $activeChallengeName",
-                        style = MaterialTheme.typography.titleSmall,
-                        color = MaterialTheme.colorScheme.tertiary,
-                        fontWeight = FontWeight.Bold,
-                        textAlign = TextAlign.Center
-                    )
-                }
 
                 Spacer(modifier = Modifier.height(8.dp))
 

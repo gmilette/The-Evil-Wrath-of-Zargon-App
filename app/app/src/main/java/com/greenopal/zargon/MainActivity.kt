@@ -268,7 +268,6 @@ class MainActivity : ComponentActivity() {
                                     saveSlots = saveRepository.getAllSaves()
                                     screenState = ScreenState.TITLE
                                 },
-                                activeChallengeName = gameState.challengeConfig?.getDisplayName(),
                                 modifier = Modifier
                                     .fillMaxSize()
                                     .padding(innerPadding)
@@ -713,7 +712,7 @@ class MainActivity : ComponentActivity() {
                                         screenState = ScreenState.TITLE
                                     }
                                 },
-                                activeChallengeName = gameState.challengeConfig?.getDisplayName(),
+                                activeChallengeConfig = gameState.challengeConfig,
                                 viewModel = challengeViewModel,
                                 modifier = Modifier
                                     .fillMaxSize()
