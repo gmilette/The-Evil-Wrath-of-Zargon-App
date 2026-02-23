@@ -60,6 +60,7 @@ import com.greenopal.zargon.ui.viewmodels.MapViewModel
 import com.greenopal.zargon.ui.viewmodels.TileInteraction
 import com.greenopal.zargon.ui.components.WorldMagicMenu
 import com.greenopal.zargon.domain.world.WorldSpell
+import com.greenopal.zargon.data.models.PrestigeBonus
 import javax.inject.Inject
 
 /**
@@ -239,6 +240,7 @@ fun MapScreen(
             WorldMagicMenu(
                 spellLevel = currentGameState!!.character.level,
                 currentMP = currentGameState!!.character.currentMP,
+                hasMasterSpellbook = currentGameState!!.prestigeData.isBonusActive(PrestigeBonus.MASTER_SPELLBOOK),
                 onSpellSelected = { spell ->
                     val (updatedState, message) = spell.cast(currentGameState!!)
                     viewModel.setGameState(updatedState)

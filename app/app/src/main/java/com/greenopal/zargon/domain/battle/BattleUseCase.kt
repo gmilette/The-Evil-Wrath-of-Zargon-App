@@ -83,7 +83,7 @@ class BattleUseCase @Inject constructor(
      * or a state with "Can't escape!" message if caught (caller should then execute counterattack).
      */
     fun attemptRun(state: BattleState, random: Random = Random): BattleState {
-        val escaped = random.nextInt(1, 5) == 1
+        val escaped = random.nextInt(1, 4) == 1
         return if (escaped) {
             state
                 .addMessage("You run away!")

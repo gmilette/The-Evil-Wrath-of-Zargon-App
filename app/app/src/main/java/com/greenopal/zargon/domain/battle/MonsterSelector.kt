@@ -44,6 +44,12 @@ class MonsterSelector @Inject constructor(
             return applyModifiersAndLabel(baseKraken, gameState)
         }
 
+        if (gameState.worldX == 4 && gameState.worldY == 1 &&
+            gameState.characterX in 17..18 && gameState.characterY in 2..3) {
+            val baseNecro = createScaledMonster(MonsterType.NECRO, playerLevel)
+            return applyModifiersAndLabel(baseNecro, gameState)
+        }
+
         if (gameState.worldX == 4 && gameState.worldY == 2 &&
             gameState.storyStatus >= 3.0f &&
             gameState.characterX == 3 && gameState.characterY == 2) {
