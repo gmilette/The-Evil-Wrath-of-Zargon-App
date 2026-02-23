@@ -85,7 +85,7 @@ class RewardSystem @Inject constructor() {
      * Formula: nextlev = nextlev + (nextlev + lev * 30)
      */
     fun calculateXPForNextLevel(currentLevel: Int, currentNextLevelXP: Int): Int {
-        val addTo = currentNextLevelXP + (currentLevel * 30)
+        val addTo = (currentNextLevelXP * 0.6).toInt() + (currentLevel * 30)
         return currentNextLevelXP + addTo
     }
 
