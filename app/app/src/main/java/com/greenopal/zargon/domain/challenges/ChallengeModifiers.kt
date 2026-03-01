@@ -20,7 +20,7 @@ class ChallengeModifiers @Inject constructor() {
         val challenges = config.challenges
         val multiplier = when {
             Challenge.STRONGER_ENEMIES in challenges || Challenge.WARRIOR_MODE in challenges -> 2.5f
-            Challenge.STRONG_ENEMIES in challenges || Challenge.IMPOSSIBLE_MISSION in challenges -> 2.0f
+            Challenge.STRONG_ENEMIES in challenges || Challenge.IMPOSSIBLE_MISSION in challenges -> 1.75f
             else -> return baseStats
         }
 
@@ -56,7 +56,7 @@ class ChallengeModifiers @Inject constructor() {
             val challenges = config.challenges
             if (Challenge.WEAK_ARMOR in challenges || Challenge.MAGE_QUEST in challenges) multiplier *= 0.5f
         }
-        if (prestige?.isBonusActive(PrestigeBonus.GREATER_ARMOR) == true) multiplier *= 2.0f
+        if (prestige?.isBonusActive(PrestigeBonus.GREATER_ARMOR) == true) multiplier *= 2.5f
         return (baseBonus * multiplier).toInt()
     }
 

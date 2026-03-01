@@ -52,6 +52,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.greenopal.zargon.data.models.GameState
 import com.greenopal.zargon.data.models.Item
+import com.greenopal.zargon.data.models.MapItems
 import com.greenopal.zargon.domain.graphics.Sprite
 import com.greenopal.zargon.domain.map.GameMap
 import com.greenopal.zargon.domain.map.TileType
@@ -59,6 +60,7 @@ import com.greenopal.zargon.ui.viewmodels.MapViewModel
 import com.greenopal.zargon.ui.viewmodels.TileInteraction
 import com.greenopal.zargon.ui.components.WorldMagicMenu
 import com.greenopal.zargon.domain.world.WorldSpell
+import com.greenopal.zargon.data.models.PrestigeBonus
 import javax.inject.Inject
 
 /**
@@ -172,12 +174,22 @@ fun MapScreen(
 
 
                 // Map display
+                val itemMarkers = if (currentGameState!!.showMapItemMarkers) {
+                    MapItems.getMarkersForWorld(
+                        currentGameState!!.worldX,
+                        currentGameState!!.worldY,
+                        currentGameState!!.discoveredItems,
+                        currentGameState!!.storyStatus
+                    )
+                } else emptyList()
+
                 MapView(
                     map = currentMap!!,
                     playerX = currentGameState!!.characterX,
                     playerY = currentGameState!!.characterY,
                     playerSprite = playerSprite,
                     tileBitmapCache = tileBitmapCache,
+                    itemMarkers = itemMarkers,
                     modifier = Modifier
                         .fillMaxWidth()
                         .weight(1f)
@@ -199,6 +211,7 @@ fun MapScreen(
                     onCast = {
                         showSpellMenu = true
                     },
+                    canCast = currentGameState!!.challengeConfig?.isNoMagic != true,
                     modifier = Modifier.fillMaxWidth()
                 )
             }
@@ -229,6 +242,7 @@ fun MapScreen(
             WorldMagicMenu(
                 spellLevel = currentGameState!!.character.level,
                 currentMP = currentGameState!!.character.currentMP,
+                hasMasterSpellbook = currentGameState!!.prestigeData.isBonusActive(PrestigeBonus.MASTER_SPELLBOOK),
                 onSpellSelected = { spell ->
                     val (updatedState, message) = spell.cast(currentGameState!!)
                     viewModel.setGameState(updatedState)
@@ -347,6 +361,7 @@ private fun MapView(
     playerY: Int,
     playerSprite: Sprite?,
     tileBitmapCache: com.greenopal.zargon.domain.graphics.TileBitmapCache? = null,
+    itemMarkers: List<Pair<Int, Int>> = emptyList(),
     modifier: Modifier = Modifier
 ) {
     Card(
@@ -423,6 +438,23 @@ private fun MapView(
                     }
                 }
 
+                // Draw item location markers
+                for ((spotX, spotY) in itemMarkers) {
+                    val cx = offsetX + spotX * tileSize + tileSize / 2
+                    val cy = offsetY + spotY * tileSize + tileSize / 2
+                    val radius = tileSize * 0.18f
+                    drawCircle(
+                        color = Color(0xFFFFD700).copy(alpha = 0.8f),
+                        radius = radius,
+                        center = Offset(cx, cy)
+                    )
+                    drawCircle(
+                        color = Color.White.copy(alpha = 0.9f),
+                        radius = radius * 0.4f,
+                        center = Offset(cx, cy)
+                    )
+                }
+
                 // Draw player sprite
                 if (playerSprite != null) {
                     drawPlayerSprite(
@@ -489,6 +521,7 @@ private fun MovementControls(
     onMove: (Direction) -> Unit,
     onSearch: () -> Unit,
     onCast: () -> Unit,
+    canCast: Boolean = true,
     modifier: Modifier = Modifier
 ) {
     Card(
@@ -551,9 +584,11 @@ private fun MovementControls(
 
                 Button(
                     onClick = onCast,
+                    enabled = canCast,
                     modifier = Modifier.weight(1f),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.tertiary
+                        containerColor = MaterialTheme.colorScheme.tertiary,
+                        disabledContainerColor = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.3f)
                     )
                 ) {
                     Text("CAST")

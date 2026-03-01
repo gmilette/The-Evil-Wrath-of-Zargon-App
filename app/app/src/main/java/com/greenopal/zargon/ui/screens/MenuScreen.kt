@@ -33,7 +33,8 @@ fun MenuScreen(
     onViewHints: () -> Unit,
     onViewChallengeProgress: () -> Unit,
     onBack: () -> Unit,
-    activeChallengeName: String? = null,
+    onExitToTitle: () -> Unit,
+    onDebugSetup: (() -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
     // Handle back button
@@ -71,16 +72,6 @@ fun MenuScreen(
                     fontWeight = FontWeight.Bold,
                     textAlign = TextAlign.Center
                 )
-
-                if (activeChallengeName != null) {
-                    Text(
-                        text = "Active: $activeChallengeName",
-                        style = MaterialTheme.typography.titleSmall,
-                        color = MaterialTheme.colorScheme.tertiary,
-                        fontWeight = FontWeight.Bold,
-                        textAlign = TextAlign.Center
-                    )
-                }
 
                 Spacer(modifier = Modifier.height(8.dp))
 
@@ -142,6 +133,22 @@ fun MenuScreen(
                     )
                 }
 
+                // Exit to title screen
+                Button(
+                    onClick = onExitToTitle,
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.tertiary,
+                        contentColor = MaterialTheme.colorScheme.onTertiary
+                    )
+                ) {
+                    Text(
+                        text = "Exit to Main Menu",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+
                 Spacer(modifier = Modifier.height(8.dp))
 
                 // Close button
@@ -149,14 +156,31 @@ fun MenuScreen(
                     onClick = onBack,
                     modifier = Modifier.fillMaxWidth(),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.surface,
-                        contentColor = MaterialTheme.colorScheme.onSurface
+                        containerColor = MaterialTheme.colorScheme.secondary,
+                        contentColor = MaterialTheme.colorScheme.onSecondary
                     )
                 ) {
                     Text(
                         text = "Close",
                         style = MaterialTheme.typography.titleMedium
                     )
+                }
+
+                if (onDebugSetup != null) {
+                    Button(
+                        onClick = onDebugSetup,
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = androidx.compose.ui.graphics.Color(0xFF00C853),
+                            contentColor = androidx.compose.ui.graphics.Color.White
+                        )
+                    ) {
+                        Text(
+                            text = "[DEBUG] Max Joe Out",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
                 }
             }
         }

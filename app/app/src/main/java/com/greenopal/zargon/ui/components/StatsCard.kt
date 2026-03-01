@@ -87,13 +87,13 @@ fun StatsCard(
 
             StatRow(
                 label = "AP",
-                value = stats.totalAP.toString(),
+                value = (stats.baseAP + stats.weaponBonus).toString(),
                 color = Color.Unspecified
             )
 
             StatRow(
                 label = "Defense",
-                value = stats.totalDefense.toString(),
+                value = (stats.baseDP + stats.armorBonus).toString(),
                 color = Color.Unspecified
             )
 

@@ -29,7 +29,7 @@ class RewardSystem @Inject constructor() {
             MonsterType.NECRO -> 20
             MonsterType.SKANDER_SNAKE -> 25
             MonsterType.KRAKEN -> 45 // No scaling for Kraken
-            MonsterType.ZARGON -> 100 // Special boss
+            MonsterType.ZARGON -> 1000 // Special boss
         }
 
         return if (monsterType == MonsterType.KRAKEN || monsterType == MonsterType.ZARGON) {
@@ -85,7 +85,7 @@ class RewardSystem @Inject constructor() {
      * Formula: nextlev = nextlev + (nextlev + lev * 30)
      */
     fun calculateXPForNextLevel(currentLevel: Int, currentNextLevelXP: Int): Int {
-        val addTo = currentNextLevelXP + (currentLevel * 30)
+        val addTo = (currentNextLevelXP * 0.6).toInt() + (currentLevel * 30)
         return currentNextLevelXP + addTo
     }
 

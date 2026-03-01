@@ -37,7 +37,6 @@ import androidx.compose.ui.unit.dp
 import com.greenopal.zargon.data.models.GameState
 import com.greenopal.zargon.data.models.PrestigeData
 import com.greenopal.zargon.domain.challenges.ChallengeModifiers
-import com.greenopal.zargon.ui.theme.EmberOrange
 
 @Composable
 fun WeaponShopScreen(
@@ -110,30 +109,6 @@ fun WeaponShopScreen(
                     textAlign = TextAlign.Center
                 )
 
-                if (challengeConfig != null) {
-                    val activeDesc = challengeConfig.getDisplayName()
-                    if (activeDesc != "Normal") {
-                        Card(
-                            modifier = Modifier.fillMaxWidth(),
-                            colors = CardDefaults.cardColors(
-                                containerColor = EmberOrange.copy(alpha = 0.3f)
-                            )
-                        ) {
-                            Column(
-                                modifier = Modifier.padding(8.dp),
-                                horizontalAlignment = Alignment.CenterHorizontally
-                            ) {
-                                Text(
-                                    text = "CHALLENGE: $activeDesc",
-                                    style = MaterialTheme.typography.titleSmall,
-                                    color = EmberOrange,
-                                    fontWeight = FontWeight.Bold
-                                )
-                            }
-                        }
-                    }
-                }
-
                 Card(
                     colors = CardDefaults.cardColors(
                         containerColor = MaterialTheme.colorScheme.surface
@@ -186,7 +161,7 @@ fun WeaponShopScreen(
                                 updatedGameState = updatedGameState.updateCharacter(
                                     updatedGameState.character.copy(
                                         gold = updatedGameState.character.gold - cost,
-                                        weaponBonus = effectiveBonus,
+                                        weaponBonus = weapon.attackBonus,
                                         weaponStatus = weapon.ordinal
                                     )
                                 )
@@ -211,7 +186,7 @@ fun WeaponShopScreen(
                                 updatedGameState = updatedGameState.updateCharacter(
                                     updatedGameState.character.copy(
                                         gold = updatedGameState.character.gold - cost,
-                                        armorBonus = effectiveBonus,
+                                        armorBonus = armor.defenseBonus,
                                         armorStatus = armor.ordinal
                                     )
                                 )

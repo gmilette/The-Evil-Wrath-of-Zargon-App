@@ -32,6 +32,7 @@ import com.greenopal.zargon.domain.world.WorldSpell
 fun WorldMagicMenu(
     spellLevel: Int,
     currentMP: Int,
+    hasMasterSpellbook: Boolean = false,
     onSpellSelected: (WorldSpell) -> Unit,
     onCancel: () -> Unit,
     modifier: Modifier = Modifier
@@ -71,7 +72,7 @@ fun WorldMagicMenu(
                 Spacer(modifier = Modifier.height(16.dp))
 
                 // Get available spells
-                val availableSpells = WorldSpell.getAvailableSpells(spellLevel)
+                val availableSpells = WorldSpell.getAvailableSpells(spellLevel, hasMasterSpellbook)
 
                 if (availableSpells.isEmpty()) {
                     Text(

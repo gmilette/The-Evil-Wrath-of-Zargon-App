@@ -18,6 +18,6 @@ enum class MonsterType(
     BELETH("Beleth", baseAP = 8, baseDP = 16, minLevel = 2),
     SKANDER_SNAKE("SkanderSnake", baseAP = 12, baseDP = 20, minLevel = 5),
     NECRO("Necro", baseAP = 13, baseDP = 30, minLevel = 6),
-    KRAKEN("Kraken", baseAP = 25, baseDP = 60, minLevel = 1),
+    KRAKEN("Kraken", baseAP = 40, baseDP = 200, minLevel = 1),
     ZARGON("ZARGON", baseAP = 100, baseDP = 400, minLevel = 1);
 }

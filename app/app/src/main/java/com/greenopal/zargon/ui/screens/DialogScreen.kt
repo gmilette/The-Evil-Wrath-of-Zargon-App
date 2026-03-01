@@ -47,6 +47,7 @@ fun DialogScreen(
     npcType: NpcType,
     dialogProvider: NpcDialogProvider,
     gameState: GameState,
+    onActionTaken: (StoryAction) -> Unit = {},
     onDialogEnd: (GameState, StoryAction?) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -122,9 +123,13 @@ fun DialogScreen(
 
                     Spacer(modifier = Modifier.height(16.dp))
 
-                    // Continue button
+                    // Continue button — apply any pending action immediately so dialog refreshes
                     Button(
                         onClick = {
+                            selectedAction?.let { action ->
+                                onActionTaken(action)
+                                selectedAction = null
+                            }
                             currentAnswer = null
                         },
                         modifier = Modifier.fillMaxWidth(),

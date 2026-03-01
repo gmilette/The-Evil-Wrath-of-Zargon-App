@@ -2,6 +2,7 @@ package com.greenopal.zargon
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.Arrangement
@@ -30,6 +31,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.greenopal.zargon.data.models.GameState
+import com.greenopal.zargon.data.models.Item
+import com.greenopal.zargon.data.models.ItemType
 import com.greenopal.zargon.data.models.NpcType
 import com.greenopal.zargon.data.models.StoryAction
 import com.greenopal.zargon.data.repository.PrestigeRepository
@@ -116,6 +120,11 @@ class MainActivity : ComponentActivity() {
                 var saveSlots by remember { mutableStateOf(saveRepository.getAllSaves()) }
                 var challengeRestartSlot by remember { mutableStateOf<Int?>(null) }
                 var challengeProgressReturnToMenu by remember { mutableStateOf(false) }
+                var victoryEarnedBonus by remember { mutableStateOf<com.greenopal.zargon.data.models.PrestigeBonus?>(null) }
+
+                BackHandler(enabled = screenState == ScreenState.MENU) {
+                    screenState = ScreenState.MAP
+                }
 
                 LaunchedEffect(gameState.challengeConfig, gameState.challengeStartTime) {
                 }
@@ -214,6 +223,9 @@ class MainActivity : ComponentActivity() {
                                 },
                                 onContinue = { slot ->
                                     saveRepository.loadGame(slot)?.let { savedState ->
+                                        // Sync any prestige victories stored in the save file
+                                        // back into the live ChallengeViewModel / PrestigeRepository.
+                                        challengeViewModel.syncPrestige(savedState.prestigeData)
                                         val correctedState = ensurePlayerNotOnInteractiveTile(savedState)
                                         viewModel.updateGameState(correctedState)
                                         isExplorationMode = true
@@ -263,7 +275,60 @@ class MainActivity : ComponentActivity() {
                                 onBack = {
                                     screenState = ScreenState.MAP
                                 },
-                                activeChallengeName = gameState.challengeConfig?.getDisplayName(),
+                                onExitToTitle = {
+                                    saveRepository.saveGame(gameState, gameState.saveSlot)
+                                    saveSlots = saveRepository.getAllSaves()
+                                    screenState = ScreenState.TITLE
+                                },
+                                onDebugSetup = if (com.greenopal.zargon.BuildConfig.DEBUG) {
+                                    {
+                                        if (gameState.character.level >= 8) {
+                                            val char = gameState.character
+                                            val apGain = kotlin.random.Random.nextInt(0, char.level + 1) + 2
+                                            val hpGain = kotlin.random.Random.nextInt(3, 8)
+                                            val dpGain = 4
+                                            val mpGain = 3 + kotlin.random.Random.nextInt(0, char.level + 1) + 1
+                                            val leveled = char.levelUp(apGain, hpGain, dpGain, mpGain)
+                                            viewModel.updateGameState(gameState.copy(character = leveled))
+                                        } else {
+                                            val questItemNames = listOf(
+                                                "dynamite", "dead wood", "rutter", "cloth",
+                                                "wood", "boat plans", "trapped soul", "ship"
+                                            )
+                                            var debugState = gameState.copy(
+                                                character = gameState.character.copy(
+                                                    level = 8,
+                                                    baseAP = 25,
+                                                    maxHP = 55,
+                                                    currentHP = 55,
+                                                    baseDP = 48,
+                                                    baseMP = 40,
+                                                    currentMP = 40,
+                                                    weaponBonus = 35,  // Atlantean Sword
+                                                    weaponStatus = 6,
+                                                    armorBonus = 50,   // Platemail
+                                                    armorStatus = 5,
+                                                    experience = 7410
+                                                ),
+                                                nextLevelXP = 15060,
+                                                storyStatus = 5.5f,
+                                                inventory = emptyList(),
+                                                discoveredItems = questItemNames.toSet()
+                                            )
+                                            questItemNames.forEach { name ->
+                                                debugState = debugState.addItem(
+                                                    com.greenopal.zargon.data.models.Item(
+                                                        name = name,
+                                                        description = "",
+                                                        type = com.greenopal.zargon.data.models.ItemType.KEY_ITEM
+                                                    )
+                                                )
+                                            }
+                                            viewModel.updateGameState(debugState)
+                                            screenState = ScreenState.MAP
+                                        }
+                                    }
+                                } else null,
                                 modifier = Modifier
                                     .fillMaxSize()
                                     .padding(innerPadding)
@@ -345,10 +410,14 @@ class MainActivity : ComponentActivity() {
                                                     updatedGameState.characterY in 4..6
 
                                             // After battle victory, return to map (or victory screen if ZARGON defeated)
-                                            screenState = if (defeatedZargon) {
-                                                ScreenState.VICTORY
+                                            if (defeatedZargon) {
+                                                victoryEarnedBonus = updatedGameState.challengeConfig?.let {
+                                                    challengeViewModel.getEarnedBonusIfNew(it)
+                                                }
+                                                saveRepository.saveGame(updatedGameState, updatedGameState.saveSlot)
+                                                screenState = ScreenState.VICTORY
                                             } else {
-                                                ScreenState.MAP
+                                                screenState = ScreenState.MAP
                                             }
                                         }
                                         is BattleResult.Defeat -> {
@@ -372,7 +441,6 @@ class MainActivity : ComponentActivity() {
                             StatsScreen(
                                 gameState = gameState,
                                 onBack = { screenState = ScreenState.MENU },
-                                prestigeRepository = prestigeRepository,
                                 modifier = Modifier
                                     .fillMaxSize()
                                     .padding(innerPadding)
@@ -395,156 +463,14 @@ class MainActivity : ComponentActivity() {
                                     npcType = npcType,
                                     dialogProvider = dialogProvider,
                                     gameState = gameState,
+                                    onActionTaken = { action ->
+                                        val updatedState = applyStoryAction(gameState, action)
+                                        viewModel.updateGameState(updatedState)
+                                    },
                                     onDialogEnd = { updatedState, storyAction ->
-                                        android.util.Log.d("MainActivity", "Dialog ended with story action: $storyAction")
-                                        android.util.Log.d("MainActivity", "Current story status: ${updatedState.storyStatus}")
-
-                                        // Handle story actions
-                                        val finalState = when (storyAction) {
-                                            is StoryAction.AdvanceStory -> {
-                                                android.util.Log.d("MainActivity", "Advancing story from ${updatedState.storyStatus} to ${storyAction.newStatus}")
-                                                updatedState.updateStory(storyAction.newStatus)
-                                            }
-                                            is StoryAction.GiveItem -> {
-                                                val stateWithItem = updatedState.addItem(
-                                                    com.greenopal.zargon.data.models.Item(
-                                                        name = storyAction.itemName,
-                                                        description = "Story item",
-                                                        type = com.greenopal.zargon.data.models.ItemType.KEY_ITEM
-                                                    )
-                                                )
-                                                // Check if story should auto-advance
-                                                StoryProgressionChecker.checkAndAdvanceStory(stateWithItem)
-                                            }
-                                            is StoryAction.TakeItem -> {
-                                                // Remove item from inventory
-                                                val itemToRemove = updatedState.inventory.find {
-                                                    it.name.equals(storyAction.itemName, ignoreCase = true)
-                                                }
-                                                if (itemToRemove != null) {
-                                                    updatedState.removeItem(itemToRemove)
-                                                } else {
-                                                    updatedState
-                                                }
-                                            }
-                                            is StoryAction.HealPlayer -> {
-                                                val healedCharacter = updatedState.character.copy(
-                                                    currentHP = updatedState.character.maxHP,
-                                                    currentMP = updatedState.character.maxMP
-                                                )
-                                                android.util.Log.d("MainActivity", "Fountain healing - HP: ${healedCharacter.currentHP}/${healedCharacter.maxHP}, MP: ${healedCharacter.currentMP}/${healedCharacter.maxMP}")
-                                                updatedState.updateCharacter(healedCharacter)
-                                            }
-                                            is StoryAction.BuildBoat -> {
-                                                val stateWithShip = updatedState
-                                                    .updateStory(5.5f)
-                                                    .addItem(
-                                                        com.greenopal.zargon.data.models.Item(
-                                                            name = "ship",
-                                                            description = "Allows travel on the river",
-                                                            type = com.greenopal.zargon.data.models.ItemType.KEY_ITEM
-                                                        )
-                                                    )
-                                                // Check if story should auto-advance
-                                                StoryProgressionChecker.checkAndAdvanceStory(stateWithShip)
-                                            }
-                                            is StoryAction.ResurrectBoatman -> {
-                                                updatedState.updateStory(5.0f)
-                                            }
-                                            is StoryAction.IncreaseAttack -> {
-                                                if (updatedState.character.gold >= storyAction.cost) {
-                                                    val updatedCharacter = updatedState.character.copy(
-                                                        gold = updatedState.character.gold - storyAction.cost,
-                                                        baseAP = updatedState.character.baseAP + 1
-                                                    )
-                                                    updatedState.updateCharacter(updatedCharacter)
-                                                } else {
-                                                    updatedState
-                                                }
-                                            }
-                                            is StoryAction.IncreaseDefense -> {
-                                                if (updatedState.character.gold >= storyAction.cost) {
-                                                    val updatedCharacter = updatedState.character.copy(
-                                                        gold = updatedState.character.gold - storyAction.cost,
-                                                        baseDP = updatedState.character.baseDP + 1,
-                                                        currentHP = updatedState.character.currentHP + 1
-                                                    )
-                                                    updatedState.updateCharacter(updatedCharacter)
-                                                } else {
-                                                    updatedState
-                                                }
-                                            }
-                                            is StoryAction.MultiAction -> {
-                                                // Process multiple actions in sequence
-                                                val finalMultiState = storyAction.actions.fold(updatedState) { currentState, action ->
-                                                    when (action) {
-                                                        is StoryAction.AdvanceStory -> currentState.updateStory(action.newStatus)
-                                                        is StoryAction.GiveItem -> {
-                                                            val withItem = currentState.addItem(
-                                                                com.greenopal.zargon.data.models.Item(
-                                                                    name = action.itemName,
-                                                                    description = "Story item",
-                                                                    type = com.greenopal.zargon.data.models.ItemType.KEY_ITEM
-                                                                )
-                                                            )
-                                                            // Check story progression after giving item
-                                                            StoryProgressionChecker.checkAndAdvanceStory(withItem)
-                                                        }
-                                                        is StoryAction.TakeItem -> {
-                                                            val itemToRemove = currentState.inventory.find {
-                                                                it.name.equals(action.itemName, ignoreCase = true)
-                                                            }
-                                                            if (itemToRemove != null) currentState.removeItem(itemToRemove) else currentState
-                                                        }
-                                                        is StoryAction.HealPlayer -> {
-                                                            val healedChar = currentState.character.copy(
-                                                                currentHP = currentState.character.maxHP,
-                                                                currentMP = currentState.character.maxMP
-                                                            )
-                                                            currentState.updateCharacter(healedChar)
-                                                        }
-                                                        is StoryAction.BuildBoat -> {
-                                                            val withShip = currentState.updateStory(5.5f).addItem(
-                                                                com.greenopal.zargon.data.models.Item(name = "ship", description = "Allows travel on the river", type = com.greenopal.zargon.data.models.ItemType.KEY_ITEM)
-                                                            )
-                                                            // Check story progression after building boat
-                                                            StoryProgressionChecker.checkAndAdvanceStory(withShip)
-                                                        }
-                                                        is StoryAction.ResurrectBoatman -> currentState.updateStory(5.0f)
-                                                        is StoryAction.IncreaseAttack -> {
-                                                            if (currentState.character.gold >= action.cost) {
-                                                                val updatedChar = currentState.character.copy(
-                                                                    gold = currentState.character.gold - action.cost,
-                                                                    baseAP = currentState.character.baseAP + 1
-                                                                )
-                                                                currentState.updateCharacter(updatedChar)
-                                                            } else {
-                                                                currentState
-                                                            }
-                                                        }
-                                                        is StoryAction.IncreaseDefense -> {
-                                                            if (currentState.character.gold >= action.cost) {
-                                                                val updatedChar = currentState.character.copy(
-                                                                    gold = currentState.character.gold - action.cost,
-                                                                    baseDP = currentState.character.baseDP + 1,
-                                                                    currentHP = currentState.character.currentHP + 1
-                                                                )
-                                                                currentState.updateCharacter(updatedChar)
-                                                            } else {
-                                                                currentState
-                                                            }
-                                                        }
-                                                        else -> currentState
-                                                    }
-                                                }
-                                                // Final story progression check after all multi-actions
-                                                StoryProgressionChecker.checkAndAdvanceStory(finalMultiState)
-                                            }
-                                            else -> updatedState
-                                        }
+                                        val finalState = if (storyAction != null) applyStoryAction(updatedState, storyAction) else updatedState
                                         android.util.Log.d("MainActivity", "Final story status after actions: ${finalState.storyStatus}")
                                         val stateWithMovedPlayer = movePlayerOutsideInteraction(finalState)
-                                        android.util.Log.d("MainActivity", "Exiting dialog - Moved player from (${finalState.characterX}, ${finalState.characterY}) to (${stateWithMovedPlayer.characterX}, ${stateWithMovedPlayer.characterY})")
                                         viewModel.updateGameState(stateWithMovedPlayer)
 
                                         // Always return to map after dialog ends
@@ -563,6 +489,7 @@ class MainActivity : ComponentActivity() {
                             WeaponShopScreen(
                                 gameState = gameState,
                                 challengeModifiers = challengeModifiers,
+                                prestige = gameState.prestigeData,
                                 onShopExit = { updatedState ->
                                     val stateWithMovedPlayer = movePlayerOutsideInteraction(updatedState)
                                     android.util.Log.d("MainActivity", "Exiting shop - Moved player from (${updatedState.characterX}, ${updatedState.characterY}) to (${stateWithMovedPlayer.characterX}, ${stateWithMovedPlayer.characterY})")
@@ -648,16 +575,21 @@ class MainActivity : ComponentActivity() {
                                     screenState = ScreenState.MAP
                                 },
                                 onChallengeComplete = { result ->
-                                    val prestigeRepo = com.greenopal.zargon.data.repository.PrestigeRepository(this@MainActivity)
-                                    val currentPrestige = prestigeRepo.loadPrestige()
-                                    val prestigeSystem = com.greenopal.zargon.domain.challenges.PrestigeSystem()
-
                                     gameState.challengeConfig?.let { config ->
-                                        val newPrestige = prestigeSystem.calculatePrestigeRewards(config, currentPrestige)
-                                        prestigeRepo.savePrestige(newPrestige)
-                                        prestigeRepo.saveChallengeResult(result)
+                                        challengeViewModel.completeChallenge(config, result)
+                                        // Embed the updated prestige in the game state and
+                                        // persist it so the save file is the source of truth.
+                                        // Clear challengeConfig — the run is over — so that
+                                        // permadeath saves are not blocked.
+                                        val updatedState = gameState.copy(
+                                            prestigeData = challengeViewModel.prestigeData.value,
+                                            challengeConfig = null
+                                        )
+                                        viewModel.updateGameState(updatedState)
+                                        saveRepository.saveGame(updatedState, updatedState.saveSlot)
                                     }
                                 },
+                                earnedBonus = victoryEarnedBonus,
                                 modifier = Modifier
                                     .fillMaxSize()
                                     .padding(innerPadding)
@@ -710,7 +642,7 @@ class MainActivity : ComponentActivity() {
                                         screenState = ScreenState.TITLE
                                     }
                                 },
-                                activeChallengeName = gameState.challengeConfig?.getDisplayName(),
+                                activeChallengeConfig = gameState.challengeConfig,
                                 viewModel = challengeViewModel,
                                 modifier = Modifier
                                     .fillMaxSize()
@@ -722,6 +654,44 @@ class MainActivity : ComponentActivity() {
                     }
                 }
             }
+        }
+    }
+
+    private fun applyStoryAction(state: GameState, action: StoryAction): GameState {
+        return when (action) {
+            is StoryAction.AdvanceStory -> state.updateStory(action.newStatus)
+            is StoryAction.GiveItem -> {
+                val withItem = state.addItem(Item(name = action.itemName, description = "Story item", type = ItemType.KEY_ITEM))
+                StoryProgressionChecker.checkAndAdvanceStory(withItem)
+            }
+            is StoryAction.TakeItem -> {
+                val itemToRemove = state.inventory.find { it.name.equals(action.itemName, ignoreCase = true) }
+                if (itemToRemove != null) state.removeItem(itemToRemove) else state
+            }
+            is StoryAction.HealPlayer -> {
+                val healed = state.character.copy(currentHP = state.character.maxHP, currentMP = state.character.maxMP)
+                state.updateCharacter(healed)
+            }
+            is StoryAction.BuildBoat -> {
+                val withShip = state.updateStory(5.5f).addItem(Item(name = "ship", description = "Allows travel on the river", type = ItemType.KEY_ITEM))
+                StoryProgressionChecker.checkAndAdvanceStory(withShip)
+            }
+            is StoryAction.ResurrectBoatman -> state.updateStory(5.0f)
+            is StoryAction.IncreaseAttack -> {
+                if (state.character.gold >= action.cost) {
+                    state.updateCharacter(state.character.copy(gold = state.character.gold - action.cost, baseAP = state.character.baseAP + 1))
+                } else state
+            }
+            is StoryAction.IncreaseDefense -> {
+                if (state.character.gold >= action.cost) {
+                    state.updateCharacter(state.character.copy(gold = state.character.gold - action.cost, baseDP = state.character.baseDP + 1))
+                } else state
+            }
+            is StoryAction.MultiAction -> {
+                val finalState = action.actions.fold(state) { acc, subAction -> applyStoryAction(acc, subAction) }
+                StoryProgressionChecker.checkAndAdvanceStory(finalState)
+            }
+            else -> state
         }
     }
 }

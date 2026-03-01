@@ -26,6 +26,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import com.greenopal.zargon.data.models.PrestigeBonus
+import com.greenopal.zargon.data.models.PrestigeData
 import com.greenopal.zargon.domain.battle.BattleAction
 import com.greenopal.zargon.domain.battle.Spell
 import com.greenopal.zargon.domain.battle.Spells
@@ -40,8 +42,10 @@ fun MagicMenu(
     currentMP: Int,
     onSpellSelected: (BattleAction.CastSpell) -> Unit,
     onCancel: () -> Unit,
+    prestigeData: PrestigeData = PrestigeData(),
     modifier: Modifier = Modifier
 ) {
+    val spellBonusActive = prestigeData.isBonusActive(PrestigeBonus.MASTER_SPELLBOOK)
     Dialog(onDismissRequest = onCancel) {
         Card(
             modifier = modifier,
@@ -75,6 +79,7 @@ fun MagicMenu(
                     SpellButton(
                         spell = spell,
                         currentMP = currentMP,
+                        spellBonusActive = spellBonusActive,
                         onClick = {
                             onSpellSelected(BattleAction.CastSpell(spell.id))
                         },
@@ -102,6 +107,7 @@ fun MagicMenu(
 private fun SpellButton(
     spell: Spell,
     currentMP: Int,
+    spellBonusActive: Boolean = false,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -133,7 +139,7 @@ private fun SpellButton(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "${spell.id}. ${spell.name}",
+                text = "${spell.id}. ${if (spellBonusActive) "Great ${spell.name}" else spell.name}",
                 color = textColor,
                 style = MaterialTheme.typography.bodyLarge
             )

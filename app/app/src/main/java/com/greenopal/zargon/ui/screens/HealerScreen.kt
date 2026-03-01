@@ -194,37 +194,19 @@ fun HealerScreen(
                     }
                 )
 
-                if (updatedGameState.challengeConfig?.isPermadeath != true) {
-                    Button(
-                        onClick = {
-                            onSaveGame(updatedGameState)
-                            message = "Game saved!"
-                            showMessageDialog = true
-                        },
-                        modifier = Modifier.fillMaxWidth(),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = MaterialTheme.colorScheme.secondary,
-                            contentColor = MaterialTheme.colorScheme.onSecondary
-                        )
-                    ) {
-                        Text("4. shall i save your game?")
-                    }
-                } else {
-                    Card(
-                        modifier = Modifier.fillMaxWidth(),
-                        colors = CardDefaults.cardColors(
-                            containerColor = MaterialTheme.colorScheme.surface
-                        )
-                    ) {
-                        Text(
-                            text = "PERMANENT DEATH MODE - No saves available",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = EmberOrange,
-                            fontWeight = FontWeight.Bold,
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier.padding(12.dp)
-                        )
-                    }
+                Button(
+                    onClick = {
+                        onSaveGame(updatedGameState)
+                        message = "Game saved!"
+                        showMessageDialog = true
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.secondary,
+                        contentColor = MaterialTheme.colorScheme.onSecondary
+                    )
+                ) {
+                    Text("4. shall i save your game?")
                 }
 
                 Button(
@@ -235,7 +217,7 @@ fun HealerScreen(
                         contentColor = MaterialTheme.colorScheme.onTertiary
                     )
                 ) {
-                    Text(if (updatedGameState.challengeConfig?.isPermadeath == true) "4. i've had enough of this guy" else "5. i've had enough of this guy")
+                    Text("5. i've had enough of this guy")
                 }
             }
 
