@@ -31,6 +31,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.greenopal.zargon.data.models.GameState
+import com.greenopal.zargon.data.models.Item
+import com.greenopal.zargon.data.models.ItemType
 import com.greenopal.zargon.data.models.NpcType
 import com.greenopal.zargon.data.models.StoryAction
 import com.greenopal.zargon.data.repository.PrestigeRepository
@@ -460,154 +463,14 @@ class MainActivity : ComponentActivity() {
                                     npcType = npcType,
                                     dialogProvider = dialogProvider,
                                     gameState = gameState,
+                                    onActionTaken = { action ->
+                                        val updatedState = applyStoryAction(gameState, action)
+                                        viewModel.updateGameState(updatedState)
+                                    },
                                     onDialogEnd = { updatedState, storyAction ->
-                                        android.util.Log.d("MainActivity", "Dialog ended with story action: $storyAction")
-                                        android.util.Log.d("MainActivity", "Current story status: ${updatedState.storyStatus}")
-
-                                        // Handle story actions
-                                        val finalState = when (storyAction) {
-                                            is StoryAction.AdvanceStory -> {
-                                                android.util.Log.d("MainActivity", "Advancing story from ${updatedState.storyStatus} to ${storyAction.newStatus}")
-                                                updatedState.updateStory(storyAction.newStatus)
-                                            }
-                                            is StoryAction.GiveItem -> {
-                                                val stateWithItem = updatedState.addItem(
-                                                    com.greenopal.zargon.data.models.Item(
-                                                        name = storyAction.itemName,
-                                                        description = "Story item",
-                                                        type = com.greenopal.zargon.data.models.ItemType.KEY_ITEM
-                                                    )
-                                                )
-                                                // Check if story should auto-advance
-                                                StoryProgressionChecker.checkAndAdvanceStory(stateWithItem)
-                                            }
-                                            is StoryAction.TakeItem -> {
-                                                // Remove item from inventory
-                                                val itemToRemove = updatedState.inventory.find {
-                                                    it.name.equals(storyAction.itemName, ignoreCase = true)
-                                                }
-                                                if (itemToRemove != null) {
-                                                    updatedState.removeItem(itemToRemove)
-                                                } else {
-                                                    updatedState
-                                                }
-                                            }
-                                            is StoryAction.HealPlayer -> {
-                                                val healedCharacter = updatedState.character.copy(
-                                                    currentHP = updatedState.character.maxHP,
-                                                    currentMP = updatedState.character.maxMP
-                                                )
-                                                android.util.Log.d("MainActivity", "Fountain healing - HP: ${healedCharacter.currentHP}/${healedCharacter.maxHP}, MP: ${healedCharacter.currentMP}/${healedCharacter.maxMP}")
-                                                updatedState.updateCharacter(healedCharacter)
-                                            }
-                                            is StoryAction.BuildBoat -> {
-                                                val stateWithShip = updatedState
-                                                    .updateStory(5.5f)
-                                                    .addItem(
-                                                        com.greenopal.zargon.data.models.Item(
-                                                            name = "ship",
-                                                            description = "Allows travel on the river",
-                                                            type = com.greenopal.zargon.data.models.ItemType.KEY_ITEM
-                                                        )
-                                                    )
-                                                // Check if story should auto-advance
-                                                StoryProgressionChecker.checkAndAdvanceStory(stateWithShip)
-                                            }
-                                            is StoryAction.ResurrectBoatman -> {
-                                                updatedState.updateStory(5.0f)
-                                            }
-                                            is StoryAction.IncreaseAttack -> {
-                                                if (updatedState.character.gold >= storyAction.cost) {
-                                                    val updatedCharacter = updatedState.character.copy(
-                                                        gold = updatedState.character.gold - storyAction.cost,
-                                                        baseAP = updatedState.character.baseAP + 1
-                                                    )
-                                                    updatedState.updateCharacter(updatedCharacter)
-                                                } else {
-                                                    updatedState
-                                                }
-                                            }
-                                            is StoryAction.IncreaseDefense -> {
-                                                if (updatedState.character.gold >= storyAction.cost) {
-                                                    val updatedCharacter = updatedState.character.copy(
-                                                        gold = updatedState.character.gold - storyAction.cost,
-                                                        baseDP = updatedState.character.baseDP + 1
-                                                    )
-                                                    updatedState.updateCharacter(updatedCharacter)
-                                                } else {
-                                                    updatedState
-                                                }
-                                            }
-                                            is StoryAction.MultiAction -> {
-                                                // Process multiple actions in sequence
-                                                val finalMultiState = storyAction.actions.fold(updatedState) { currentState, action ->
-                                                    when (action) {
-                                                        is StoryAction.AdvanceStory -> currentState.updateStory(action.newStatus)
-                                                        is StoryAction.GiveItem -> {
-                                                            val withItem = currentState.addItem(
-                                                                com.greenopal.zargon.data.models.Item(
-                                                                    name = action.itemName,
-                                                                    description = "Story item",
-                                                                    type = com.greenopal.zargon.data.models.ItemType.KEY_ITEM
-                                                                )
-                                                            )
-                                                            // Check story progression after giving item
-                                                            StoryProgressionChecker.checkAndAdvanceStory(withItem)
-                                                        }
-                                                        is StoryAction.TakeItem -> {
-                                                            val itemToRemove = currentState.inventory.find {
-                                                                it.name.equals(action.itemName, ignoreCase = true)
-                                                            }
-                                                            if (itemToRemove != null) currentState.removeItem(itemToRemove) else currentState
-                                                        }
-                                                        is StoryAction.HealPlayer -> {
-                                                            val healedChar = currentState.character.copy(
-                                                                currentHP = currentState.character.maxHP,
-                                                                currentMP = currentState.character.maxMP
-                                                            )
-                                                            currentState.updateCharacter(healedChar)
-                                                        }
-                                                        is StoryAction.BuildBoat -> {
-                                                            val withShip = currentState.updateStory(5.5f).addItem(
-                                                                com.greenopal.zargon.data.models.Item(name = "ship", description = "Allows travel on the river", type = com.greenopal.zargon.data.models.ItemType.KEY_ITEM)
-                                                            )
-                                                            // Check story progression after building boat
-                                                            StoryProgressionChecker.checkAndAdvanceStory(withShip)
-                                                        }
-                                                        is StoryAction.ResurrectBoatman -> currentState.updateStory(5.0f)
-                                                        is StoryAction.IncreaseAttack -> {
-                                                            if (currentState.character.gold >= action.cost) {
-                                                                val updatedChar = currentState.character.copy(
-                                                                    gold = currentState.character.gold - action.cost,
-                                                                    baseAP = currentState.character.baseAP + 1
-                                                                )
-                                                                currentState.updateCharacter(updatedChar)
-                                                            } else {
-                                                                currentState
-                                                            }
-                                                        }
-                                                        is StoryAction.IncreaseDefense -> {
-                                                            if (currentState.character.gold >= action.cost) {
-                                                                val updatedChar = currentState.character.copy(
-                                                                    gold = currentState.character.gold - action.cost,
-                                                                    baseDP = currentState.character.baseDP + 1
-                                                                )
-                                                                currentState.updateCharacter(updatedChar)
-                                                            } else {
-                                                                currentState
-                                                            }
-                                                        }
-                                                        else -> currentState
-                                                    }
-                                                }
-                                                // Final story progression check after all multi-actions
-                                                StoryProgressionChecker.checkAndAdvanceStory(finalMultiState)
-                                            }
-                                            else -> updatedState
-                                        }
+                                        val finalState = if (storyAction != null) applyStoryAction(updatedState, storyAction) else updatedState
                                         android.util.Log.d("MainActivity", "Final story status after actions: ${finalState.storyStatus}")
                                         val stateWithMovedPlayer = movePlayerOutsideInteraction(finalState)
-                                        android.util.Log.d("MainActivity", "Exiting dialog - Moved player from (${finalState.characterX}, ${finalState.characterY}) to (${stateWithMovedPlayer.characterX}, ${stateWithMovedPlayer.characterY})")
                                         viewModel.updateGameState(stateWithMovedPlayer)
 
                                         // Always return to map after dialog ends
@@ -791,6 +654,44 @@ class MainActivity : ComponentActivity() {
                     }
                 }
             }
+        }
+    }
+
+    private fun applyStoryAction(state: GameState, action: StoryAction): GameState {
+        return when (action) {
+            is StoryAction.AdvanceStory -> state.updateStory(action.newStatus)
+            is StoryAction.GiveItem -> {
+                val withItem = state.addItem(Item(name = action.itemName, description = "Story item", type = ItemType.KEY_ITEM))
+                StoryProgressionChecker.checkAndAdvanceStory(withItem)
+            }
+            is StoryAction.TakeItem -> {
+                val itemToRemove = state.inventory.find { it.name.equals(action.itemName, ignoreCase = true) }
+                if (itemToRemove != null) state.removeItem(itemToRemove) else state
+            }
+            is StoryAction.HealPlayer -> {
+                val healed = state.character.copy(currentHP = state.character.maxHP, currentMP = state.character.maxMP)
+                state.updateCharacter(healed)
+            }
+            is StoryAction.BuildBoat -> {
+                val withShip = state.updateStory(5.5f).addItem(Item(name = "ship", description = "Allows travel on the river", type = ItemType.KEY_ITEM))
+                StoryProgressionChecker.checkAndAdvanceStory(withShip)
+            }
+            is StoryAction.ResurrectBoatman -> state.updateStory(5.0f)
+            is StoryAction.IncreaseAttack -> {
+                if (state.character.gold >= action.cost) {
+                    state.updateCharacter(state.character.copy(gold = state.character.gold - action.cost, baseAP = state.character.baseAP + 1))
+                } else state
+            }
+            is StoryAction.IncreaseDefense -> {
+                if (state.character.gold >= action.cost) {
+                    state.updateCharacter(state.character.copy(gold = state.character.gold - action.cost, baseDP = state.character.baseDP + 1))
+                } else state
+            }
+            is StoryAction.MultiAction -> {
+                val finalState = action.actions.fold(state) { acc, subAction -> applyStoryAction(acc, subAction) }
+                StoryProgressionChecker.checkAndAdvanceStory(finalState)
+            }
+            else -> state
         }
     }
 }

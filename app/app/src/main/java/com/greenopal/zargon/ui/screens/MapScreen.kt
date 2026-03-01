@@ -178,7 +178,8 @@ fun MapScreen(
                     MapItems.getMarkersForWorld(
                         currentGameState!!.worldX,
                         currentGameState!!.worldY,
-                        currentGameState!!.inventory
+                        currentGameState!!.discoveredItems,
+                        currentGameState!!.storyStatus
                     )
                 } else emptyList()
 
@@ -210,6 +211,7 @@ fun MapScreen(
                     onCast = {
                         showSpellMenu = true
                     },
+                    canCast = currentGameState!!.challengeConfig?.isNoMagic != true,
                     modifier = Modifier.fillMaxWidth()
                 )
             }
@@ -519,6 +521,7 @@ private fun MovementControls(
     onMove: (Direction) -> Unit,
     onSearch: () -> Unit,
     onCast: () -> Unit,
+    canCast: Boolean = true,
     modifier: Modifier = Modifier
 ) {
     Card(
@@ -581,9 +584,11 @@ private fun MovementControls(
 
                 Button(
                     onClick = onCast,
+                    enabled = canCast,
                     modifier = Modifier.weight(1f),
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.tertiary
+                        containerColor = MaterialTheme.colorScheme.tertiary,
+                        disabledContainerColor = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.3f)
                     )
                 ) {
                     Text("CAST")

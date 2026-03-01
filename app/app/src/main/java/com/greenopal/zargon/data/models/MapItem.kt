@@ -9,7 +9,8 @@ data class MapItem(
     val worldY: Int,      // Map quadrant coordinate (1-4)
     val spotX: Int,       // X coordinate on map (cx in QBASIC)
     val spotY: Int,       // Y coordinate on map (cy in QBASIC)
-    val item: Item        // The item to be found
+    val item: Item,       // The item to be found
+    val minStoryStatus: Float = 0f  // Minimum story status required to show marker
 )
 
 /**
@@ -30,7 +31,8 @@ object MapItems {
                 name = "dynamite",
                 description = "Used to blast through rocks",
                 type = ItemType.KEY_ITEM
-            )
+            ),
+            minStoryStatus = 0f
         ),
 
         // Item 2: Dead Wood - Map 14 (World 1, Quadrant 4)
@@ -44,7 +46,8 @@ object MapItems {
                 name = "dead wood",
                 description = "Dried wood for ship construction",
                 type = ItemType.KEY_ITEM
-            )
+            ),
+            minStoryStatus = 2.0f  // Player has freed the boatman and is collecting materials
         ),
 
         // Item 4: Rutter - Map 24 (World 2, Quadrant 4)
@@ -58,7 +61,8 @@ object MapItems {
                 name = "rutter",
                 description = "Navigation tool for ship",
                 type = ItemType.KEY_ITEM
-            )
+            ),
+            minStoryStatus = 2.0f
         ),
 
         // Item 5: Cloth - Map 13 (World 1, Quadrant 3)
@@ -73,7 +77,8 @@ object MapItems {
                 name = "cloth",
                 description = "Sail material for ship",
                 type = ItemType.KEY_ITEM
-            )
+            ),
+            minStoryStatus = 2.0f
         ),
 
         // Item 6: Wood - Map 22 (World 2, Quadrant 2)
@@ -87,7 +92,8 @@ object MapItems {
                 name = "wood",
                 description = "Strong wood for ship hull",
                 type = ItemType.KEY_ITEM
-            )
+            ),
+            minStoryStatus = 2.0f
         )
     )
 
@@ -112,12 +118,13 @@ object MapItems {
 
     /**
      * Get marker positions for items on the given world that haven't been collected yet
+     * and are visible at the current story status
      */
-    fun getMarkersForWorld(worldX: Int, worldY: Int, inventory: List<Item>): List<Pair<Int, Int>> {
-        val inventoryNames = inventory.map { it.name.lowercase() }.toSet()
+    fun getMarkersForWorld(worldX: Int, worldY: Int, discoveredItems: Set<String>, storyStatus: Float): List<Pair<Int, Int>> {
         return allItems
             .filter { it.worldX == worldX && it.worldY == worldY }
-            .filter { it.item.name.lowercase() !in inventoryNames }
+            .filter { it.item.name.lowercase() !in discoveredItems }
+            .filter { storyStatus >= it.minStoryStatus }
             .map { Pair(it.spotX, it.spotY) }
     }
 }

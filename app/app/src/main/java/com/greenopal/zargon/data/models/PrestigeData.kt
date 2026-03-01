@@ -7,9 +7,9 @@ enum class PrestigeBonus(
     val displayName: String,
     val description: String
 ) {
-    XP_BOOST("XP Boost", "+10% XP per enemy"),
+    XP_BOOST("XP Boost", "+25% XP per enemy"),
     STARTING_GOLD("Starting Gold", "+100 starting gold"),
-    GOLD_BOOST("Gold Boost", "+10% gold per enemy"),
+    GOLD_BOOST("Gold Boost", "+25% gold per enemy"),
     GREAT_WEAPONS("Great Weapons", "Weapons 150% more effective"),
     GREATER_ARMOR("Greater Armor", "Armor 150% more effective"),
     MASTER_SPELLBOOK("Master Spellbook", "All spells 50% more effective")
