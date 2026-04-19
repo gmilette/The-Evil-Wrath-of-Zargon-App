@@ -358,7 +358,7 @@ private fun ActionMenu(
                 variant = btnVariant,
             ) {
                 Image(
-                    painter            = painterResource(R.drawable.attack_icon),
+                    painter            = painterResource(R.drawable.icon_attack),
                     contentDescription = "Attack",
                     modifier           = Modifier.size(40.dp),
                 )
@@ -370,7 +370,7 @@ private fun ActionMenu(
                 variant = btnVariant,
             ) {
                 Image(
-                    painter            = painterResource(R.drawable.spell),
+                    painter            = painterResource(R.drawable.icon_magic),
                     contentDescription = "Magic",
                     modifier           = Modifier.size(40.dp),
                 )
@@ -382,7 +382,7 @@ private fun ActionMenu(
                 variant = btnVariant,
             ) {
                 Image(
-                    painter            = painterResource(R.drawable.run_icon),
+                    painter            = painterResource(R.drawable.icon_flee),
                     contentDescription = "Flee",
                     modifier           = Modifier.size(40.dp),
                 )

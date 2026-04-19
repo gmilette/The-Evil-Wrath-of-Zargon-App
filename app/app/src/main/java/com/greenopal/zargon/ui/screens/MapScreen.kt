@@ -1,6 +1,7 @@
 package com.greenopal.zargon.ui.screens
 
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -31,9 +32,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.nativeCanvas
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.greenopal.zargon.R
 import com.greenopal.zargon.data.models.GameState
 import com.greenopal.zargon.data.models.Item
 import com.greenopal.zargon.data.models.MapItems
@@ -406,14 +409,22 @@ private fun MovementControls(
                     modifier = Modifier.weight(1f),
                     variant  = MedievalButtonVariant.Gold,
                 ) {
-                    Text("SEARCH", style = MaterialTheme.typography.titleMedium)
+                    Image(
+                        painter            = painterResource(R.drawable.icon_search),
+                        contentDescription = "Search",
+                        modifier           = Modifier.size(36.dp),
+                    )
                 }
                 MedievalButton(
                     onClick  = onCast,
                     modifier = Modifier.weight(1f),
                     variant  = if (canCast) MedievalButtonVariant.Gold else MedievalButtonVariant.Disabled,
                 ) {
-                    Text("CAST", style = MaterialTheme.typography.titleMedium)
+                    Image(
+                        painter            = painterResource(R.drawable.icon_cast_map),
+                        contentDescription = "Cast",
+                        modifier           = Modifier.size(36.dp),
+                    )
                 }
             }
         }
