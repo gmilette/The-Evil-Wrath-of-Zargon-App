@@ -128,6 +128,54 @@ sealed class WorldSpell(
         }
     }
 
+    object GreaterCure : WorldSpell(
+        id = 1,
+        name = "Greater Cure",
+        mpCost = 5,
+        requiredSpellLevel = 3,
+        description = "Restore hit points (1.5x enhanced)"
+    ) {
+        override fun cast(gameState: GameState): Pair<GameState, String> {
+            if (gameState.character.currentHP >= gameState.character.maxHP) {
+                return gameState to "Already at full health!"
+            }
+            val healAmount = (Random.nextInt(1, 7) + 6 * gameState.character.level) * 3 / 2
+            val newHP = minOf(gameState.character.currentHP + healAmount, gameState.character.maxHP)
+            val actualHealed = newHP - gameState.character.currentHP
+            val updatedState = gameState.copy(
+                character = gameState.character.copy(
+                    currentHP = newHP,
+                    currentMP = gameState.character.currentMP - mpCost
+                )
+            )
+            return updatedState to "Greater Cure restored $actualHealed HP!"
+        }
+    }
+
+    object GreaterRestore : WorldSpell(
+        id = 2,
+        name = "Greater Restore",
+        mpCost = 12,
+        requiredSpellLevel = 5,
+        description = "Restore hit points (1.5x enhanced)"
+    ) {
+        override fun cast(gameState: GameState): Pair<GameState, String> {
+            if (gameState.character.currentHP >= gameState.character.maxHP) {
+                return gameState to "Already at full health!"
+            }
+            val healAmount = (Random.nextInt(1, 11) + 10 * gameState.character.level) * 3 / 2
+            val newHP = minOf(gameState.character.currentHP + healAmount, gameState.character.maxHP)
+            val actualHealed = newHP - gameState.character.currentHP
+            val updatedState = gameState.copy(
+                character = gameState.character.copy(
+                    currentHP = newHP,
+                    currentMP = gameState.character.currentMP - mpCost
+                )
+            )
+            return updatedState to "Greater Restore healed $actualHealed HP!"
+        }
+    }
+
     companion object {
         /**
          * All available world spells
@@ -135,10 +183,19 @@ sealed class WorldSpell(
         val ALL = listOf(Cure, Restore, Warp)
 
         /**
-         * Get spells available at a given spell level
+         * Get spells available at a given spell level, optionally with MASTER_SPELLBOOK enhancements
          */
-        fun getAvailableSpells(spellLevel: Int): List<WorldSpell> {
-            return ALL.filter { it.requiredSpellLevel <= spellLevel }
+        fun getAvailableSpells(spellLevel: Int, hasMasterSpellbook: Boolean = false): List<WorldSpell> {
+            return ALL
+                .filter { it.requiredSpellLevel <= spellLevel }
+                .map { spell ->
+                    if (!hasMasterSpellbook) spell
+                    else when (spell) {
+                        Cure -> GreaterCure
+                        Restore -> GreaterRestore
+                        else -> spell
+                    }
+                }
         }
 
         /**

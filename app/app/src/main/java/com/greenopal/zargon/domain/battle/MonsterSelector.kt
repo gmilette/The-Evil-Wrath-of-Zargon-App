@@ -24,7 +24,7 @@ class MonsterSelector @Inject constructor(
             if (gameState.characterX in 13..16 && gameState.characterY in 4..6) {
                 val baseZargon = MonsterStats(
                     type = MonsterType.ZARGON,
-                    attackPower = 100,
+                    attackPower = 135,
                     currentHP = 400,
                     maxHP = 400,
                     scalingFactor = 1
@@ -42,6 +42,12 @@ class MonsterSelector @Inject constructor(
                 scalingFactor = 1
             )
             return applyModifiersAndLabel(baseKraken, gameState)
+        }
+
+        if (gameState.worldX == 4 && gameState.worldY == 1 &&
+            gameState.characterX in 17..18 && gameState.characterY in 2..3) {
+            val baseNecro = createScaledMonster(MonsterType.NECRO, playerLevel)
+            return applyModifiersAndLabel(baseNecro, gameState)
         }
 
         if (gameState.worldX == 4 && gameState.worldY == 2 &&

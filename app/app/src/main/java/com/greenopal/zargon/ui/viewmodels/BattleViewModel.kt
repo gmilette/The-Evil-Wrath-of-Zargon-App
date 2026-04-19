@@ -4,14 +4,17 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.greenopal.zargon.data.models.CharacterStats
 import com.greenopal.zargon.data.models.GameState
+import com.greenopal.zargon.data.models.PrestigeData
 import com.greenopal.zargon.domain.battle.BattleAction
-import com.greenopal.zargon.domain.battle.BattleEngine
 import com.greenopal.zargon.domain.battle.BattleResult
 import com.greenopal.zargon.domain.battle.BattleState
+import com.greenopal.zargon.domain.battle.BattleUseCase
 import com.greenopal.zargon.domain.battle.MonsterSelector
+import com.greenopal.zargon.domain.battle.Spells
 import com.greenopal.zargon.domain.progression.BattleRewards
 import com.greenopal.zargon.domain.progression.LevelingSystem
 import com.greenopal.zargon.domain.progression.RewardSystem
+import com.greenopal.zargon.domain.challenges.PrestigeSystem
 import com.greenopal.zargon.domain.story.StoryProgressionChecker
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
@@ -20,17 +23,14 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-import kotlin.random.Random
 
 @HiltViewModel
 class BattleViewModel @Inject constructor(
     private val monsterSelector: MonsterSelector,
     private val rewardSystem: RewardSystem,
     private val levelingSystem: LevelingSystem,
-    private val battleEngine: BattleEngine,
-    private val challengeModifiers: com.greenopal.zargon.domain.challenges.ChallengeModifiers,
-    private val prestigeRepository: com.greenopal.zargon.data.repository.PrestigeRepository,
-    private val prestigeSystem: com.greenopal.zargon.domain.challenges.PrestigeSystem
+    private val battleUseCase: BattleUseCase,
+    private val prestigeSystem: PrestigeSystem
 ) : ViewModel() {
 
     private val _battleState = MutableStateFlow<BattleState?>(null)
@@ -56,8 +56,7 @@ class BattleViewModel @Inject constructor(
     private var isProcessingAction = false
 
     fun canUseMagic(): Boolean {
-        val gameState = currentGameState ?: return true
-        return challengeModifiers.canUseMagic(gameState.challengeConfig)
+        return battleUseCase.canUseMagic(currentGameState?.challengeConfig)
     }
 
     fun onAction(action: BattleAction) {
@@ -71,190 +70,95 @@ class BattleViewModel @Inject constructor(
             is BattleAction.Attack -> performAttack(state)
             is BattleAction.Magic -> {
                 if (canUseMagic()) {
-                    showMagicMenu(state)
+                    _battleState.value = state.copy(showMagicMenu = true)
                 } else {
                     _battleState.value = state.addMessage("Magic is forbidden in this challenge!")
                 }
             }
-            is BattleAction.Run -> attemptRun(state)
+            is BattleAction.Run -> performRun(state)
             is BattleAction.CastSpell -> castSpell(state, action.spellIndex)
         }
     }
+
+    private fun prestige(): PrestigeData = currentGameState?.prestigeData ?: PrestigeData()
+    private fun config() = currentGameState?.challengeConfig
 
     private fun performAttack(state: BattleState) {
         viewModelScope.launch {
             isProcessingAction = true
             try {
-                val gameState = currentGameState
-                val prestige = prestigeRepository.loadPrestige()
-
-                val effectiveWeaponBonus = challengeModifiers.getEffectiveWeaponBonus(
-                    state.character.weaponBonus,
-                    gameState?.challengeConfig,
-                    prestige
-                )
-
-                val damage = battleEngine.calculatePlayerDamage(state.character, effectiveWeaponBonus)
-
-                val newMonster = state.monster.takeDamage(damage)
-
-                var newState = state
-                    .updateMonster(newMonster)
-                    .addMessage("You hit ${state.monster.name} for $damage damage!")
-
-                if (!newMonster.isAlive) {
-                    newState = newState.addMessage("${state.monster.name} is defeated!")
-                    _battleState.value = newState
-
-                    delay(500)
-                    calculateVictoryRewards(newState)
-
-                    val updatedState = _battleState.value
-                    if (updatedState != null) {
-                        newState = updatedState.checkBattleEnd()
-                        _battleState.value = newState
-                    }
-                    return@launch
-                }
-
+                var newState = battleUseCase.executePlayerAttack(state, config(), prestige())
                 _battleState.value = newState
 
-                delay(500)
-                monsterCounterattack(newState)
+                if (newState.battleResult == BattleResult.Victory) {
+                    newState = newState.addMessage("${state.monster.name} is defeated!")
+                    _battleState.value = newState
+                    delay(500)
+                    calculateVictoryRewards(newState)
+                    _battleState.value?.let { _battleState.value = it.checkBattleEnd() }
+                } else if (newState.battleResult == BattleResult.InProgress) {
+                    delay(500)
+                    newState = battleUseCase.executeMonsterCounterattack(newState, config(), prestige())
+                    _battleState.value = newState
+                }
             } finally {
                 isProcessingAction = false
             }
         }
     }
 
-    private suspend fun monsterCounterattack(state: BattleState) {
-        val gameState = currentGameState
-        val prestige = prestigeRepository.loadPrestige()
-
-        val effectiveArmorBonus = challengeModifiers.getEffectiveArmorBonus(
-            state.character.armorBonus,
-            gameState?.challengeConfig,
-            prestige
-        )
-
-        val damage = battleEngine.calculateMonsterDamage(
-            state.monster, state.character, effectiveArmorBonus
-        )
-
-        val newCharacter = state.character.takeDamage(damage)
-
-        var newState = state
-            .updateCharacter(newCharacter)
-            .addMessage("${state.monster.name} hits you for $damage damage!")
-
-        newState = newState.checkBattleEnd()
-        _battleState.value = newState
-    }
-
-    private fun attemptRun(state: BattleState) {
+    private fun performRun(state: BattleState) {
         viewModelScope.launch {
             isProcessingAction = true
             try {
-                val escaped = Random.nextInt(1, 5) == 1
+                val newState = battleUseCase.attemptRun(state)
+                _battleState.value = newState
 
-                if (escaped) {
-                    val newState = state
-                        .addMessage("You run away!")
-                        .copy(battleResult = BattleResult.Fled)
-                    _battleState.value = newState
-                } else {
-                    val newState = state.addMessage("Can't escape!")
-                    _battleState.value = newState
-
+                if (newState.battleResult == BattleResult.InProgress) {
                     delay(500)
-                    monsterCounterattack(newState)
+                    _battleState.value = battleUseCase.executeMonsterCounterattack(newState, config(), prestige())
                 }
             } finally {
                 isProcessingAction = false
             }
         }
-    }
-
-    private fun showMagicMenu(state: BattleState) {
-        _battleState.value = state.copy(showMagicMenu = true)
     }
 
     private fun castSpell(state: BattleState, spellIndex: Int) {
         viewModelScope.launch {
             isProcessingAction = true
             try {
-                val spell = com.greenopal.zargon.domain.battle.Spells.getByIndex(spellIndex)
+                val spell = Spells.getByIndex(spellIndex)
 
                 if (spell == null) {
-                    val newState = state
-                        .copy(showMagicMenu = false)
-                        .addMessage("Invalid spell!")
-                    _battleState.value = newState
+                    _battleState.value = state.copy(showMagicMenu = false).addMessage("Invalid spell!")
                     return@launch
                 }
 
-                val availableSpells = com.greenopal.zargon.domain.battle.Spells.getAvailableSpells(state.character.level)
-                if (spell !in availableSpells) {
-                    val newState = state
-                        .addMessage("Spell not yet learned!")
-                    _battleState.value = newState
+                if (spell !in Spells.getAvailableSpells(state.character.level)) {
+                    _battleState.value = state.addMessage("Spell not yet learned!")
                     return@launch
                 }
 
                 if (!spell.canCast(state.character.currentMP)) {
-                    val newState = state
-                        .addMessage("Not enough MP!")
-                    _battleState.value = newState
+                    _battleState.value = state.addMessage("Not enough MP!")
                     return@launch
                 }
 
-                var newState = state.copy(showMagicMenu = false)
+                var newState = battleUseCase.executeSpell(
+                    state.copy(showMagicMenu = false), spell, config(), prestige()
+                )
+                _battleState.value = newState
 
-                val newCharacter = state.character.useMagic(spell.mpCost)
-                newState = newState.updateCharacter(newCharacter)
-
-                val prestige = prestigeRepository.loadPrestige()
-                val spellMultiplier = challengeModifiers.getSpellEffectMultiplier(prestige)
-
-                if (spell.isHealing) {
-                    val healAmount = spell.calculateEffect(state.character.level, spellMultiplier)
-                    val healedCharacter = newCharacter.heal(healAmount)
-                    newState = newState
-                        .updateCharacter(healedCharacter)
-                        .addMessage("${spell.name} restores $healAmount HP!")
-
+                if (newState.battleResult == BattleResult.Victory) {
+                    newState = newState.addMessage("${state.monster.name} is defeated!")
                     _battleState.value = newState
-
                     delay(500)
-                    monsterCounterattack(newState)
-                } else {
-                    val damage = spell.calculateEffect(state.character.level, spellMultiplier)
-                    val damagedMonster = state.monster.takeDamage(damage)
-
-                    newState = newState
-                        .updateMonster(damagedMonster)
-                        .addMessage("${spell.name} deals $damage damage!")
-
-                    if (!damagedMonster.isAlive) {
-                        newState = newState
-                            .addMessage("${state.monster.name} is defeated!")
-                        _battleState.value = newState
-
-                        delay(500)
-                        calculateVictoryRewards(newState)
-
-                        val updatedState = _battleState.value
-                        if (updatedState != null) {
-                            newState = updatedState.checkBattleEnd()
-                            _battleState.value = newState
-                        }
-                        return@launch
-                    }
-
-                    _battleState.value = newState
-
+                    calculateVictoryRewards(newState)
+                    _battleState.value?.let { _battleState.value = it.checkBattleEnd() }
+                } else if (newState.battleResult == BattleResult.InProgress) {
                     delay(500)
-                    monsterCounterattack(newState)
+                    _battleState.value = battleUseCase.executeMonsterCounterattack(newState, config(), prestige())
                 }
             } finally {
                 isProcessingAction = false
@@ -283,8 +187,8 @@ class BattleViewModel @Inject constructor(
             return
         }
 
+        val prestige = prestige()
         val monster = state.monster
-        val prestige = prestigeRepository.loadPrestige()
 
         val baseXP = rewardSystem.calculateXP(monster.type, monster.scalingFactor)
         val baseGold = rewardSystem.calculateGold(monster.type, monster.scalingFactor)
@@ -334,8 +238,7 @@ class BattleViewModel @Inject constructor(
             )
         }
 
-        val newState = state.updateCharacter(updatedCharacter)
-        _battleState.value = newState
+        _battleState.value = state.updateCharacter(updatedCharacter)
         _battleRewards.value = rewards
     }
 

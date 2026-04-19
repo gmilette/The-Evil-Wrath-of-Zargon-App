@@ -33,7 +33,9 @@ import androidx.compose.ui.unit.dp
 import com.greenopal.zargon.data.models.GameState
 import com.greenopal.zargon.data.models.Item
 import com.greenopal.zargon.data.models.ItemType
+import com.greenopal.zargon.data.models.PrestigeBonus
 import com.greenopal.zargon.ui.theme.DarkStone
+import com.greenopal.zargon.ui.theme.EmberOrange
 import com.greenopal.zargon.ui.theme.Gold
 import com.greenopal.zargon.ui.theme.Parchment
 import kotlinx.coroutines.delay
@@ -47,6 +49,7 @@ fun VictoryScreen(
     onReturnToTitle: () -> Unit,
     onReturnToGEF: (GameState) -> Unit,
     onChallengeComplete: ((com.greenopal.zargon.data.models.ChallengeResult) -> Unit)? = null,
+    earnedBonus: PrestigeBonus? = null,
     modifier: Modifier = Modifier
 ) {
     var showText by remember { mutableStateOf(false) }
@@ -144,6 +147,20 @@ fun VictoryScreen(
                                         fontWeight = FontWeight.Bold
                                     )
                                 }
+                                if (earnedBonus != null) {
+                                    Spacer(modifier = Modifier.height(6.dp))
+                                    Text(
+                                        text = "Bonus Unlocked: ${earnedBonus.displayName}",
+                                        style = MaterialTheme.typography.titleSmall,
+                                        color = EmberOrange,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                    Text(
+                                        text = earnedBonus.description,
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = DarkStone
+                                    )
+                                }
                             }
                         }
                         Spacer(modifier = Modifier.height(8.dp))
@@ -180,8 +197,8 @@ fun VictoryScreen(
                             StatLine("Level", "${finalGameState.character.level}")
                             StatLine("Experience", "${finalGameState.character.experience}")
                             StatLine("Gold", "${finalGameState.character.gold}g")
-                            StatLine("Attack Power", "${finalGameState.character.totalAP}")
-                            StatLine("Defense", "${finalGameState.character.totalDefense}")
+                            StatLine("Attack Power", "${finalGameState.character.baseAP + finalGameState.character.weaponBonus}")
+                            StatLine("Defense", "${finalGameState.character.baseDP + finalGameState.character.armorBonus}")
                         }
                     }
 

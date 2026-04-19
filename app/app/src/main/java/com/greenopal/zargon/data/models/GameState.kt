@@ -45,7 +45,13 @@ data class GameState(
 
     // Statistics tracking for challenge completion
     val monstersDefeated: Int = 0,
-    val deathCount: Int = 0
+    val deathCount: Int = 0,
+
+    // Prestige / challenge victories (persisted here so save files are self-contained)
+    val prestigeData: PrestigeData = PrestigeData(),
+
+    // Whether to show item location markers on the map (can be disabled by challenges)
+    val showMapItemMarkers: Boolean = true
 ) {
     /**
      * Add item to inventory (max 10 items)

@@ -63,12 +63,15 @@ class PrestigeSystem @Inject constructor() {
     }
 
     fun getXPMultiplier(prestige: PrestigeData): Float {
-        var multiplier = 1.0f
-        if (prestige.isBonusActive(PrestigeBonus.XP_BOOST)) multiplier *= 1.1f
-        return multiplier
+        val xpChallengeNames = listOf("IMPOSSIBLE_MISSION", "MAGE_QUEST", "WARRIOR_MODE")
+        val completedXPChallenges = xpChallengeNames.count { challengeName ->
+            prestige.completedChallenges.any { completedId -> challengeName in completedId }
+        }
+        return if (completedXPChallenges == 0) 1.0f
+               else 1.0f + (completedXPChallenges * 0.25f)
     }
 
     fun getGoldMultiplier(prestige: PrestigeData): Float {
-        return if (prestige.isBonusActive(PrestigeBonus.GOLD_BOOST)) 1.1f else 1.0f
+        return if (prestige.isBonusActive(PrestigeBonus.GOLD_BOOST)) 1.25f else 1.0f
     }
 }

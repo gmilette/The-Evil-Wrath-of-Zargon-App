@@ -194,7 +194,8 @@ fun BattleScreen(
                     },
                     onCancel = {
                         viewModel.closeMagicMenu()
-                    }
+                    },
+                    prestigeData = gameState.prestigeData
                 )
             }
         } else {
@@ -345,7 +346,7 @@ private fun CharacterStatsMini(
             )
             Spacer(modifier = Modifier.height(4.dp))
             Text(
-                text = "AP: ${character.totalAP}",
+                text = "AP: ${character.baseAP + character.weaponBonus}",
                 style = MaterialTheme.typography.bodySmall
             )
             Text(

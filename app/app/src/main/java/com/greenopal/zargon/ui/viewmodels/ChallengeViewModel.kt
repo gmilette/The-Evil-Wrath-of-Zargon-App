@@ -3,6 +3,7 @@ package com.greenopal.zargon.ui.viewmodels
 import androidx.lifecycle.ViewModel
 import com.greenopal.zargon.data.models.Challenge
 import com.greenopal.zargon.data.models.ChallengeConfig
+import com.greenopal.zargon.data.models.ChallengeResult
 import com.greenopal.zargon.data.models.CharacterStats
 import com.greenopal.zargon.data.models.GameState
 import com.greenopal.zargon.data.models.PrestigeBonus
@@ -75,8 +76,27 @@ class ChallengeViewModel @Inject constructor(
         return GameState(
             saveSlot = saveSlot,
             character = prestigeCharacter,
-            challengeConfig = if (config.challenges.isNotEmpty()) config else null
+            challengeConfig = if (config.challenges.isNotEmpty()) config else null,
+            prestigeData = prestige
         )
+    }
+
+    /**
+     * Merge prestige loaded from a save file into the live state.
+     * Takes the union of completed challenges so no progress is ever lost.
+     */
+    fun syncPrestige(fromSave: PrestigeData) {
+        val current = _prestigeData.value
+        val merged = current.copy(
+            completedChallenges = current.completedChallenges + fromSave.completedChallenges,
+            unlockedBonuses = current.unlockedBonuses + fromSave.unlockedBonuses,
+            activeBonuses = current.activeBonuses + fromSave.activeBonuses,
+            totalCompletions = maxOf(current.totalCompletions, fromSave.totalCompletions)
+        )
+        if (merged != current) {
+            _prestigeData.value = merged
+            prestigeRepository.savePrestige(merged)
+        }
     }
 
     fun isChallengeCompleted(challengeId: String): Boolean {
@@ -85,5 +105,19 @@ class ChallengeViewModel @Inject constructor(
 
     fun getRewardForChallenge(challenge: Challenge): PrestigeBonus? {
         return prestigeSystem.getRewardForConfig(ChallengeConfig(challenges = setOf(challenge)))
+    }
+
+    /** Returns the bonus that would be earned for completing this config, or null if already completed. */
+    fun getEarnedBonusIfNew(config: ChallengeConfig): PrestigeBonus? {
+        if (isChallengeCompleted(config.getChallengeId())) return null
+        return prestigeSystem.getRewardForConfig(config)
+    }
+
+    /** Marks the challenge complete, persists prestige, and refreshes in-memory state. */
+    fun completeChallenge(config: ChallengeConfig, result: ChallengeResult) {
+        val newPrestige = prestigeSystem.calculatePrestigeRewards(config, _prestigeData.value)
+        prestigeRepository.savePrestige(newPrestige)
+        prestigeRepository.saveChallengeResult(result)
+        _prestigeData.value = newPrestige
     }
 }

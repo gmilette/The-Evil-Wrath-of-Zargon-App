@@ -28,7 +28,9 @@
       "mcp__pixellab__create_character",
       "Bash(git rebase:*)",
       "Bash(GIT_EDITOR=true git rebase:*)",
-      "Bash(git cherry-pick:*)"
+      "Bash(git cherry-pick:*)",
+      "Bash(git branch:*)",
+      "Bash(git checkout:*)"
     ],
     "deny": [],
     "ask": []
