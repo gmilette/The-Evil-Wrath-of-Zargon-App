@@ -1,168 +1,99 @@
 package com.greenopal.zargon.ui.components
 
-import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import com.greenopal.zargon.domain.progression.BattleRewards
+import com.greenopal.zargon.ui.theme.Ember
+import com.greenopal.zargon.ui.theme.Gold
+import com.greenopal.zargon.ui.theme.GoldBright
+import com.greenopal.zargon.ui.theme.Parchment
+import com.greenopal.zargon.ui.theme.ParchmentDim
+import com.greenopal.zargon.ui.theme.XpGreenBright
 
-/**
- * Dialog showing battle rewards after victory
- * Based on WinBattle messages (ZARGON.BAS:3664-3684)
- */
 @Composable
 fun BattleRewardsDialog(
     rewards: BattleRewards,
     onDismiss: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     Dialog(onDismissRequest = onDismiss) {
-        Card(
-            modifier = modifier,
-            colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surface
-            ),
-            border = BorderStroke(3.dp, MaterialTheme.colorScheme.primary),
-            shape = RoundedCornerShape(8.dp)
-        ) {
+        MedievalPanel(modifier = modifier.fillMaxWidth()) {
             Column(
-                modifier = Modifier
-                    .padding(24.dp)
-                    .fillMaxWidth(),
-                horizontalAlignment = Alignment.CenterHorizontally
+                modifier            = Modifier.fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
-                // Victory message
                 Text(
-                    text = "You Win!",
-                    style = MaterialTheme.typography.titleLarge,
-                    color = MaterialTheme.colorScheme.primary,
-                    fontWeight = FontWeight.Bold
+                    text      = "Victory!",
+                    style     = MaterialTheme.typography.headlineMedium.copy(color = GoldBright),
+                    textAlign = TextAlign.Center,
                 )
 
-                Spacer(modifier = Modifier.height(16.dp))
+                OrnateSeparator()
 
-                // XP and Gold rewards
-                Text(
-                    text = "You Gained:",
-                    style = MaterialTheme.typography.bodyLarge
-                )
-
-                Spacer(modifier = Modifier.height(8.dp))
+                Text("You Gained:", style = MaterialTheme.typography.bodyMedium.copy(color = Parchment))
 
                 Text(
-                    text = "${rewards.xpGained}",
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.secondary,
-                    fontWeight = FontWeight.Bold
-                )
-                Text(
-                    text = "Experience!",
-                    style = MaterialTheme.typography.bodyMedium
+                    text  = "${rewards.xpGained} Experience!",
+                    style = MaterialTheme.typography.titleMedium.copy(color = XpGreenBright),
                 )
 
-                Spacer(modifier = Modifier.height(8.dp))
-
                 Text(
-                    text = "And:",
-                    style = MaterialTheme.typography.bodyMedium
-                )
-                Text(
-                    text = "${rewards.goldGained} gold!",
-                    style = MaterialTheme.typography.titleMedium,
-                    color = Color(0xFFFFD700), // Gold color
-                    fontWeight = FontWeight.Bold
+                    text  = "${rewards.goldGained} Gold!",
+                    style = MaterialTheme.typography.titleMedium.copy(color = Gold),
                 )
 
-                // Item dropped
                 rewards.itemDropped?.let { item ->
-                    Spacer(modifier = Modifier.height(12.dp))
-                    Text(
-                        text = "You picked up:",
-                        style = MaterialTheme.typography.bodyMedium
-                    )
-                    Text(
-                        text = item.name,
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.tertiary,
-                        fontWeight = FontWeight.Bold
-                    )
+                    OrnateSeparator()
+                    Text("You picked up:", style = MaterialTheme.typography.bodySmall.copy(color = ParchmentDim))
+                    Text(item.name, style = MaterialTheme.typography.bodyLarge.copy(color = Ember))
                 }
 
-                // Level up message
                 if (rewards.leveledUp && rewards.newLevel != null) {
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    Card(
-                        colors = CardDefaults.cardColors(
-                            containerColor = MaterialTheme.colorScheme.primaryContainer
-                        ),
-                        border = BorderStroke(2.dp, MaterialTheme.colorScheme.primary)
-                    ) {
+                    OrnateSeparator()
+                    MedievalPanel(showCornerGems = false) {
                         Column(
-                            modifier = Modifier.padding(16.dp),
-                            horizontalAlignment = Alignment.CenterHorizontally
+                            modifier            = Modifier.fillMaxWidth(),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.spacedBy(4.dp),
                         ) {
                             Text(
-                                text = "LEVEL UP!",
-                                style = MaterialTheme.typography.titleMedium,
-                                color = MaterialTheme.colorScheme.primary,
-                                fontWeight = FontWeight.Bold
+                                text  = "LEVEL UP!",
+                                style = MaterialTheme.typography.headlineSmall.copy(color = GoldBright),
                             )
-
-                            Spacer(modifier = Modifier.height(8.dp))
-
                             Text(
-                                text = "JOE has raised to level ${rewards.newLevel}!",
-                                style = MaterialTheme.typography.bodyMedium,
-                                textAlign = TextAlign.Center
+                                text      = "JOE has raised to level ${rewards.newLevel}!",
+                                style     = MaterialTheme.typography.bodyMedium.copy(color = Parchment),
+                                textAlign = TextAlign.Center,
                             )
-
-                            Spacer(modifier = Modifier.height(8.dp))
-
                             if (rewards.apGain != null && rewards.dpGain != null && rewards.mpGain != null) {
-                                Text(
-                                    text = "AP +${rewards.apGain}",
-                                    style = MaterialTheme.typography.bodySmall
-                                )
-                                Text(
-                                    text = "DP +${rewards.dpGain}",
-                                    style = MaterialTheme.typography.bodySmall
-                                )
-                                Text(
-                                    text = "MP +${rewards.mpGain}",
-                                    style = MaterialTheme.typography.bodySmall
-                                )
+                                Spacer(Modifier.height(4.dp))
+                                Text("AP +${rewards.apGain}", style = MaterialTheme.typography.bodySmall.copy(color = ParchmentDim))
+                                Text("DP +${rewards.dpGain}", style = MaterialTheme.typography.bodySmall.copy(color = ParchmentDim))
+                                Text("MP +${rewards.mpGain}", style = MaterialTheme.typography.bodySmall.copy(color = ParchmentDim))
                             }
                         }
                     }
                 }
 
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(Modifier.height(4.dp))
 
-                Button(
-                    onClick = {
-                        android.util.Log.d("BattleRewardsDialog", "Continue button clicked - Gold gained: ${rewards.goldGained}")
-                        onDismiss()
-                    },
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text("Continue")
+                MedievalButton(onClick = {
+                    android.util.Log.d("BattleRewardsDialog", "Continue button clicked - Gold gained: ${rewards.goldGained}")
+                    onDismiss()
+                }) {
+                    Text("Continue", style = MaterialTheme.typography.titleMedium)
                 }
             }
         }

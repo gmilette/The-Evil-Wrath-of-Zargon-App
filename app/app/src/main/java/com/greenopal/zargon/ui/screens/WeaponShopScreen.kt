@@ -1,27 +1,19 @@
 package com.greenopal.zargon.ui.screens
 
 import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.background
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -34,9 +26,23 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.greenopal.zargon.data.models.GameState
 import com.greenopal.zargon.data.models.PrestigeData
 import com.greenopal.zargon.domain.challenges.ChallengeModifiers
+import com.greenopal.zargon.ui.components.DungeonBackground
+import com.greenopal.zargon.ui.components.MedievalButton
+import com.greenopal.zargon.ui.components.MedievalButtonVariant
+import com.greenopal.zargon.ui.components.MedievalPanel
+import com.greenopal.zargon.ui.components.OrnateSeparator
+import com.greenopal.zargon.ui.components.PanelHeading
+import com.greenopal.zargon.ui.components.FlavorText
+import com.greenopal.zargon.ui.components.ScrollBanner
+import com.greenopal.zargon.ui.theme.EmberBright
+import com.greenopal.zargon.ui.theme.Gold
+import com.greenopal.zargon.ui.theme.GoldBright
+import com.greenopal.zargon.ui.theme.Parchment
+import com.greenopal.zargon.ui.theme.TextDim
 
 @Composable
 fun WeaponShopScreen(
@@ -49,434 +55,263 @@ fun WeaponShopScreen(
     val challengeConfig = gameState.challengeConfig
 
     var currentScreen by remember { mutableStateOf(ShopScreen.MAIN) }
-    var message by remember { mutableStateOf<String?>(null) }
-    var updatedGameState by remember { mutableStateOf(gameState) }
+    var message       by remember { mutableStateOf<String?>(null) }
+    var updatedState  by remember { mutableStateOf(gameState) }
 
     BackHandler {
-        when (currentScreen) {
-            ShopScreen.MAIN -> onShopExit(updatedGameState)
-            else -> currentScreen = ShopScreen.MAIN
-        }
+        if (currentScreen == ShopScreen.MAIN) onShopExit(updatedState)
+        else currentScreen = ShopScreen.MAIN
     }
 
-    Box(
-        modifier = modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background),
-        contentAlignment = Alignment.Center
-    ) {
-        Card(
-            modifier = Modifier
-                .fillMaxWidth(0.9f)
-                .padding(16.dp),
-            colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surface
-            ),
-            border = BorderStroke(3.dp, MaterialTheme.colorScheme.primary)
+    DungeonBackground {
+        LazyColumn(
+            modifier            = modifier
+                .fillMaxSize()
+                .padding(horizontal = 16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(10.dp),
+            contentPadding      = PaddingValues(vertical = 24.dp),
         ) {
-            Box {
-                IconButton(
-                    onClick = { onShopExit(updatedGameState) },
-                    modifier = Modifier
-                        .align(Alignment.TopStart)
-                        .padding(8.dp)
+            item {
+                MedievalPanel(
+                    modifier       = Modifier.fillMaxWidth(),
+                    contentPadding = PaddingValues(0.dp),
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.Close,
-                        contentDescription = "Exit shop",
-                        tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.size(32.dp)
-                    )
-                }
-
-                Column(
-                    modifier = Modifier
-                        .padding(start = 24.dp, end = 24.dp, bottom = 24.dp, top = 56.dp)
-                        .fillMaxWidth(),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                Text(
-                    text = "Gothox Slothair's Weapon Shop",
-                    style = MaterialTheme.typography.headlineSmall,
-                    color = MaterialTheme.colorScheme.primary,
-                    textAlign = TextAlign.Center
-                )
-
-                Text(
-                    text = "A large, dirt-covered blacksmith stands behind the counter",
-                    style = MaterialTheme.typography.bodySmall,
-                    textAlign = TextAlign.Center
-                )
-
-                Card(
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.surface
-                    )
-                ) {
-                    Text(
-                        text = "You have ${updatedGameState.character.gold} gold",
-                        style = MaterialTheme.typography.titleMedium,
-                        color = MaterialTheme.colorScheme.primary,
-                        fontWeight = FontWeight.Bold,
-                        modifier = Modifier.padding(8.dp)
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                if (message != null) {
-                    Card(
-                        modifier = Modifier.fillMaxWidth(),
-                        colors = CardDefaults.cardColors(
-                            containerColor = MaterialTheme.colorScheme.errorContainer
-                        )
+                    Column(
+                        modifier            = Modifier.fillMaxWidth(),
+                        horizontalAlignment = Alignment.CenterHorizontally,
                     ) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(top = 28.dp, start = 24.dp, end = 24.dp),
+                        ) {
+                            Text(
+                                text     = "✕",
+                                style    = MaterialTheme.typography.titleSmall.copy(color = Gold.copy(alpha = 0.7f)),
+                                modifier = Modifier
+                                    .align(Alignment.TopStart)
+                                    .clickable(
+                                        interactionSource = remember { MutableInteractionSource() },
+                                        indication        = null,
+                                    ) { onShopExit(updatedState) },
+                            )
+                            Column(
+                                modifier            = Modifier.fillMaxWidth(),
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement = Arrangement.spacedBy(6.dp),
+                            ) {
+                                PanelHeading("Gothox Slothair's\nWeapon Shop")
+                                FlavorText("A large, dirt-covered blacksmith stands behind the counter")
+                            }
+                        }
+
+                        Spacer(Modifier.height(12.dp))
+                        OrnateSeparator(Modifier.padding(horizontal = 24.dp))
+                        Spacer(Modifier.height(10.dp))
+
+                        challengeConfig?.getDisplayName()?.takeIf { it != "Normal" }?.let { badge ->
+                            Text(
+                                text  = "⚔ CHALLENGE: $badge ⚔",
+                                style = MaterialTheme.typography.headlineSmall.copy(
+                                    color    = EmberBright,
+                                    fontSize = 11.sp,
+                                ),
+                                modifier = Modifier.padding(bottom = 6.dp),
+                            )
+                        }
+
                         Text(
-                            text = message!!,
-                            modifier = Modifier.padding(12.dp),
-                            style = MaterialTheme.typography.bodyMedium
+                            text  = "You have  ${updatedState.character.gold} gold",
+                            style = MaterialTheme.typography.titleMedium.copy(
+                                color      = GoldBright,
+                                fontWeight = FontWeight.Bold,
+                            ),
+                            modifier = Modifier.padding(bottom = 4.dp),
                         )
+
+                        message?.let { msg ->
+                            Spacer(Modifier.height(4.dp))
+                            Text(
+                                text      = msg,
+                                style     = MaterialTheme.typography.bodyMedium.copy(color = EmberBright),
+                                modifier  = Modifier.padding(horizontal = 24.dp),
+                                textAlign = TextAlign.Center,
+                            )
+                        }
+
+                        Spacer(Modifier.height(12.dp))
+                        OrnateSeparator(Modifier.padding(horizontal = 24.dp))
+                        Spacer(Modifier.height(12.dp))
+
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 20.dp)
+                                .padding(bottom = 20.dp),
+                            verticalArrangement = Arrangement.spacedBy(8.dp),
+                        ) {
+                            when (currentScreen) {
+                                ShopScreen.MAIN -> ShopMainMenu(
+                                    onBuyWeapon = { currentScreen = ShopScreen.WEAPONS },
+                                    onBuyArmor  = { currentScreen = ShopScreen.ARMOR },
+                                    onLeave     = { onShopExit(updatedState) },
+                                )
+
+                                ShopScreen.WEAPONS -> {
+                                    ScrollBanner("Weapons for Sale")
+                                    Spacer(Modifier.height(4.dp))
+                                    Weapon.values().forEach { weapon ->
+                                        val name = challengeModifiers.getWeaponDisplayName(
+                                            weapon.displayName, challengeConfig, prestige,
+                                        )
+                                        val bonus = challengeModifiers.getEffectiveWeaponBonus(
+                                            weapon.attackBonus, challengeConfig, prestige,
+                                        )
+                                        val equipped  = weapon.ordinal == updatedState.character.weaponStatus
+                                        val canAfford = updatedState.character.gold >= weapon.basePrice
+
+                                        ShopItemButton(
+                                            name      = if (equipped) "$name (+${bonus} AP) [EQUIPPED]" else "$name (+${bonus} AP)",
+                                            priceText = if (equipped) null else "${weapon.basePrice}g",
+                                            equipped  = equipped,
+                                            canAfford = canAfford,
+                                            onClick   = {
+                                                if (!equipped && canAfford) {
+                                                    updatedState = updatedState.updateCharacter(
+                                                        updatedState.character.copy(
+                                                            gold         = updatedState.character.gold - weapon.basePrice,
+                                                            weaponBonus  = bonus,
+                                                            weaponStatus = weapon.ordinal,
+                                                        )
+                                                    )
+                                                    message = "Purchased $name!"
+                                                    currentScreen = ShopScreen.MAIN
+                                                } else if (!canAfford) {
+                                                    message = "Not enough gold"
+                                                }
+                                            },
+                                        )
+                                    }
+                                    Spacer(Modifier.height(4.dp))
+                                    MedievalButton(
+                                        onClick = { currentScreen = ShopScreen.MAIN },
+                                        variant = MedievalButtonVariant.Ember,
+                                    ) {
+                                        Text("Back", style = MaterialTheme.typography.titleMedium)
+                                    }
+                                }
+
+                                ShopScreen.ARMOR -> {
+                                    ScrollBanner("Armor for Sale")
+                                    Spacer(Modifier.height(4.dp))
+                                    Armor.values().forEach { armor ->
+                                        val name = challengeModifiers.getArmorDisplayName(
+                                            armor.displayName, challengeConfig, prestige,
+                                        )
+                                        val bonus = challengeModifiers.getEffectiveArmorBonus(
+                                            armor.defenseBonus, challengeConfig, prestige,
+                                        )
+                                        val equipped  = armor.ordinal == updatedState.character.armorStatus
+                                        val canAfford = updatedState.character.gold >= armor.basePrice
+
+                                        ShopItemButton(
+                                            name      = if (equipped) "$name (+${bonus} DP) [EQUIPPED]" else "$name (+${bonus} DP)",
+                                            priceText = if (equipped) null else "${armor.basePrice}g",
+                                            equipped  = equipped,
+                                            canAfford = canAfford,
+                                            onClick   = {
+                                                if (!equipped && canAfford) {
+                                                    updatedState = updatedState.updateCharacter(
+                                                        updatedState.character.copy(
+                                                            gold        = updatedState.character.gold - armor.basePrice,
+                                                            armorBonus  = bonus,
+                                                            armorStatus = armor.ordinal,
+                                                        )
+                                                    )
+                                                    message = "Purchased $name!"
+                                                    currentScreen = ShopScreen.MAIN
+                                                } else if (!canAfford) {
+                                                    message = "Not enough gold"
+                                                }
+                                            },
+                                        )
+                                    }
+                                    Spacer(Modifier.height(4.dp))
+                                    MedievalButton(
+                                        onClick = { currentScreen = ShopScreen.MAIN },
+                                        variant = MedievalButtonVariant.Ember,
+                                    ) {
+                                        Text("Back", style = MaterialTheme.typography.titleMedium)
+                                    }
+                                }
+                            }
+                        }
                     }
-                }
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                when (currentScreen) {
-                    ShopScreen.MAIN -> MainMenu(
-                        onBuyWeapon = { currentScreen = ShopScreen.WEAPONS },
-                        onBuyArmor = { currentScreen = ShopScreen.ARMOR },
-                        onLeave = { onShopExit(updatedGameState) }
-                    )
-
-                    ShopScreen.WEAPONS -> WeaponList(
-                        currentGold = updatedGameState.character.gold,
-                        currentWeaponStatus = updatedGameState.character.weaponStatus,
-                        challengeConfig = challengeConfig,
-                        challengeModifiers = challengeModifiers,
-                        prestige = prestige,
-                        onPurchase = { weapon, effectiveBonus, displayName ->
-                            val cost = weapon.basePrice
-                            if (updatedGameState.character.gold >= cost) {
-                                updatedGameState = updatedGameState.updateCharacter(
-                                    updatedGameState.character.copy(
-                                        gold = updatedGameState.character.gold - cost,
-                                        weaponBonus = weapon.attackBonus,
-                                        weaponStatus = weapon.ordinal
-                                    )
-                                )
-                                message = "Purchased $displayName!"
-                                currentScreen = ShopScreen.MAIN
-                            } else {
-                                message = "You can't afford it"
-                            }
-                        },
-                        onBack = { currentScreen = ShopScreen.MAIN }
-                    )
-
-                    ShopScreen.ARMOR -> ArmorList(
-                        currentGold = updatedGameState.character.gold,
-                        currentArmorStatus = updatedGameState.character.armorStatus,
-                        challengeConfig = challengeConfig,
-                        challengeModifiers = challengeModifiers,
-                        prestige = prestige,
-                        onPurchase = { armor, effectiveBonus, displayName ->
-                            val cost = armor.basePrice
-                            if (updatedGameState.character.gold >= cost) {
-                                updatedGameState = updatedGameState.updateCharacter(
-                                    updatedGameState.character.copy(
-                                        gold = updatedGameState.character.gold - cost,
-                                        armorBonus = armor.defenseBonus,
-                                        armorStatus = armor.ordinal
-                                    )
-                                )
-                                message = "Purchased $displayName!"
-                                currentScreen = ShopScreen.MAIN
-                            } else {
-                                message = "You can't afford it"
-                            }
-                        },
-                        onBack = { currentScreen = ShopScreen.MAIN }
-                    )
                 }
             }
         }
     }
-    }
 }
 
 @Composable
-private fun MainMenu(
+private fun ShopMainMenu(
     onBuyWeapon: () -> Unit,
     onBuyArmor: () -> Unit,
-    onLeave: () -> Unit
+    onLeave: () -> Unit,
 ) {
-    Button(
-        onClick = onBuyWeapon,
-        modifier = Modifier.fillMaxWidth(),
-        colors = ButtonDefaults.buttonColors(
-            containerColor = MaterialTheme.colorScheme.primary,
-            contentColor = MaterialTheme.colorScheme.onPrimary
-        )
-    ) {
-        Text("1. Buy a Weapon")
+    MedievalButton(onClick = onBuyWeapon) {
+        Text("1. Buy a Weapon", style = MaterialTheme.typography.titleMedium)
     }
-
-    Button(
-        onClick = onBuyArmor,
-        modifier = Modifier.fillMaxWidth(),
-        colors = ButtonDefaults.buttonColors(
-            containerColor = MaterialTheme.colorScheme.primary,
-            contentColor = MaterialTheme.colorScheme.onPrimary
-        )
-    ) {
-        Text("2. Buy Armor")
+    MedievalButton(onClick = onBuyArmor) {
+        Text("2. Buy Armor", style = MaterialTheme.typography.titleMedium)
     }
-
-    Button(
-        onClick = onLeave,
-        modifier = Modifier.fillMaxWidth(),
-        colors = ButtonDefaults.buttonColors(
-            containerColor = MaterialTheme.colorScheme.tertiary,
-            contentColor = MaterialTheme.colorScheme.onTertiary
-        )
-    ) {
-        Text("0. Leave the store")
+    OrnateSeparator()
+    MedievalButton(onClick = onLeave, variant = MedievalButtonVariant.Ember) {
+        Text("0. Leave the store", style = MaterialTheme.typography.titleMedium)
     }
 }
 
 @Composable
-private fun WeaponList(
-    currentGold: Int,
-    currentWeaponStatus: Int,
-    challengeConfig: com.greenopal.zargon.data.models.ChallengeConfig?,
-    challengeModifiers: ChallengeModifiers,
-    prestige: PrestigeData?,
-    onPurchase: (Weapon, Int, String) -> Unit,
-    onBack: () -> Unit
-) {
-    Column(
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        Text(
-            "Weapons for Sale:",
-            style = MaterialTheme.typography.titleMedium,
-            modifier = Modifier.padding(bottom = 8.dp)
-        )
-
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxWidth()
-                .weight(1f),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            Weapon.values().forEach { weapon ->
-                val displayName = challengeModifiers.getWeaponDisplayName(
-                    weapon.displayName, challengeConfig, prestige
-                )
-                val effectiveBonus = challengeModifiers.getEffectiveWeaponBonus(
-                    weapon.attackBonus, challengeConfig, prestige
-                )
-                val isEquipped = weapon.ordinal == currentWeaponStatus
-
-                item {
-                    WeaponItem(
-                        name = displayName,
-                        price = weapon.basePrice,
-                        effectiveBonus = effectiveBonus,
-                        canAfford = currentGold >= weapon.basePrice,
-                        isEquipped = isEquipped
-                    ) {
-                        onPurchase(weapon, effectiveBonus, displayName)
-                    }
-                }
-            }
-        }
-
-        Button(
-            onClick = onBack,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 8.dp),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = MaterialTheme.colorScheme.tertiary,
-                contentColor = MaterialTheme.colorScheme.onTertiary
-            )
-        ) {
-            Text("Back")
-        }
-    }
-}
-
-@Composable
-private fun WeaponItem(
+private fun ShopItemButton(
     name: String,
-    price: Int,
-    effectiveBonus: Int,
+    priceText: String?,
+    equipped: Boolean,
     canAfford: Boolean,
-    isEquipped: Boolean,
-    onPurchase: () -> Unit
+    onClick: () -> Unit,
 ) {
-    Button(
-        onClick = onPurchase,
-        modifier = Modifier.fillMaxWidth(),
-        enabled = canAfford && !isEquipped,
-        colors = ButtonDefaults.buttonColors(
-            containerColor = when {
-                isEquipped -> MaterialTheme.colorScheme.secondary
-                canAfford -> MaterialTheme.colorScheme.primary
-                else -> MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)
-            },
-            contentColor = when {
-                isEquipped -> MaterialTheme.colorScheme.onSecondary
-                canAfford -> MaterialTheme.colorScheme.onPrimary
-                else -> MaterialTheme.colorScheme.onSurface
-            },
-            disabledContainerColor = when {
-                isEquipped -> MaterialTheme.colorScheme.secondary
-                else -> MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)
-            },
-            disabledContentColor = when {
-                isEquipped -> MaterialTheme.colorScheme.onSecondary
-                else -> MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-            }
-        ),
-        border = if (!canAfford && !isEquipped) BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)) else null
-    ) {
-        Column(
-            modifier = Modifier.fillMaxWidth()
+    val variant = when {
+        equipped   -> MedievalButtonVariant.Equipped
+        !canAfford -> MedievalButtonVariant.Disabled
+        else       -> MedievalButtonVariant.Gold
+    }
+
+    MedievalButton(onClick = onClick, variant = variant) {
+        Row(
+            modifier              = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment     = Alignment.CenterVertically,
         ) {
             Text(
-                text = if (isEquipped) {
-                    "$name (+${effectiveBonus} AP) [EQUIPPED]"
-                } else {
-                    "$name (+${effectiveBonus} AP)"
-                }
+                text     = name,
+                style    = MaterialTheme.typography.titleMedium.copy(
+                    color      = when {
+                        equipped   -> Parchment
+                        canAfford  -> Gold
+                        else       -> TextDim
+                    },
+                    fontWeight = if (equipped) FontWeight.Bold else FontWeight.Normal,
+                ),
+                modifier = Modifier.weight(1f),
             )
-            if (!isEquipped) {
+            priceText?.let {
                 Text(
-                    text = "${price}g",
-                    color = if (canAfford) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
-                    fontWeight = FontWeight.Bold
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun ArmorList(
-    currentGold: Int,
-    currentArmorStatus: Int,
-    challengeConfig: com.greenopal.zargon.data.models.ChallengeConfig?,
-    challengeModifiers: ChallengeModifiers,
-    prestige: PrestigeData?,
-    onPurchase: (Armor, Int, String) -> Unit,
-    onBack: () -> Unit
-) {
-    Column(
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        Text(
-            "Armor for Sale:",
-            style = MaterialTheme.typography.titleMedium,
-            modifier = Modifier.padding(bottom = 8.dp)
-        )
-
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxWidth()
-                .weight(1f),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            Armor.values().forEach { armor ->
-                val displayName = challengeModifiers.getArmorDisplayName(
-                    armor.displayName, challengeConfig, prestige
-                )
-                val effectiveBonus = challengeModifiers.getEffectiveArmorBonus(
-                    armor.defenseBonus, challengeConfig, prestige
-                )
-                val isEquipped = armor.ordinal == currentArmorStatus
-
-                item {
-                    ArmorItem(
-                        name = displayName,
-                        price = armor.basePrice,
-                        effectiveBonus = effectiveBonus,
-                        canAfford = currentGold >= armor.basePrice,
-                        isEquipped = isEquipped
-                    ) {
-                        onPurchase(armor, effectiveBonus, displayName)
-                    }
-                }
-            }
-        }
-
-        Button(
-            onClick = onBack,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 8.dp),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = MaterialTheme.colorScheme.tertiary,
-                contentColor = MaterialTheme.colorScheme.onTertiary
-            )
-        ) {
-            Text("Back")
-        }
-    }
-}
-
-@Composable
-private fun ArmorItem(
-    name: String,
-    price: Int,
-    effectiveBonus: Int,
-    canAfford: Boolean,
-    isEquipped: Boolean,
-    onPurchase: () -> Unit
-) {
-    Button(
-        onClick = onPurchase,
-        modifier = Modifier.fillMaxWidth(),
-        enabled = canAfford && !isEquipped,
-        colors = ButtonDefaults.buttonColors(
-            containerColor = when {
-                isEquipped -> MaterialTheme.colorScheme.secondary
-                canAfford -> MaterialTheme.colorScheme.primary
-                else -> MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)
-            },
-            contentColor = when {
-                isEquipped -> MaterialTheme.colorScheme.onSecondary
-                canAfford -> MaterialTheme.colorScheme.onPrimary
-                else -> MaterialTheme.colorScheme.onSurface
-            },
-            disabledContainerColor = when {
-                isEquipped -> MaterialTheme.colorScheme.secondary
-                else -> MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)
-            },
-            disabledContentColor = when {
-                isEquipped -> MaterialTheme.colorScheme.onSecondary
-                else -> MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-            }
-        ),
-        border = if (!canAfford && !isEquipped) BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)) else null
-    ) {
-        Column(
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text(
-                text = if (isEquipped) {
-                    "$name (+${effectiveBonus} DP) [EQUIPPED]"
-                } else {
-                    "$name (+${effectiveBonus} DP)"
-                }
-            )
-            if (!isEquipped) {
-                Text(
-                    text = "${price}g",
-                    color = if (canAfford) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
-                    fontWeight = FontWeight.Bold
+                    text  = it,
+                    style = MaterialTheme.typography.bodyLarge.copy(
+                        color      = if (canAfford) GoldBright else TextDim,
+                        fontWeight = FontWeight.Bold,
+                    ),
+                    modifier = Modifier.padding(start = 12.dp),
                 )
             }
         }

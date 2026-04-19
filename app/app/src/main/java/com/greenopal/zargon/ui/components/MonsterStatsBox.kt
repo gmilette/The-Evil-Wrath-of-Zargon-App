@@ -1,99 +1,59 @@
 package com.greenopal.zargon.ui.components
 
-import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.greenopal.zargon.data.models.MonsterStats
+import com.greenopal.zargon.ui.theme.Ember
+import com.greenopal.zargon.ui.theme.HpRedBright
+import com.greenopal.zargon.ui.theme.Parchment
 
-/**
- * Displays monster stats in battle
- * Based on monstastaz procedure (ZARGON.BAS)
- */
 @Composable
 fun MonsterStatsBox(
     monster: MonsterStats,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
-    Card(
-        modifier = modifier,
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
-        ),
-        border = BorderStroke(2.dp, MaterialTheme.colorScheme.tertiary)
+    MedievalPanel(
+        modifier       = modifier,
+        contentPadding = PaddingValues(10.dp),
+        showCornerGems = false,
     ) {
         Column(
-            modifier = Modifier
-                .padding(12.dp)
-                .fillMaxWidth()
+            modifier            = Modifier.fillMaxWidth(),
+            verticalArrangement = Arrangement.spacedBy(6.dp),
         ) {
-            // Monster name
             Text(
-                text = monster.name,
-                style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.tertiary,
-                fontWeight = FontWeight.Bold
+                text  = monster.name,
+                style = MaterialTheme.typography.titleSmall.copy(color = Ember),
             )
 
-            Spacer(modifier = Modifier.height(8.dp))
-
-            // Monster AP
             Row(
-                modifier = Modifier.fillMaxWidth()
+                modifier              = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
             ) {
-                Text(
-                    text = "AP:",
-                    style = MaterialTheme.typography.bodyMedium
-                )
-                Spacer(modifier = Modifier.weight(1f))
-                Text(
-                    text = monster.attackPower.toString(),
-                    style = MaterialTheme.typography.bodyMedium,
-                    fontWeight = FontWeight.Bold
-                )
+                Text("AP:", style = MaterialTheme.typography.bodySmall.copy(color = Parchment))
+                Text(monster.attackPower.toString(), style = MaterialTheme.typography.bodySmall.copy(color = Parchment))
             }
 
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(Modifier.height(2.dp))
 
-            // Monster HP bar
-            Column {
-                Row(
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text(
-                        text = "HP:",
-                        style = MaterialTheme.typography.bodyMedium
-                    )
-                    Spacer(modifier = Modifier.weight(1f))
-                    Text(
-                        text = "${monster.currentHP} / ${monster.maxHP}",
-                        style = MaterialTheme.typography.bodyMedium,
-                        fontWeight = FontWeight.Bold
-                    )
-                }
-                Spacer(modifier = Modifier.height(4.dp))
-                LinearProgressIndicator(
-                    progress = { monster.hpPercentage },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(6.dp),
-                    color = Color(0xFFFF5555),
-                    trackColor = MaterialTheme.colorScheme.surfaceVariant,
-                )
+            Row(
+                modifier              = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+            ) {
+                Text("HP", style = MaterialTheme.typography.labelSmall.copy(color = HpRedBright))
+                Text("${monster.currentHP} / ${monster.maxHP}", style = MaterialTheme.typography.labelSmall.copy(color = HpRedBright))
             }
+            MedievalStatBar(monster.currentHP, monster.maxHP, StatBarType.HP, height = 6.dp)
         }
     }
 }

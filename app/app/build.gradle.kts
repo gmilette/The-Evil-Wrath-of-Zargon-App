@@ -94,6 +94,8 @@ dependencies {
     implementation(libs.bundles.compose)
     implementation(libs.androidx.compose.material.icons.core)
     implementation(libs.androidx.compose.material.icons.extended)
+    implementation(libs.androidx.compose.material)
+    implementation(libs.androidx.compose.ui.text.google.fonts)
     debugImplementation(libs.bundles.compose.debug)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
 

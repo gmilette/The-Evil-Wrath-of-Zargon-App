@@ -1,47 +1,42 @@
 package com.greenopal.zargon.ui.screens
 
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.runtime.LaunchedEffect
 import com.greenopal.zargon.data.models.Dialog
 import com.greenopal.zargon.data.models.GameState
 import com.greenopal.zargon.data.models.NpcType
 import com.greenopal.zargon.data.models.StoryAction
 import com.greenopal.zargon.domain.story.NpcDialogProvider
+import com.greenopal.zargon.ui.components.DungeonBackground
+import com.greenopal.zargon.ui.components.FlavorText
+import com.greenopal.zargon.ui.components.MedievalButton
+import com.greenopal.zargon.ui.components.MedievalButtonVariant
+import com.greenopal.zargon.ui.components.MedievalPanel
+import com.greenopal.zargon.ui.components.OrnateSeparator
+import com.greenopal.zargon.ui.components.PanelHeading
+import com.greenopal.zargon.ui.theme.Gold
+import com.greenopal.zargon.ui.theme.Parchment
+import com.greenopal.zargon.ui.theme.ParchmentDim
 
-/**
- * Dialog screen for NPC interactions
- * Based on QBASIC hut dialog system (ZARGON.BAS:1860+)
- */
 @Composable
 fun DialogScreen(
     npcType: NpcType,
@@ -61,188 +56,115 @@ fun DialogScreen(
         selectedAction = null
     }
 
-    Box(
-        modifier = modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background),
-        contentAlignment = Alignment.Center
-    ) {
-        Card(
-            modifier = Modifier
-                .fillMaxWidth(0.9f)
-                .padding(16.dp),
-            colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surface
-            ),
-            border = BorderStroke(3.dp, MaterialTheme.colorScheme.primary)
+    DungeonBackground {
+        Box(
+            modifier = modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center,
         ) {
-            Box {
-                Column(
-                    modifier = Modifier
-                        .padding(24.dp)
-                        .fillMaxWidth(),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                // NPC name
-                Text(
-                    text = npcType.displayName,
-                    style = MaterialTheme.typography.headlineSmall,
-                    color = MaterialTheme.colorScheme.primary,
-                    textAlign = TextAlign.Center
-                )
-
-                // Description (if present)
-                dialog.description?.let { description ->
-                    Text(
-                        text = description,
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurface,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.padding(vertical = 8.dp)
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                // Answer display (if question was asked)
-                if (currentAnswer != null) {
-                    Card(
-                        modifier = Modifier.fillMaxWidth(),
-                        colors = CardDefaults.cardColors(
-                            containerColor = MaterialTheme.colorScheme.secondaryContainer
-                        )
-                    ) {
-                        Text(
-                            text = currentAnswer!!,
-                            style = MaterialTheme.typography.bodyMedium,
-                            modifier = Modifier.padding(16.dp),
-                            textAlign = TextAlign.Start
-                        )
-                    }
-
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    // Continue button — apply any pending action immediately so dialog refreshes
-                    Button(
-                        onClick = {
-                            selectedAction?.let { action ->
-                                onActionTaken(action)
-                                selectedAction = null
-                            }
-                            currentAnswer = null
-                        },
-                        modifier = Modifier.fillMaxWidth(),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = MaterialTheme.colorScheme.secondary,
-                            contentColor = MaterialTheme.colorScheme.onSecondary
-                        )
-                    ) {
-                        Text("Continue...")
-                    }
-                } else {
-                    // Question buttons
-                    if (dialog.question1.isNotEmpty()) {
-                        Button(
-                            onClick = {
-                                currentAnswer = dialog.answer1
-                                // Only update selectedAction if there's a new non-null action
-                                dialog.action1?.let { selectedAction = it }
-                            },
-                            enabled = dialog.enabled1,
-                            modifier = Modifier.fillMaxWidth(),
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = MaterialTheme.colorScheme.primary,
-                                contentColor = MaterialTheme.colorScheme.onPrimary,
-                                disabledContainerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f),
-                                disabledContentColor = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.5f)
-                            )
-                        ) {
-                            Text(
-                                text = "1. ${dialog.question1}",
-                                style = MaterialTheme.typography.bodyMedium
-                            )
-                        }
-                    }
-
-                    if (dialog.question2.isNotEmpty()) {
-                        Button(
-                            onClick = {
-                                currentAnswer = dialog.answer2
-                                // Only update selectedAction if there's a new non-null action
-                                dialog.action2?.let { selectedAction = it }
-                            },
-                            enabled = dialog.enabled2,
-                            modifier = Modifier.fillMaxWidth(),
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = MaterialTheme.colorScheme.primary,
-                                contentColor = MaterialTheme.colorScheme.onPrimary,
-                                disabledContainerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f),
-                                disabledContentColor = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.5f)
-                            )
-                        ) {
-                            Text(
-                                text = "2. ${dialog.question2}",
-                                style = MaterialTheme.typography.bodyMedium
-                            )
-                        }
-                    }
-
-                    if (dialog.question3.isNotEmpty()) {
-                        Button(
-                            onClick = {
-                                currentAnswer = dialog.answer3
-                                // Only update selectedAction if there's a new non-null action
-                                dialog.storyAction?.let { selectedAction = it }
-                            },
-                            enabled = dialog.enabled3,
-                            modifier = Modifier.fillMaxWidth(),
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = MaterialTheme.colorScheme.primary,
-                                contentColor = MaterialTheme.colorScheme.onPrimary,
-                                disabledContainerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f),
-                                disabledContentColor = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.5f)
-                            )
-                        ) {
-                            Text(
-                                text = "3. ${dialog.question3}",
-                                style = MaterialTheme.typography.bodyMedium
-                            )
-                        }
-                    }
-
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    // Leave button
-                    Button(
-                        onClick = {
-                            onDialogEnd(gameState, selectedAction)
-                        },
-                        modifier = Modifier.fillMaxWidth(),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = MaterialTheme.colorScheme.tertiary,
-                            contentColor = MaterialTheme.colorScheme.onTertiary
-                        )
-                    ) {
-                        Text("0. Leave")
-                    }
-                }
-            }
-
-            // Exit button in top-left corner
-            IconButton(
-                onClick = { onDialogEnd(gameState, selectedAction) },
-                modifier = Modifier
-                    .align(Alignment.TopStart)
-                    .padding(8.dp)
+            MedievalPanel(
+                modifier       = Modifier
+                    .fillMaxWidth(0.9f)
+                    .padding(16.dp),
+                contentPadding = PaddingValues(24.dp),
             ) {
-                Icon(
-                    imageVector = Icons.Default.Close,
-                    contentDescription = "Exit dialog",
-                    tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.size(32.dp)
-                )
-            }
+                Column(
+                    modifier            = Modifier.fillMaxWidth(),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                ) {
+                    Box(modifier = Modifier.fillMaxWidth()) {
+                        Text(
+                            text     = "✕",
+                            style    = MaterialTheme.typography.titleSmall.copy(color = Gold.copy(alpha = 0.7f)),
+                            modifier = Modifier
+                                .align(Alignment.TopStart)
+                                .padding(bottom = 8.dp),
+                        )
+                        PanelHeading(npcType.displayName)
+                    }
+
+                    dialog.description?.let { description ->
+                        FlavorText(description)
+                        OrnateSeparator()
+                    }
+
+                    if (currentAnswer != null) {
+                        MedievalPanel(
+                            modifier       = Modifier.fillMaxWidth(),
+                            contentPadding = PaddingValues(16.dp),
+                            showCornerGems = false,
+                        ) {
+                            Text(
+                                text      = currentAnswer!!,
+                                style     = MaterialTheme.typography.bodyMedium.copy(color = Parchment),
+                                textAlign = TextAlign.Start,
+                                modifier  = Modifier.fillMaxWidth(),
+                            )
+                        }
+
+                        Spacer(Modifier.height(4.dp))
+
+                        MedievalButton(
+                            onClick = {
+                                selectedAction?.let { action ->
+                                    onActionTaken(action)
+                                    selectedAction = null
+                                }
+                                currentAnswer = null
+                            }
+                        ) {
+                            Text("Continue...", style = MaterialTheme.typography.titleMedium)
+                        }
+                    } else {
+                        if (dialog.question1.isNotEmpty()) {
+                            val isDisabled = !dialog.enabled1
+                            MedievalButton(
+                                onClick = {
+                                    currentAnswer = dialog.answer1
+                                    dialog.action1?.let { selectedAction = it }
+                                },
+                                variant = if (isDisabled) MedievalButtonVariant.Disabled else MedievalButtonVariant.Gold,
+                            ) {
+                                Text("1. ${dialog.question1}", style = MaterialTheme.typography.titleMedium)
+                            }
+                        }
+
+                        if (dialog.question2.isNotEmpty()) {
+                            val isDisabled = !dialog.enabled2
+                            MedievalButton(
+                                onClick = {
+                                    currentAnswer = dialog.answer2
+                                    dialog.action2?.let { selectedAction = it }
+                                },
+                                variant = if (isDisabled) MedievalButtonVariant.Disabled else MedievalButtonVariant.Gold,
+                            ) {
+                                Text("2. ${dialog.question2}", style = MaterialTheme.typography.titleMedium)
+                            }
+                        }
+
+                        if (dialog.question3.isNotEmpty()) {
+                            val isDisabled = !dialog.enabled3
+                            MedievalButton(
+                                onClick = {
+                                    currentAnswer = dialog.answer3
+                                    dialog.storyAction?.let { selectedAction = it }
+                                },
+                                variant = if (isDisabled) MedievalButtonVariant.Disabled else MedievalButtonVariant.Gold,
+                            ) {
+                                Text("3. ${dialog.question3}", style = MaterialTheme.typography.titleMedium)
+                            }
+                        }
+
+                        OrnateSeparator()
+
+                        MedievalButton(
+                            variant = MedievalButtonVariant.Ember,
+                            onClick = { onDialogEnd(gameState, selectedAction) },
+                        ) {
+                            Text("0. Leave", style = MaterialTheme.typography.titleMedium)
+                        }
+                    }
+                }
             }
         }
     }
