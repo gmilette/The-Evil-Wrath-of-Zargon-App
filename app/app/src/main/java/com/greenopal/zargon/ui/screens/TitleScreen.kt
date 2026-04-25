@@ -2,21 +2,19 @@ package com.greenopal.zargon.ui.screens
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -27,20 +25,24 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.greenopal.zargon.R
 import com.greenopal.zargon.data.repository.SaveSlotInfo
+import com.greenopal.zargon.ui.components.DungeonBackground
+import com.greenopal.zargon.ui.components.GameTitle
+import com.greenopal.zargon.ui.components.MedievalButton
+import com.greenopal.zargon.ui.components.MedievalButtonVariant
+import com.greenopal.zargon.ui.components.MedievalPanel
+import com.greenopal.zargon.ui.components.ScrollBanner
+import com.greenopal.zargon.ui.theme.Ember
+import com.greenopal.zargon.ui.theme.EmberBright
 import com.greenopal.zargon.ui.theme.Gold
-import com.greenopal.zargon.ui.theme.DarkStone
-import com.greenopal.zargon.ui.theme.MidStone
+import com.greenopal.zargon.ui.theme.GoldBright
+import com.greenopal.zargon.ui.theme.PanelBg
 import com.greenopal.zargon.ui.theme.Parchment
-import com.greenopal.zargon.ui.theme.EmberOrange
+import com.greenopal.zargon.ui.theme.ParchmentDim
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -55,80 +57,62 @@ fun TitleScreen(
 ) {
     var slotToDelete by remember { mutableStateOf<Int?>(null) }
 
-    Box(
-        modifier = modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth(0.85f)
-                .padding(horizontal = 16.dp, vertical = 24.dp),
+    DungeonBackground {
+        LazyColumn(
+            modifier            = modifier
+                .fillMaxSize()
+                .padding(horizontal = 24.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+            contentPadding      = PaddingValues(vertical = 32.dp),
         ) {
-            Spacer(modifier = Modifier.height(32.dp))
+            item {
+                Row(
+                    modifier          = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    Image(
+                        painter            = painterResource(R.drawable.torch),
+                        contentDescription = null,
+                        modifier           = Modifier.width(32.dp).height(88.dp),
+                    )
+                    GameTitle(
+                        text     = "THE EVIL WRATH\nOF ZARGON",
+                        modifier = Modifier.weight(1f),
+                    )
+                    Image(
+                        painter            = painterResource(R.drawable.torch),
+                        contentDescription = null,
+                        modifier           = Modifier
+                            .width(32.dp)
+                            .height(88.dp)
+                            .graphicsLayer { scaleX = -1f },
+                    )
+                }
+            }
 
-            Text(
-                text = "THE EVIL WRATH\nOF ZARGON",
-                style = MaterialTheme.typography.headlineLarge.copy(
-                    fontSize = 32.sp,
-                    letterSpacing = 2.sp
-                ),
-                color = Gold,
-                fontWeight = FontWeight.Bold,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.padding(bottom = 16.dp)
-            )
+            item {
+                ScrollBanner("Select Save Slot")
+            }
 
-            Text(
-                text = "Select Save Slot:",
-                style = MaterialTheme.typography.titleLarge.copy(
-                    fontSize = 20.sp
-                ),
-                color = Parchment,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(bottom = 8.dp)
-            )
-
-            saveSlots.forEach { slot ->
-                SaveSlotButton(
-                    slot = slot,
-                    onClick = {
-                        if (slot.exists) {
-                            onContinue(slot.slot)
-                        } else {
-                            onNewGame(slot.slot)
-                        }
-                    },
-                    onLongClick = {
-                        if (slot.exists) {
-                            slotToDelete = slot.slot
-                        }
-                    },
-                    onRestartChallenge = { onRestartChallenge(slot.slot) }
+            items(saveSlots) { slot ->
+                SaveSlotRow(
+                    slot               = slot,
+                    onClick            = { if (slot.exists) onContinue(slot.slot) else onNewGame(slot.slot) },
+                    onLongClick        = { if (slot.exists) slotToDelete = slot.slot },
+                    onRestartChallenge = { onRestartChallenge(slot.slot) },
                 )
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Button(
-                onClick = onViewProgress,
-                modifier = Modifier.fillMaxWidth(),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Gold,
-                    contentColor = DarkStone
-                )
-            ) {
-                Text(
-                    text = "View Challenge Progress",
-                    style = MaterialTheme.typography.titleMedium.copy(
-                        fontSize = 16.sp
-                    ),
-                    fontWeight = FontWeight.Bold
-                )
+            item {
+                MedievalButton(
+                    onClick  = onViewProgress,
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    Text("View Challenge Progress", style = MaterialTheme.typography.titleMedium)
+                }
             }
-
-            Spacer(modifier = Modifier.height(24.dp))
         }
     }
 
@@ -137,137 +121,90 @@ fun TitleScreen(
             onDismissRequest = { slotToDelete = null },
             title = {
                 Text(
-                    text = "Delete Save Slot?",
-                    color = Gold
+                    "Delete Save Slot?",
+                    style = MaterialTheme.typography.headlineSmall.copy(color = GoldBright),
                 )
             },
             text = {
                 Text(
-                    text = "Are you sure you want to delete save slot $slot? This action cannot be undone.",
-                    color = Parchment
+                    "Are you sure you want to delete save slot $slot? This cannot be undone.",
+                    style = MaterialTheme.typography.bodyMedium.copy(color = Parchment),
                 )
             },
             confirmButton = {
-                TextButton(
-                    onClick = {
-                        onDeleteSave(slot)
-                        slotToDelete = null
-                    }
-                ) {
-                    Text("Delete", color = EmberOrange)
+                TextButton(onClick = { onDeleteSave(slot); slotToDelete = null }) {
+                    Text("Delete", style = MaterialTheme.typography.titleMedium.copy(color = Ember))
                 }
             },
             dismissButton = {
                 TextButton(onClick = { slotToDelete = null }) {
-                    Text("Cancel", color = Parchment)
+                    Text("Cancel", style = MaterialTheme.typography.titleMedium.copy(color = Gold))
                 }
             },
-            containerColor = DarkStone
+            containerColor = PanelBg,
         )
     }
 }
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun SaveSlotButton(
+private fun SaveSlotRow(
     slot: SaveSlotInfo,
     onClick: () -> Unit,
     onLongClick: () -> Unit,
     onRestartChallenge: () -> Unit,
-    modifier: Modifier = Modifier
 ) {
-    androidx.compose.foundation.layout.Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(vertical = 4.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    Row(
+        modifier              = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalAlignment     = Alignment.CenterVertically,
     ) {
-        Box(
+        MedievalPanel(
             modifier = Modifier
                 .weight(1f)
-                .height(95.dp)
-                .background(
-                    color = MidStone,
-                    shape = RoundedCornerShape(8.dp)
-                )
-                .combinedClickable(
-                    onClick = onClick,
-                    onLongClick = onLongClick
-                ),
-            contentAlignment = Alignment.Center
+                .combinedClickable(onClick = onClick, onLongClick = onLongClick),
         ) {
             Column(
-                modifier = Modifier.padding(12.dp),
+                modifier            = Modifier.fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
+                verticalArrangement = Arrangement.spacedBy(4.dp),
             ) {
                 if (slot.exists) {
                     Text(
-                        text = "Slot ${slot.slot} - Continue",
-                        style = MaterialTheme.typography.titleMedium.copy(
-                            fontSize = 16.sp
-                        ),
-                        color = Gold,
-                        fontWeight = FontWeight.Bold
+                        text  = "Slot ${slot.slot} — Continue",
+                        style = MaterialTheme.typography.titleMedium.copy(color = GoldBright),
                     )
-                    Spacer(modifier = Modifier.height(2.dp))
                     slot.gameState?.let { state ->
                         Text(
-                            text = "Level ${state.character.level} | ${state.character.gold} gold",
-                            style = MaterialTheme.typography.bodyMedium.copy(
-                                fontSize = 11.sp
-                            ),
-                            color = Parchment
+                            text  = "Lv${state.character.level} · ${state.character.gold}g",
+                            style = MaterialTheme.typography.bodySmall.copy(color = Parchment),
                         )
                         state.challengeConfig?.let { config ->
                             Text(
-                                text = config.getDisplayName(),
-                                style = MaterialTheme.typography.bodySmall.copy(
-                                    fontSize = 10.sp
-                                ),
-                                color = EmberOrange,
-                                fontWeight = FontWeight.Bold
+                                text  = config.getDisplayName(),
+                                style = MaterialTheme.typography.labelSmall.copy(color = EmberBright),
                             )
                         }
                     }
                 } else {
                     Text(
-                        text = "Slot ${slot.slot} - New Game",
-                        style = MaterialTheme.typography.titleMedium.copy(
-                            fontSize = 16.sp
-                        ),
-                        color = Gold,
-                        fontWeight = FontWeight.Bold
+                        text  = "Slot ${slot.slot} — New Game",
+                        style = MaterialTheme.typography.titleMedium.copy(color = Gold),
                     )
-                    Spacer(modifier = Modifier.height(2.dp))
                     Text(
-                        text = "Empty",
-                        style = MaterialTheme.typography.bodyMedium.copy(
-                            fontSize = 12.sp
-                        ),
-                        color = MidStone
+                        text  = "Empty",
+                        style = MaterialTheme.typography.bodySmall.copy(color = ParchmentDim),
                     )
                 }
             }
         }
 
-        Button(
-            onClick = onRestartChallenge,
-            modifier = Modifier
-                .height(95.dp),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = Parchment,
-                contentColor = DarkStone
-            ),
-            shape = RoundedCornerShape(8.dp)
+        MedievalButton(
+            onClick  = onRestartChallenge,
+            variant  = MedievalButtonVariant.Ember,
+            modifier = Modifier,
         ) {
-            Text(
-                text = "Restart",
-                style = MaterialTheme.typography.bodyMedium.copy(
-                    fontSize = 13.sp
-                ),
-                fontWeight = FontWeight.Bold
-            )
+            Text("Restart", style = MaterialTheme.typography.bodyMedium)
         }
     }
 }

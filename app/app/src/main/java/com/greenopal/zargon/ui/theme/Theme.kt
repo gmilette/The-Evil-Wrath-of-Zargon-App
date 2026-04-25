@@ -3,38 +3,49 @@ package com.greenopal.zargon.ui.theme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.graphics.Color
 
-// Medieval theme colors - shared across the app
-val Gold = Color(0xFFD4AF37)
-val DarkStone = Color(0xFF3A3A3A)
-val MidStone = Color(0xFF5B5B5B)
-val Parchment = Color(0xFFD8C8A0)
-val EmberOrange = Color(0xFFFF9A3C)
+private val MedievalColorScheme = darkColorScheme(
+    // ── Primary actions: gold-bordered buttons, selected states ──
+    primary          = Gold,
+    onPrimary        = StoneDark,
+    primaryContainer = PanelMid,
+    onPrimaryContainer = GoldBright,
 
-private val DarkColorScheme = darkColorScheme(
-    primary = Gold,
-    secondary = Parchment,
-    tertiary = EmberOrange,
-    background = DarkStone,
-    surface = MidStone,
-    error = EmberOrange,
-    onPrimary = DarkStone,
-    onSecondary = DarkStone,
-    onTertiary = DarkStone,
+    // ── Secondary: parchment-toned elements ──
+    secondary          = Parchment,
+    onSecondary        = StoneDark,
+    secondaryContainer = PanelBg,
+    onSecondaryContainer = ParchmentDim,
+
+    // ── Tertiary: ember/leave/exit actions ──
+    tertiary          = Ember,
+    onTertiary        = Parchment,
+    tertiaryContainer = EmberDark,
+    onTertiaryContainer = EmberBright,
+
+    // ── Background & surfaces ──
+    background = StoneBg,
     onBackground = Parchment,
-    onSurface = Gold,
+
+    surface        = PanelBg,
+    onSurface      = Gold,
+    surfaceVariant = PanelMid,
+    onSurfaceVariant = ParchmentDim,
+
+    // ── Error ──
+    error   = HpRed,
+    onError = Parchment,
+
+    // ── Outlines ──
+    outline        = GoldDark,
+    outlineVariant = GoldDeep,
 )
 
 @Composable
-fun ZargonTheme(
-    content: @Composable () -> Unit
-) {
-    val colorScheme = DarkColorScheme
-
+fun ZargonTheme(content: @Composable () -> Unit) {
     MaterialTheme(
-        colorScheme = colorScheme,
-        typography = Typography,
-        content = content
+        colorScheme = MedievalColorScheme,
+        typography  = Typography,
+        content     = content,
     )
 }

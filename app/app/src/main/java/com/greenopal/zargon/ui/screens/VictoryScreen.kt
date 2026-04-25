@@ -1,10 +1,8 @@
 package com.greenopal.zargon.ui.screens
 
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -12,10 +10,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -26,23 +20,30 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.greenopal.zargon.data.models.GameState
 import com.greenopal.zargon.data.models.Item
 import com.greenopal.zargon.data.models.ItemType
 import com.greenopal.zargon.data.models.PrestigeBonus
-import com.greenopal.zargon.ui.theme.DarkStone
-import com.greenopal.zargon.ui.theme.EmberOrange
+import com.greenopal.zargon.ui.components.DungeonBackground
+import com.greenopal.zargon.ui.components.GameTitle
+import com.greenopal.zargon.ui.components.MedievalButton
+import com.greenopal.zargon.ui.components.MedievalButtonVariant
+import com.greenopal.zargon.ui.components.MedievalPanel
+import com.greenopal.zargon.ui.components.OrnateSeparator
+import com.greenopal.zargon.ui.theme.Ember
+import com.greenopal.zargon.ui.theme.EmberBright
 import com.greenopal.zargon.ui.theme.Gold
+import com.greenopal.zargon.ui.theme.GoldBright
 import com.greenopal.zargon.ui.theme.Parchment
+import com.greenopal.zargon.ui.theme.ParchmentDim
+import com.greenopal.zargon.ui.theme.XpGreenBright
 import kotlinx.coroutines.delay
 
-/**
- * Victory screen shown after defeating Zargon
- */
 @Composable
 fun VictoryScreen(
     finalGameState: GameState,
@@ -52,11 +53,12 @@ fun VictoryScreen(
     earnedBonus: PrestigeBonus? = null,
     modifier: Modifier = Modifier
 ) {
-    var showText by remember { mutableStateOf(false) }
+    var showContent by remember { mutableStateOf(false) }
+    val haptic = LocalHapticFeedback.current
 
     LaunchedEffect(Unit) {
         delay(500)
-        showText = true
+        showContent = true
 
         finalGameState.challengeConfig?.let { config ->
             val challengeStartTime = finalGameState.challengeStartTime ?: System.currentTimeMillis()
@@ -65,232 +67,141 @@ fun VictoryScreen(
             val result = com.greenopal.zargon.data.models.ChallengeResult(
                 challengeId = config.getChallengeId(),
                 completedAt = System.currentTimeMillis(),
-                finalStats = com.greenopal.zargon.data.models.ChallengeCompletionStats(
-                    finalLevel = finalGameState.character.level,
-                    totalGoldEarned = finalGameState.character.gold,
+                finalStats  = com.greenopal.zargon.data.models.ChallengeCompletionStats(
+                    finalLevel       = finalGameState.character.level,
+                    totalGoldEarned  = finalGameState.character.gold,
                     monstersDefeated = finalGameState.monstersDefeated,
-                    deathCount = finalGameState.deathCount
+                    deathCount       = finalGameState.deathCount,
                 ),
-                timeElapsedMs = timeElapsed
+                timeElapsedMs = timeElapsed,
             )
-
             onChallengeComplete?.invoke(result)
         }
     }
 
-    Box(
-        modifier = modifier
-            .fillMaxSize()
-            .background(Color.Black),
-        contentAlignment = Alignment.Center
-    ) {
-        if (showText) {
-            Card(
-                modifier = Modifier
-                    .fillMaxWidth(0.9f)
-                    .padding(16.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surface
-                ),
-                border = BorderStroke(3.dp, Color(0xFFFFD700)) // Gold border
+    DungeonBackground {
+        if (showContent) {
+            Column(
+                modifier = modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 24.dp)
+                    .verticalScroll(rememberScrollState()),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center,
             ) {
-                Column(
-                    modifier = Modifier
-                        .padding(32.dp)
-                        .fillMaxWidth()
-                        .verticalScroll(rememberScrollState()),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
-                    Text(
-                        text = "VICTORY!",
-                        style = MaterialTheme.typography.displayMedium,
-                        color = Color(0xFFFFD700),
-                        fontWeight = FontWeight.Bold,
-                        textAlign = TextAlign.Center
-                    )
+                Spacer(Modifier.height(32.dp))
 
-                    Spacer(modifier = Modifier.height(8.dp))
+                GameTitle("VICTORY!", fontSize = 40.sp)
 
-                    finalGameState.challengeConfig?.let { config ->
-                        Card(
-                            modifier = Modifier.fillMaxWidth(),
-                            colors = CardDefaults.cardColors(
-                                containerColor = Parchment
-                            )
-                        ) {
-                            Column(
-                                modifier = Modifier.padding(12.dp),
-                                horizontalAlignment = Alignment.CenterHorizontally,
-                                verticalArrangement = Arrangement.spacedBy(4.dp)
-                            ) {
-                                Text(
-                                    text = "CHALLENGE COMPLETED!",
-                                    style = MaterialTheme.typography.titleMedium,
-                                    color = Gold,
-                                    fontWeight = FontWeight.Bold
-                                )
-                                Text(
-                                    text = config.getDisplayName(),
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    color = DarkStone
-                                )
-                                if (finalGameState.challengeStartTime != null) {
-                                    val challengeStartTime = finalGameState.challengeStartTime
-                                    val timeElapsed = (System.currentTimeMillis() - challengeStartTime - finalGameState.totalPauseTime) / 1000
-                                    val minutes = timeElapsed / 60
-                                    val seconds = timeElapsed % 60
-                                    Text(
-                                        text = "Time: ${minutes}m ${seconds}s",
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = DarkStone,
-                                        fontWeight = FontWeight.Bold
-                                    )
-                                }
-                                if (earnedBonus != null) {
-                                    Spacer(modifier = Modifier.height(6.dp))
-                                    Text(
-                                        text = "Bonus Unlocked: ${earnedBonus.displayName}",
-                                        style = MaterialTheme.typography.titleSmall,
-                                        color = EmberOrange,
-                                        fontWeight = FontWeight.Bold
-                                    )
-                                    Text(
-                                        text = earnedBonus.description,
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = DarkStone
-                                    )
-                                }
-                            }
-                        }
-                        Spacer(modifier = Modifier.height(8.dp))
-                    }
+                Spacer(Modifier.height(16.dp))
 
-                    // Victory message
-                    Text(
-                        text = "You have defeated ZARGON\nand saved the land of GEF!",
-                        style = MaterialTheme.typography.titleLarge,
-                        color = MaterialTheme.colorScheme.primary,
-                        textAlign = TextAlign.Center
-                    )
-
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    // Final stats
-                    Card(
-                        modifier = Modifier.fillMaxWidth(),
-                        colors = CardDefaults.cardColors(
-                            containerColor = MaterialTheme.colorScheme.secondaryContainer
-                        )
-                    ) {
+                finalGameState.challengeConfig?.let { config ->
+                    MedievalPanel(modifier = Modifier.fillMaxWidth()) {
                         Column(
-                            modifier = Modifier.padding(16.dp),
-                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                            modifier            = Modifier.fillMaxWidth(),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.spacedBy(6.dp),
                         ) {
                             Text(
-                                text = "Final Statistics",
-                                style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.onSecondaryContainer
+                                text  = "Challenge Completed!",
+                                style = MaterialTheme.typography.headlineSmall.copy(color = GoldBright),
                             )
-
-                            StatLine("Level", "${finalGameState.character.level}")
-                            StatLine("Experience", "${finalGameState.character.experience}")
-                            StatLine("Gold", "${finalGameState.character.gold}g")
-                            StatLine("Attack Power", "${finalGameState.character.baseAP + finalGameState.character.weaponBonus}")
-                            StatLine("Defense", "${finalGameState.character.baseDP + finalGameState.character.armorBonus}")
+                            Text(
+                                text  = config.getDisplayName(),
+                                style = MaterialTheme.typography.bodyMedium.copy(color = Parchment),
+                            )
+                            if (finalGameState.challengeStartTime != null) {
+                                val elapsed = (System.currentTimeMillis() - finalGameState.challengeStartTime - finalGameState.totalPauseTime) / 1000
+                                Text(
+                                    text  = "Time: ${elapsed / 60}m ${elapsed % 60}s",
+                                    style = MaterialTheme.typography.bodyLarge.copy(color = Gold),
+                                )
+                            }
+                            if (earnedBonus != null) {
+                                OrnateSeparator()
+                                Text(
+                                    text  = "Bonus Unlocked: ${earnedBonus.displayName}",
+                                    style = MaterialTheme.typography.headlineSmall.copy(color = EmberBright),
+                                )
+                                Text(
+                                    text  = earnedBonus.description,
+                                    style = MaterialTheme.typography.bodyMedium.copy(color = ParchmentDim),
+                                )
+                            }
                         }
                     }
 
-                    Spacer(modifier = Modifier.height(16.dp))
+                    Spacer(Modifier.height(12.dp))
+                }
 
-                    // Ending message
-                    Text(
-                        text = "The evil has been vanquished.\nPeace returns to the realm.",
-                        style = MaterialTheme.typography.bodyLarge,
-                        textAlign = TextAlign.Center,
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
+                MedievalPanel(modifier = Modifier.fillMaxWidth()) {
+                    Column(
+                        modifier            = Modifier.fillMaxWidth(),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(10.dp),
+                    ) {
+                        Text(
+                            text      = "You have defeated ZARGON\nand saved the land of GEF!",
+                            style     = MaterialTheme.typography.headlineMedium.copy(color = GoldBright),
+                            textAlign = TextAlign.Center,
+                        )
 
-                    Spacer(modifier = Modifier.height(24.dp))
+                        OrnateSeparator()
 
-                    // Credits
-                    Text(
-                        text = "Original QBASIC Game (1998-1999)\nSnappahed Software 98",
-                        style = MaterialTheme.typography.bodySmall,
-                        textAlign = TextAlign.Center,
-                        color = Color.Gray
-                    )
+                        Column(
+                            modifier            = Modifier.fillMaxWidth(),
+                            verticalArrangement = Arrangement.spacedBy(4.dp),
+                        ) {
+                            Text("Final Statistics", style = MaterialTheme.typography.titleSmall.copy(color = Gold))
+                            Text("Level: ${finalGameState.character.level}", style = MaterialTheme.typography.bodyLarge.copy(color = Parchment))
+                            Text("Experience: ${finalGameState.character.experience}", style = MaterialTheme.typography.bodyLarge.copy(color = Parchment))
+                            Text("Gold: ${finalGameState.character.gold}g", style = MaterialTheme.typography.bodyLarge.copy(color = Parchment))
+                            Text("Attack Power: ${finalGameState.character.baseAP + finalGameState.character.weaponBonus}", style = MaterialTheme.typography.bodyLarge.copy(color = Parchment))
+                            Text("Defense: ${finalGameState.character.baseDP + finalGameState.character.armorBonus}", style = MaterialTheme.typography.bodyLarge.copy(color = Parchment))
+                        }
 
-                    Text(
-                        text = "Android Port (2025)",
-                        style = MaterialTheme.typography.bodySmall,
-                        textAlign = TextAlign.Center,
-                        color = Color.Gray
-                    )
+                        OrnateSeparator()
 
-                    Spacer(modifier = Modifier.height(16.dp))
+                        Text(
+                            text      = "The evil has been vanquished.\nPeace returns to the realm.",
+                            style     = MaterialTheme.typography.bodyMedium.copy(color = ParchmentDim),
+                            textAlign = TextAlign.Center,
+                        )
 
-                    // Return to GEF button
-                    Button(
-                        onClick = {
-                            // Warp to healer location (Map 2,4 at coordinates 10,8)
-                            // Add "Zargon" trophy item to inventory
-                            val zargonTrophy = Item(
-                                name = "Zargon",
-                                description = "Trophy of your victory over the evil overlord",
-                                type = ItemType.KEY_ITEM
-                            )
+                        Text(
+                            text      = "Original QBASIC Game (1998-1999)\nSnappahed Software 98",
+                            style     = MaterialTheme.typography.labelSmall.copy(color = ParchmentDim),
+                            textAlign = TextAlign.Center,
+                        )
 
-                            val updatedState = finalGameState
-                                .copy(
-                                    worldX = 2,
-                                    worldY = 4,
-                                    characterX = 10,
-                                    characterY = 8
+                        MedievalButton(
+                            onClick = {
+                                val trophy = Item(
+                                    name        = "Zargon",
+                                    description = "Trophy of your victory over the evil overlord",
+                                    type        = ItemType.KEY_ITEM,
                                 )
-                                .addItem(zargonTrophy)
+                                val updatedState = finalGameState
+                                    .copy(worldX = 2, worldY = 4, characterX = 10, characterY = 8)
+                                    .addItem(trophy)
+                                onReturnToGEF(updatedState)
+                            },
+                        ) {
+                            Text("Return to GEF", style = MaterialTheme.typography.titleMedium.copy(color = XpGreenBright))
+                        }
 
-                            onReturnToGEF(updatedState)
-                        },
-                        modifier = Modifier.fillMaxWidth(),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = Color(0xFF4CAF50) // Green for continue
-                        )
-                    ) {
-                        Text(
-                            text = "Return to GEF",
-                            style = MaterialTheme.typography.titleMedium,
-                            color = Color.White
-                        )
-                    }
-
-                    Spacer(modifier = Modifier.height(8.dp))
-
-                    // Return to title button
-                    Button(
-                        onClick = onReturnToTitle,
-                        modifier = Modifier.fillMaxWidth(),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = MaterialTheme.colorScheme.secondary
-                        )
-                    ) {
-                        Text(
-                            text = "Return to Title",
-                            style = MaterialTheme.typography.titleMedium
-                        )
+                        MedievalButton(
+                            variant = MedievalButtonVariant.Ember,
+                            onClick = onReturnToTitle,
+                        ) {
+                            Text("Return to Title", style = MaterialTheme.typography.titleMedium)
+                        }
                     }
                 }
+
+                Spacer(Modifier.height(32.dp))
             }
         }
     }
 }
 
-@Composable
-private fun StatLine(label: String, value: String) {
-    Text(
-        text = "$label: $value",
-        style = MaterialTheme.typography.bodyMedium,
-        color = MaterialTheme.colorScheme.onSecondaryContainer
-    )
-}

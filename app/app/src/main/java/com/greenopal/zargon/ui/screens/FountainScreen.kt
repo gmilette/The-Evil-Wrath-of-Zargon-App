@@ -1,26 +1,15 @@
 package com.greenopal.zargon.ui.screens
 
 import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -31,16 +20,24 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.greenopal.zargon.data.models.GameState
+import com.greenopal.zargon.ui.components.DungeonBackground
+import com.greenopal.zargon.ui.components.FlavorText
+import com.greenopal.zargon.ui.components.MedievalButton
+import com.greenopal.zargon.ui.components.MedievalButtonVariant
+import com.greenopal.zargon.ui.components.MedievalPanel
+import com.greenopal.zargon.ui.components.MedievalStatBar
+import com.greenopal.zargon.ui.components.OrnateSeparator
+import com.greenopal.zargon.ui.components.PanelHeading
+import com.greenopal.zargon.ui.components.StatBarType
+import com.greenopal.zargon.ui.theme.Gold
+import com.greenopal.zargon.ui.theme.GoldBright
+import com.greenopal.zargon.ui.theme.HpRedBright
+import com.greenopal.zargon.ui.theme.MpBlueBright
+import com.greenopal.zargon.ui.theme.PanelBg
+import com.greenopal.zargon.ui.theme.Parchment
 
-/**
- * Fountain screen for restoring HP/MP and saving
- * Based on QBASIC fountain procedure (ZARGON.BAS:1487-1540)
- */
 @Composable
 fun FountainScreen(
     gameState: GameState,
@@ -48,193 +45,133 @@ fun FountainScreen(
     onFountainExit: (GameState) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    var message by remember { mutableStateOf<String?>(null) }
+    var message          by remember { mutableStateOf<String?>(null) }
     var updatedGameState by remember { mutableStateOf(gameState) }
-    var showMessageDialog by remember { mutableStateOf(false) }
+    var showDialog       by remember { mutableStateOf(false) }
 
-    // Handle Android back button
-    BackHandler {
-        onFountainExit(updatedGameState)
-    }
+    BackHandler { onFountainExit(updatedGameState) }
 
-    Box(
-        modifier = modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background),
-        contentAlignment = Alignment.Center
-    ) {
-        Card(
-            modifier = Modifier
-                .fillMaxWidth(0.9f)
-                .padding(16.dp),
-            colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surface
-            ),
-            border = BorderStroke(3.dp, MaterialTheme.colorScheme.primary)
+    DungeonBackground {
+        LazyColumn(
+            modifier            = modifier
+                .fillMaxSize()
+                .padding(horizontal = 16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+            contentPadding      = PaddingValues(vertical = 24.dp),
         ) {
-            Box {
-                // Exit button in top-left corner
-                IconButton(
-                    onClick = { onFountainExit(updatedGameState) },
-                    modifier = Modifier
-                        .align(Alignment.TopStart)
-                        .padding(8.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Close,
-                        contentDescription = "Exit fountain",
-                        tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.size(32.dp)
-                    )
-                }
-
-                Column(
-                    modifier = Modifier
-                        .padding(24.dp)
-                        .fillMaxWidth()
-                        .verticalScroll(rememberScrollState()),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                // Header
-                Text(
-                    text = "The Fountain",
-                    style = MaterialTheme.typography.headlineSmall,
-                    color = MaterialTheme.colorScheme.primary,
-                    textAlign = TextAlign.Center
-                )
-
-                Text(
-                    text = "A beautiful crystal-clear fountain flows before you",
-                    style = MaterialTheme.typography.bodyMedium,
-                    textAlign = TextAlign.Center
-                )
-
-                // Stats display
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.surface
-                    )
-                ) {
+            item {
+                MedievalPanel(modifier = Modifier.fillMaxWidth()) {
                     Column(
-                        modifier = Modifier.padding(16.dp),
-                        verticalArrangement = Arrangement.spacedBy(4.dp)
+                        modifier            = Modifier.fillMaxWidth(),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(12.dp),
                     ) {
-                        Text(
-                            text = "Current Stats:",
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.secondary
-                        )
-                        Text(
-                            text = "HP: ${updatedGameState.character.currentHP}/${updatedGameState.character.maxHP}",
-                            color = MaterialTheme.colorScheme.onSurface
-                        )
-                        Text(
-                            text = "MP: ${updatedGameState.character.currentMP}/${updatedGameState.character.maxMP}",
-                            color = MaterialTheme.colorScheme.onSurface
-                        )
+                        PanelHeading("The Fountain")
+                        FlavorText("A beautiful crystal-clear fountain flows before you")
+
+                        OrnateSeparator()
+
+                        MedievalPanel(
+                            modifier       = Modifier.fillMaxWidth(),
+                            contentPadding = PaddingValues(16.dp),
+                            showCornerGems = false,
+                        ) {
+                            Column(
+                                modifier            = Modifier.fillMaxWidth(),
+                                verticalArrangement = Arrangement.spacedBy(6.dp),
+                            ) {
+                                Row(
+                                    modifier              = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                ) {
+                                    Text("HP", style = MaterialTheme.typography.titleSmall.copy(color = HpRedBright))
+                                    Text(
+                                        "${updatedGameState.character.currentHP}/${updatedGameState.character.maxHP}",
+                                        style = MaterialTheme.typography.bodyLarge.copy(color = HpRedBright),
+                                    )
+                                }
+                                MedievalStatBar(updatedGameState.character.currentHP, updatedGameState.character.maxHP, StatBarType.HP)
+
+                                Row(
+                                    modifier              = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                ) {
+                                    Text("MP", style = MaterialTheme.typography.titleSmall.copy(color = MpBlueBright))
+                                    Text(
+                                        "${updatedGameState.character.currentMP}/${updatedGameState.character.maxMP}",
+                                        style = MaterialTheme.typography.bodyLarge.copy(color = MpBlueBright),
+                                    )
+                                }
+                                MedievalStatBar(updatedGameState.character.currentMP, updatedGameState.character.maxMP, StatBarType.MP)
+                            }
+                        }
+
+                        OrnateSeparator()
+
+                        val needsHeal = updatedGameState.character.currentHP < updatedGameState.character.maxHP ||
+                            updatedGameState.character.currentMP < updatedGameState.character.maxMP
+
+                        MedievalButton(
+                            onClick = {
+                                val healed = updatedGameState.character.copy(
+                                    currentHP = updatedGameState.character.maxHP,
+                                    currentMP = updatedGameState.character.maxMP,
+                                )
+                                updatedGameState = updatedGameState.updateCharacter(healed)
+                                message    = "You drink the cool refreshing water. You feel revitalized! HP and MP restored!"
+                                showDialog = true
+                            },
+                            variant = if (needsHeal) MedievalButtonVariant.Gold else MedievalButtonVariant.Disabled,
+                        ) {
+                            Text("1. drink from fountain", style = MaterialTheme.typography.titleMedium)
+                        }
+
+                        MedievalButton(
+                            onClick = {
+                                val healed = updatedGameState.character.copy(
+                                    currentHP = updatedGameState.character.maxHP,
+                                    currentMP = updatedGameState.character.maxMP,
+                                )
+                                updatedGameState = updatedGameState.updateCharacter(healed)
+                                message    = "You bathe in the fountain. The water cleanses your wounds! HP and MP restored!"
+                                showDialog = true
+                            },
+                            variant = if (needsHeal) MedievalButtonVariant.Gold else MedievalButtonVariant.Disabled,
+                        ) {
+                            Text("2. bathe in fountain", style = MaterialTheme.typography.titleMedium)
+                        }
+
+                        MedievalButton(onClick = {
+                            onSaveGame(updatedGameState)
+                            message    = "Game saved!"
+                            showDialog = true
+                        }) {
+                            Text("3. save your journey", style = MaterialTheme.typography.titleMedium)
+                        }
+
+                        MedievalButton(
+                            variant = MedievalButtonVariant.Ember,
+                            onClick = { onFountainExit(updatedGameState) },
+                        ) {
+                            Text("0. leave", style = MaterialTheme.typography.titleMedium)
+                        }
                     }
-                }
-
-                // Fountain action buttons
-                Button(
-                    onClick = {
-                        val healedCharacter = updatedGameState.character.copy(
-                            currentHP = updatedGameState.character.maxHP,
-                            currentMP = updatedGameState.character.maxMP
-                        )
-                        updatedGameState = updatedGameState.updateCharacter(healedCharacter)
-                        message = "You drink the cool refreshing water. You feel revitalized! HP and MP restored!"
-                        showMessageDialog = true
-                    },
-                    modifier = Modifier.fillMaxWidth(),
-                    enabled = updatedGameState.character.currentHP < updatedGameState.character.maxHP ||
-                            updatedGameState.character.currentMP < updatedGameState.character.maxMP,
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.primary,
-                        contentColor = MaterialTheme.colorScheme.onPrimary,
-                        disabledContainerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f),
-                        disabledContentColor = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.5f)
-                    )
-                ) {
-                    Text("1. drink from fountain")
-                }
-
-                Button(
-                    onClick = {
-                        val healedCharacter = updatedGameState.character.copy(
-                            currentHP = updatedGameState.character.maxHP,
-                            currentMP = updatedGameState.character.maxMP
-                        )
-                        updatedGameState = updatedGameState.updateCharacter(healedCharacter)
-                        message = "You bathe in the fountain. The water cleanses your wounds! HP and MP restored!"
-                        showMessageDialog = true
-                    },
-                    modifier = Modifier.fillMaxWidth(),
-                    enabled = updatedGameState.character.currentHP < updatedGameState.character.maxHP ||
-                            updatedGameState.character.currentMP < updatedGameState.character.maxMP,
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.primary,
-                        contentColor = MaterialTheme.colorScheme.onPrimary,
-                        disabledContainerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f),
-                        disabledContentColor = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.5f)
-                    )
-                ) {
-                    Text("2. bathe in fountain")
-                }
-
-                Button(
-                    onClick = {
-                        onSaveGame(updatedGameState)
-                        message = "Game saved!"
-                        showMessageDialog = true
-                    },
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.secondary,
-                        contentColor = MaterialTheme.colorScheme.onSecondary
-                    )
-                ) {
-                    Text("3. save your journey")
-                }
-
-                Button(
-                    onClick = { onFountainExit(updatedGameState) },
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.tertiary,
-                        contentColor = MaterialTheme.colorScheme.onTertiary
-                    )
-                ) {
-                    Text("0. leave")
                 }
             }
         }
-        }
 
-        // Message dialog popup
-        if (showMessageDialog && message != null) {
+        if (showDialog && message != null) {
             AlertDialog(
-                onDismissRequest = { showMessageDialog = false },
-                title = {
-                    Text(
-                        text = "Fountain",
-                        style = MaterialTheme.typography.titleLarge
-                    )
-                },
-                text = {
-                    Text(
-                        text = message!!,
-                        style = MaterialTheme.typography.bodyLarge
-                    )
-                },
+                onDismissRequest = { showDialog = false },
+                title = { Text("Fountain", style = MaterialTheme.typography.headlineMedium.copy(color = GoldBright)) },
+                text  = { Text(message!!, style = MaterialTheme.typography.bodyMedium.copy(color = Parchment)) },
                 confirmButton = {
-                    TextButton(onClick = { showMessageDialog = false }) {
-                        Text("OK")
+                    TextButton(onClick = { showDialog = false }) {
+                        Text("OK", style = MaterialTheme.typography.titleMedium.copy(color = Gold))
                     }
                 },
-                containerColor = MaterialTheme.colorScheme.surface
+                containerColor = PanelBg,
             )
         }
     }

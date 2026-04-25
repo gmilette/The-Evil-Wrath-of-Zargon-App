@@ -1,28 +1,20 @@
 package com.greenopal.zargon.ui.screens
 
 import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Close
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -33,17 +25,26 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.greenopal.zargon.data.models.GameState
-import com.greenopal.zargon.ui.theme.EmberOrange
+import com.greenopal.zargon.ui.components.DungeonBackground
+import com.greenopal.zargon.ui.components.FlavorText
+import com.greenopal.zargon.ui.components.MedievalButton
+import com.greenopal.zargon.ui.components.MedievalButtonVariant
+import com.greenopal.zargon.ui.components.MedievalPanel
+import com.greenopal.zargon.ui.components.MedievalStatBar
+import com.greenopal.zargon.ui.components.OrnateSeparator
+import com.greenopal.zargon.ui.components.PanelHeading
+import com.greenopal.zargon.ui.components.StatBarType
+import com.greenopal.zargon.ui.theme.Gold
+import com.greenopal.zargon.ui.theme.GoldBright
+import com.greenopal.zargon.ui.theme.HpRedBright
+import com.greenopal.zargon.ui.theme.MpBlueBright
+import com.greenopal.zargon.ui.theme.PanelBg
+import com.greenopal.zargon.ui.theme.Parchment
+import com.greenopal.zargon.ui.theme.ParchmentDim
+import com.greenopal.zargon.ui.theme.TextDim
 
-/**
- * Healer screen for restoring HP/MP
- * Based on QBASIC healr procedure (ZARGON.BAS:1610-1665)
- */
 @Composable
 fun HealerScreen(
     gameState: GameState,
@@ -51,241 +52,180 @@ fun HealerScreen(
     onHealerExit: (GameState) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    var message by remember { mutableStateOf<String?>(null) }
+    var message          by remember { mutableStateOf<String?>(null) }
     var updatedGameState by remember { mutableStateOf(gameState) }
-    var showMessageDialog by remember { mutableStateOf(false) }
+    var showDialog       by remember { mutableStateOf(false) }
 
-    // Handle Android back button
-    BackHandler {
-        onHealerExit(updatedGameState)
-    }
+    BackHandler { onHealerExit(updatedGameState) }
 
-    Box(
-        modifier = modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background),
-        contentAlignment = Alignment.Center
-    ) {
-        Card(
-            modifier = Modifier
-                .fillMaxWidth(0.9f)
-                .padding(16.dp),
-            colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surface
-            ),
-            border = BorderStroke(3.dp, MaterialTheme.colorScheme.primary)
+    DungeonBackground {
+        LazyColumn(
+            modifier            = modifier
+                .fillMaxSize()
+                .padding(horizontal = 16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(12.dp),
+            contentPadding      = PaddingValues(vertical = 24.dp),
         ) {
-            Box {
-                Column(
-                    modifier = Modifier
-                        .padding(24.dp)
-                        .fillMaxWidth()
-                        .verticalScroll(rememberScrollState()),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                // Header
-                Text(
-                    text = "The Healer",
-                    style = MaterialTheme.typography.headlineSmall,
-                    color = MaterialTheme.colorScheme.primary,
-                    textAlign = TextAlign.Center
-                )
+            item {
+                MedievalPanel(modifier = Modifier.fillMaxWidth()) {
+                    Box(modifier = Modifier.fillMaxWidth()) {
+                        Column(
+                            modifier            = Modifier.fillMaxWidth(),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.spacedBy(12.dp),
+                        ) {
+                        PanelHeading("The Healer")
+                        FlavorText("hi mr. healer!")
 
-                Text(
-                    text = "hi mr. healer!",
-                    style = MaterialTheme.typography.bodyMedium,
-                    textAlign = TextAlign.Center
-                )
+                        OrnateSeparator()
 
-                Spacer(modifier = Modifier.height(8.dp))
+                        MedievalPanel(
+                            modifier       = Modifier.fillMaxWidth(),
+                            contentPadding = PaddingValues(16.dp),
+                            showCornerGems = false,
+                        ) {
+                            Column(
+                                modifier            = Modifier.fillMaxWidth(),
+                                verticalArrangement = Arrangement.spacedBy(6.dp),
+                            ) {
+                                Row(
+                                    modifier              = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                ) {
+                                    Text("HP", style = MaterialTheme.typography.titleSmall.copy(color = HpRedBright))
+                                    Text(
+                                        "${updatedGameState.character.currentHP}/${updatedGameState.character.maxHP}",
+                                        style = MaterialTheme.typography.bodyLarge.copy(color = HpRedBright),
+                                    )
+                                }
+                                MedievalStatBar(updatedGameState.character.currentHP, updatedGameState.character.maxHP, StatBarType.HP)
 
-                // Stats display
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.surface
-                    )
-                ) {
-                    Column(
-                        modifier = Modifier.padding(16.dp),
-                        verticalArrangement = Arrangement.spacedBy(4.dp)
-                    ) {
-                        Text(
-                            text = "Current Stats:",
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.secondary
+                                Row(
+                                    modifier              = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                ) {
+                                    Text("MP", style = MaterialTheme.typography.titleSmall.copy(color = MpBlueBright))
+                                    Text(
+                                        "${updatedGameState.character.currentMP}/${updatedGameState.character.maxMP}",
+                                        style = MaterialTheme.typography.bodyLarge.copy(color = MpBlueBright),
+                                    )
+                                }
+                                MedievalStatBar(updatedGameState.character.currentMP, updatedGameState.character.maxMP, StatBarType.MP)
+
+                                Row(
+                                    modifier              = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                ) {
+                                    Text("Gold", style = MaterialTheme.typography.titleSmall.copy(color = Gold))
+                                    Text(
+                                        "${updatedGameState.character.gold}g",
+                                        style = MaterialTheme.typography.bodyLarge.copy(color = GoldBright),
+                                    )
+                                }
+                            }
+                        }
+
+                        OrnateSeparator()
+
+                        FlavorText("what do you want?")
+
+                        HealingOption(
+                            label   = "1) healing  3gp",
+                            enabled = updatedGameState.character.gold >= 3,
+                            onClick = {
+                                val newChar = updatedGameState.character.copy(
+                                    currentHP = updatedGameState.character.maxHP,
+                                    gold      = updatedGameState.character.gold - 3,
+                                )
+                                updatedGameState = updatedGameState.updateCharacter(newChar)
+                                message    = "sure my son"
+                                showDialog = true
+                            }
                         )
-                        Text(
-                            text = "HP: ${updatedGameState.character.currentHP}/${updatedGameState.character.maxHP}",
-                            color = MaterialTheme.colorScheme.onSurface
+
+                        HealingOption(
+                            label   = "2) magic healing  3gp",
+                            enabled = updatedGameState.character.gold >= 3,
+                            onClick = {
+                                val newChar = updatedGameState.character.copy(
+                                    currentMP = updatedGameState.character.maxMP,
+                                    gold      = updatedGameState.character.gold - 3,
+                                )
+                                updatedGameState = updatedGameState.updateCharacter(newChar)
+                                message    = "sure my son"
+                                showDialog = true
+                            }
                         )
-                        Text(
-                            text = "MP: ${updatedGameState.character.currentMP}/${updatedGameState.character.maxMP}",
-                            color = MaterialTheme.colorScheme.onSurface
+
+                        HealingOption(
+                            label   = "3) complete rest  5gp",
+                            enabled = updatedGameState.character.gold >= 5,
+                            onClick = {
+                                val newChar = updatedGameState.character.copy(
+                                    currentHP = updatedGameState.character.maxHP,
+                                    currentMP = updatedGameState.character.maxMP,
+                                    gold      = updatedGameState.character.gold - 5,
+                                )
+                                updatedGameState = updatedGameState.updateCharacter(newChar)
+                                message    = "sure my son"
+                                showDialog = true
+                            }
                         )
+
+                        MedievalButton(onClick = {
+                            onSaveGame(updatedGameState)
+                            message    = "Game saved!"
+                            showDialog = true
+                        }) {
+                            Text("4. shall i save your game?", style = MaterialTheme.typography.titleMedium)
+                        }
+
+                        MedievalButton(
+                            variant = MedievalButtonVariant.Ember,
+                            onClick = { onHealerExit(updatedGameState) },
+                        ) {
+                            Text("5. i've had enough of this guy", style = MaterialTheme.typography.titleMedium)
+                        }
+                        }
                         Text(
-                            text = "Gold: ${updatedGameState.character.gold}",
-                            color = MaterialTheme.colorScheme.primary,
-                            fontWeight = FontWeight.Bold
+                            text     = "✕",
+                            style    = MaterialTheme.typography.titleMedium.copy(color = GoldBright),
+                            modifier = Modifier
+                                .align(Alignment.TopEnd)
+                                .clickable(
+                                    indication        = null,
+                                    interactionSource = remember { MutableInteractionSource() },
+                                    onClick           = { onHealerExit(updatedGameState) },
+                                ),
                         )
                     }
-                }
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                Text(
-                    text = "what do you want?",
-                    style = MaterialTheme.typography.bodyMedium,
-                    fontWeight = FontWeight.Bold
-                )
-
-                // Service buttons
-                HealingOption(
-                    number = 1,
-                    service = "healing",
-                    cost = 3,
-                    enabled = updatedGameState.character.gold >= 3 &&
-                            updatedGameState.character.currentHP < updatedGameState.character.maxHP,
-                    onClick = {
-                        val newChar = updatedGameState.character.copy(
-                            currentHP = updatedGameState.character.maxHP,
-                            gold = updatedGameState.character.gold - 3
-                        )
-                        updatedGameState = updatedGameState.updateCharacter(newChar)
-                        message = "sure my son"
-                        showMessageDialog = true
-                    }
-                )
-
-                HealingOption(
-                    number = 2,
-                    service = "magic healing",
-                    cost = 3,
-                    enabled = updatedGameState.character.gold >= 3 &&
-                            updatedGameState.character.currentMP < updatedGameState.character.maxMP,
-                    onClick = {
-                        val newChar = updatedGameState.character.copy(
-                            currentMP = updatedGameState.character.maxMP,
-                            gold = updatedGameState.character.gold - 3
-                        )
-                        updatedGameState = updatedGameState.updateCharacter(newChar)
-                        message = "sure my son"
-                        showMessageDialog = true
-                    }
-                )
-
-                HealingOption(
-                    number = 3,
-                    service = "complete rest",
-                    cost = 5,
-                    enabled = updatedGameState.character.gold >= 5 &&
-                            (updatedGameState.character.currentHP < updatedGameState.character.maxHP ||
-                                    updatedGameState.character.currentMP < updatedGameState.character.maxMP),
-                    onClick = {
-                        val newChar = updatedGameState.character.copy(
-                            currentHP = updatedGameState.character.maxHP,
-                            currentMP = updatedGameState.character.maxMP,
-                            gold = updatedGameState.character.gold - 5
-                        )
-                        updatedGameState = updatedGameState.updateCharacter(newChar)
-                        message = "sure my son"
-                        showMessageDialog = true
-                    }
-                )
-
-                Button(
-                    onClick = {
-                        onSaveGame(updatedGameState)
-                        message = "Game saved!"
-                        showMessageDialog = true
-                    },
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.secondary,
-                        contentColor = MaterialTheme.colorScheme.onSecondary
-                    )
-                ) {
-                    Text("4. shall i save your game?")
-                }
-
-                Button(
-                    onClick = { onHealerExit(updatedGameState) },
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.tertiary,
-                        contentColor = MaterialTheme.colorScheme.onTertiary
-                    )
-                ) {
-                    Text("5. i've had enough of this guy")
                 }
             }
-
-                IconButton(
-                    onClick = { onHealerExit(updatedGameState) },
-                    modifier = Modifier
-                        .align(Alignment.TopStart)
-                        .padding(8.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Close,
-                        contentDescription = "Exit healer",
-                        tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.size(32.dp)
-                    )
-                }
-        }
         }
 
-        // Message dialog popup
-        if (showMessageDialog && message != null) {
+        if (showDialog && message != null) {
             AlertDialog(
-                onDismissRequest = { showMessageDialog = false },
-                title = {
-                    Text(
-                        text = "Healer",
-                        style = MaterialTheme.typography.titleLarge
-                    )
-                },
-                text = {
-                    Text(
-                        text = message!!,
-                        style = MaterialTheme.typography.bodyLarge
-                    )
-                },
+                onDismissRequest = { showDialog = false },
+                title = { Text("Healer", style = MaterialTheme.typography.headlineMedium.copy(color = GoldBright)) },
+                text  = { Text(message!!, style = MaterialTheme.typography.bodyMedium.copy(color = Parchment)) },
                 confirmButton = {
-                    TextButton(onClick = { showMessageDialog = false }) {
-                        Text("OK")
+                    TextButton(onClick = { showDialog = false }) {
+                        Text("OK", style = MaterialTheme.typography.titleMedium.copy(color = Gold))
                     }
                 },
-                containerColor = MaterialTheme.colorScheme.surface
+                containerColor = PanelBg,
             )
         }
     }
 }
 
 @Composable
-private fun HealingOption(
-    number: Int,
-    service: String,
-    cost: Int,
-    enabled: Boolean,
-    onClick: () -> Unit
-) {
-    Button(
+private fun HealingOption(label: String, enabled: Boolean, onClick: () -> Unit) {
+    MedievalButton(
         onClick = onClick,
-        modifier = Modifier.fillMaxWidth(),
-        enabled = enabled,
-        colors = ButtonDefaults.buttonColors(
-            containerColor = MaterialTheme.colorScheme.primary,
-            contentColor = MaterialTheme.colorScheme.onPrimary,
-            disabledContainerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f),
-            disabledContentColor = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.5f)
-        ),
-        border = if (!enabled) BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)) else null
+        variant = if (enabled) MedievalButtonVariant.Gold else MedievalButtonVariant.Disabled,
     ) {
-        Text(
-            text = "$number) $service  ${cost}gp"
-        )
+        Text(label, style = MaterialTheme.typography.titleMedium)
     }
 }

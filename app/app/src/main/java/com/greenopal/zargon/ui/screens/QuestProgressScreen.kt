@@ -1,13 +1,9 @@
 package com.greenopal.zargon.ui.screens
 
 import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -15,41 +11,43 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Clear
-import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.greenopal.zargon.data.models.GameState
+import com.greenopal.zargon.ui.components.DungeonBackground
+import com.greenopal.zargon.ui.components.MedievalButton
+import com.greenopal.zargon.ui.components.MedievalPanel
+import com.greenopal.zargon.ui.components.MedievalStatBar
+import com.greenopal.zargon.ui.components.OrnateSeparator
+import com.greenopal.zargon.ui.components.ScreenHeading
+import com.greenopal.zargon.ui.components.ScrollBanner
+import com.greenopal.zargon.ui.components.StatBarType
+import com.greenopal.zargon.ui.theme.Gold
+import com.greenopal.zargon.ui.theme.GoldBright
+import com.greenopal.zargon.ui.theme.Parchment
+import com.greenopal.zargon.ui.theme.ParchmentDim
+import com.greenopal.zargon.ui.theme.TextDim
+import com.greenopal.zargon.ui.theme.XpGreen
+import com.greenopal.zargon.ui.theme.XpGreenBright
 
-/**
- * Quest progress screen showing story completion
- * Tracks all 8 quest items and calculates game completion percentage
- */
 @Composable
 fun QuestProgressScreen(
     gameState: GameState,
     onBack: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    // Handle back button
-    BackHandler {
-        onBack()
-    }
-    // Define all quest items
+    BackHandler { onBack() }
+
     val questItems = listOf(
         QuestItem("dynamite", "Dynamite", "Blast through rocks"),
         QuestItem("dead wood", "Dead Wood", "Material for ship"),
@@ -62,196 +60,134 @@ fun QuestProgressScreen(
         QuestItem("Zargon", "Zargon Trophy", "Victory over evil overlord")
     )
 
-    // Calculate progress based on discovered items (not current inventory)
-    val foundItems = questItems.count { item ->
-        gameState.hasDiscovered(item.itemName)
-    }
-    val totalItems = questItems.size
+    val foundItems       = questItems.count { gameState.hasDiscovered(it.itemName) }
+    val totalItems       = questItems.size
     val completionPercent = (foundItems.toFloat() / totalItems * 100).toInt()
 
-    Box(
-        modifier = modifier
-            .fillMaxSize()
-            .background(Color.Black),
-        contentAlignment = Alignment.Center
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth(0.9f)
-                .padding(16.dp)
-                .verticalScroll(rememberScrollState()),
+    DungeonBackground {
+        LazyColumn(
+            modifier            = modifier
+                .fillMaxSize()
+                .padding(horizontal = 16.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+            contentPadding      = PaddingValues(vertical = 24.dp),
         ) {
-            // Title
-            Text(
-                text = "QUEST PROGRESS",
-                style = MaterialTheme.typography.headlineMedium,
-                color = MaterialTheme.colorScheme.primary,
-                fontWeight = FontWeight.Bold
-            )
+            item { ScreenHeading("Quest Progress") }
 
-            // Progress Summary Card
-            Card(
-                colors = CardDefaults.cardColors(
-                    containerColor = Color(0xFF1A1A1A) // Dark background
-                ),
-                border = BorderStroke(2.dp, Color(0xFF4CAF50)), // Green border
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Column(
-                    modifier = Modifier.padding(20.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    Text(
-                        text = "Game Completion",
-                        style = MaterialTheme.typography.titleLarge,
-                        fontWeight = FontWeight.Bold,
-                        color = Color.White
-                    )
+            item {
+                MedievalPanel(modifier = Modifier.fillMaxWidth()) {
+                    Column(
+                        modifier            = Modifier.fillMaxWidth(),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(12.dp),
+                    ) {
+                        Text(
+                            text  = "Game Completion",
+                            style = MaterialTheme.typography.headlineMedium.copy(color = GoldBright),
+                        )
 
-                    Text(
-                        text = "$completionPercent%",
-                        style = MaterialTheme.typography.displayMedium,
-                        fontWeight = FontWeight.Bold,
-                        color = Color(0xFF4CAF50) // Bright green
-                    )
+                        Text(
+                            text  = "$completionPercent%",
+                            style = MaterialTheme.typography.displayLarge.copy(color = XpGreenBright),
+                        )
 
-                    LinearProgressIndicator(
-                        progress = completionPercent / 100f,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(12.dp),
-                        color = Color(0xFF4CAF50), // Bright green
-                        trackColor = Color(0xFF424242) // Dark gray
-                    )
+                        MedievalStatBar(
+                            current = foundItems,
+                            max     = totalItems,
+                            type    = StatBarType.XP,
+                            height  = 14.dp,
+                        )
 
-                    Text(
-                        text = "$foundItems / $totalItems Quest Items",
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = Color.White
-                    )
+                        Text(
+                            text  = "$foundItems / $totalItems Quest Items",
+                            style = MaterialTheme.typography.bodyLarge.copy(color = Parchment),
+                        )
+                    }
                 }
             }
 
-            // Quest Items List
-            Card(
-                colors = CardDefaults.cardColors(
-                    containerColor = Color(0xFF2A2A2A) // Dark background
-                ),
-                border = BorderStroke(2.dp, Color(0xFF2196F3)), // Blue border
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Column(
-                    modifier = Modifier.padding(20.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    Text(
-                        text = "QUEST ITEMS",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold,
-                        color = Color(0xFF2196F3) // Bright blue
-                    )
+            item {
+                MedievalPanel(modifier = Modifier.fillMaxWidth()) {
+                    Column(
+                        modifier            = Modifier.fillMaxWidth(),
+                        verticalArrangement = Arrangement.spacedBy(6.dp),
+                    ) {
+                        ScrollBanner("Quest Items")
 
-                    Spacer(modifier = Modifier.height(8.dp))
+                        Spacer(Modifier.height(8.dp))
 
-                    questItems.forEach { item ->
-                        val found = gameState.hasDiscovered(item.itemName)
-                        QuestItemRow(
-                            item = item,
-                            found = found
-                        )
-                        if (item != questItems.last()) {
-                            HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp))
+                        questItems.forEachIndexed { index, item ->
+                            val found = gameState.hasDiscovered(item.itemName)
+                            QuestItemRow(item = item, found = found)
+                            if (index < questItems.lastIndex) {
+                                OrnateSeparator()
+                            }
                         }
                     }
                 }
             }
 
-            // Story Status
-            Card(
-                colors = CardDefaults.cardColors(
-                    containerColor = Color(0xFF1A1A1A) // Dark background
-                ),
-                border = BorderStroke(2.dp, Color(0xFFFFD700)), // Gold border
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Column(
-                    modifier = Modifier.padding(16.dp)
-                ) {
-                    Text(
-                        text = "Story Progress: ${String.format("%.1f", gameState.storyStatus)}",
-                        style = MaterialTheme.typography.titleSmall,
-                        fontWeight = FontWeight.Bold,
-                        color = Color(0xFFFFD700) // Bright gold
-                    )
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(
-                        text = getStoryStageDescription(gameState.storyStatus),
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = Color.White
-                    )
+            item {
+                MedievalPanel(modifier = Modifier.fillMaxWidth()) {
+                    Column(modifier = Modifier.fillMaxWidth()) {
+                        Text(
+                            text  = "Story Progress: ${String.format("%.1f", gameState.storyStatus)}",
+                            style = MaterialTheme.typography.titleSmall.copy(color = Gold),
+                        )
+                        Spacer(Modifier.height(4.dp))
+                        Text(
+                            text  = getStoryStageDescription(gameState.storyStatus),
+                            style = MaterialTheme.typography.bodyMedium.copy(color = ParchmentDim),
+                        )
+                    }
                 }
             }
 
-            // Back button
-            Spacer(modifier = Modifier.height(8.dp))
-            Button(
-                onClick = onBack,
-                modifier = Modifier.fillMaxWidth(0.6f)
-            ) {
-                Text("BACK TO MENU")
+            item {
+                MedievalButton(onClick = onBack) {
+                    Text("Back to Menu", style = MaterialTheme.typography.titleMedium)
+                }
             }
         }
     }
 }
 
 @Composable
-private fun QuestItemRow(
-    item: QuestItem,
-    found: Boolean,
-    modifier: Modifier = Modifier
-) {
+private fun QuestItemRow(item: QuestItem, found: Boolean) {
     Row(
-        modifier = modifier.fillMaxWidth(),
+        modifier              = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment     = Alignment.CenterVertically,
     ) {
         Row(
             horizontalArrangement = Arrangement.spacedBy(12.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.weight(1f)
+            verticalAlignment     = Alignment.CenterVertically,
+            modifier              = Modifier.weight(1f),
         ) {
             Icon(
-                imageVector = if (found) Icons.Default.Check else Icons.Default.Clear,
+                imageVector    = if (found) Icons.Default.Check else Icons.Default.Clear,
                 contentDescription = if (found) "Found" else "Not found",
-                tint = if (found) Color(0xFF4CAF50) else Color(0xFF9E9E9E),
-                modifier = Modifier.size(24.dp)
+                tint           = if (found) XpGreenBright else TextDim,
+                modifier       = Modifier.size(24.dp),
             )
-
-            Text(
-                text = item.displayName,
-                style = MaterialTheme.typography.bodyLarge,
-                fontWeight = if (found) FontWeight.Bold else FontWeight.Normal,
-                color = if (found) Color.White else Color(0xFF999999) // White or medium gray
-            )
-        }
-
-        if (found) {
-            Text(
-                text = "✓",
-                style = MaterialTheme.typography.titleMedium,
-                color = Color(0xFF4CAF50),
-                fontWeight = FontWeight.Bold
-            )
+            Column {
+                Text(
+                    text  = item.displayName,
+                    style = MaterialTheme.typography.bodyLarge.copy(
+                        color      = if (found) Parchment else TextDim,
+                        fontWeight = if (found) FontWeight.Bold else FontWeight.Normal,
+                    ),
+                )
+                Text(
+                    text  = item.description,
+                    style = MaterialTheme.typography.bodySmall.copy(color = ParchmentDim),
+                )
+            }
         }
     }
 }
 
-/**
- * Get human-readable description of story stage
- */
 private fun getStoryStageDescription(status: Float): String {
     return when {
         status < 1.5f -> "Beginning: Need to rescue boatman"
@@ -264,15 +200,12 @@ private fun getStoryStageDescription(status: Float): String {
         status < 5.0f -> "Have soul, ready for necromancer"
         status < 5.5f -> "Boatman resurrected"
         status >= 5.5f -> "Ship built, can travel river!"
-        else -> "Unknown stage"
+        else           -> "Unknown stage"
     }
 }
 
-/**
- * Data class for quest items
- */
 private data class QuestItem(
-    val itemName: String,       // Name as stored in inventory
-    val displayName: String,    // Display name
-    val description: String     // Short description
+    val itemName: String,
+    val displayName: String,
+    val description: String
 )
