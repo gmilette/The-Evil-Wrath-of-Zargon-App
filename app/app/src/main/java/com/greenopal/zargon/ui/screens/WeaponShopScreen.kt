@@ -110,17 +110,6 @@ fun WeaponShopScreen(
                         OrnateSeparator(Modifier.padding(horizontal = 24.dp))
                         Spacer(Modifier.height(10.dp))
 
-                        challengeConfig?.getDisplayName()?.takeIf { it != "Normal" }?.let { badge ->
-                            Text(
-                                text  = "⚔ CHALLENGE: $badge ⚔",
-                                style = MaterialTheme.typography.headlineSmall.copy(
-                                    color    = EmberBright,
-                                    fontSize = 11.sp,
-                                ),
-                                modifier = Modifier.padding(bottom = 6.dp),
-                            )
-                        }
-
                         Text(
                             text  = "You have  ${updatedState.character.gold} gold",
                             style = MaterialTheme.typography.titleMedium.copy(
